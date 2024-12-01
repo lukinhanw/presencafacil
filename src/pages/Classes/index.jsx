@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
-import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, PlusIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import DataTable from '../../components/DataTable';
 import Modal from '../../components/Modal';
 import Alert from '../../components/Alert';
 import ClassForm from '../../components/ClassForm';
 import ClassFilters from '../../components/ClassFilters';
-import { getClasses, createClass, updateClass, deleteClass, CLASS_TYPES } from '../../services/classService';
+import { getClasses, createClass, deleteClass, CLASS_TYPES } from '../../services/classService';
 import { getTrainings } from '../../services/trainingService';
 import { getInstructors } from '../../services/instructorService';
 import { useAuth } from '../../contexts/AuthContext';
 import { showToast } from '../../components/Toast';
+import { useNavigate } from 'react-router-dom';
 
 export default function Classes() {
 	const [classes, setClasses] = useState([]);
@@ -21,10 +22,10 @@ export default function Classes() {
 		types: [],
 		units: []
 	});
-	const [selectedClass, setSelectedClass] = useState(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [deleteAlert, setDeleteAlert] = useState({ isOpen: false, classId: null });
 	const { hasRole } = useAuth();
+	const navigate = useNavigate();
 	const isAdmin = hasRole('ADMIN_ROLE');
 
 	const fetchClasses = useCallback(async () => {
@@ -67,26 +68,19 @@ export default function Classes() {
 		fetchInstructors();
 	}, [fetchClasses]);
 
-	const handleOpenModal = (classData = null) => {
-		setSelectedClass(classData);
+	const handleOpenModal = () => {
 		setIsModalOpen(true);
 	};
 
 	const handleCloseModal = () => {
-		setSelectedClass(null);
 		setIsModalOpen(false);
 	};
 
 	const handleSubmit = async (data) => {
 		try {
 			setIsLoading(true);
-			if (selectedClass) {
-				await updateClass(selectedClass.id, data);
-				showToast.success('Sucesso', 'Aula atualizada com sucesso!');
-			} else {
-				await createClass(data);
-				showToast.success('Sucesso', 'Aula criada com sucesso!');
-			}
+			await createClass(data);
+			showToast.success('Sucesso', 'Aula criada com sucesso!');
 			handleCloseModal();
 			fetchClasses();
 		} catch (error) {
@@ -110,6 +104,10 @@ export default function Classes() {
 		}
 	};
 
+	const handleEnterClass = (classId) => {
+		navigate(`/aulas/${classId}`);
+	};
+
 	const columns = [
 		{
 			accessorKey: 'training.name',
@@ -122,21 +120,6 @@ export default function Classes() {
 			cell: (row) => row.training?.code || 'N/A'
 		},
 		{
-			accessorKey: 'training.duration',
-			header: 'Duração',
-			cell: (row) => row.training?.duration || 'N/A'
-		},
-		{
-			accessorKey: 'training.provider',
-			header: 'Fornecedor',
-			cell: (row) => row.training?.provider || 'N/A'
-		},
-		{
-			accessorKey: 'training.classification',
-			header: 'Classificação',
-			cell: (row) => row.training?.classification || 'N/A'
-		},
-		{
 			accessorKey: 'type',
 			header: 'Tipo',
 			cell: (row) => CLASS_TYPES.find(t => t.value === row.type)?.label || row.type
@@ -147,48 +130,37 @@ export default function Classes() {
 			cell: (row) => row.date_start ? new Date(row.date_start).toLocaleString() : 'N/A'
 		},
 		{
-			accessorKey: 'date_end',
-			header: 'Data Fim',
-			cell: (row) => row.date_end ? new Date(row.date_end).toLocaleString() : 'N/A'
-		},
-		{
 			accessorKey: 'presents',
 			header: 'Presentes',
 			cell: (row) => row.presents || 'N/A'
 		},
 		{
-			accessorKey: 'status',
-			header: 'Status',
-			cell: (row) => row.status || 'N/A'
-		},
-		{
 			accessorKey: 'instructor.name',
 			header: 'Instrutor',
 			cell: (row) => row.instructor?.name || 'N/A'
-		},
-		{
-			accessorKey: 'unit',
-			header: 'Unidade',
-			cell: (row) => row.unit || 'N/A'
 		}
 	];
 
-	const actions = (row) => isAdmin ? (
+	const actions = (row) => (
 		<>
 			<button
-				onClick={() => handleOpenModal(row)}
+				onClick={() => handleEnterClass(row.id)}
 				className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
+				title="Entrar na aula"
 			>
-				<PencilIcon className="h-5 w-5" />
+				<ArrowRightIcon className="h-5 w-5" />
 			</button>
-			<button
-				onClick={() => setDeleteAlert({ isOpen: true, classId: row.id })}
-				className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-			>
-				<TrashIcon className="h-5 w-5" />
-			</button>
+			{isAdmin && (
+				<button
+					onClick={() => setDeleteAlert({ isOpen: true, classId: row.id })}
+					className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+					title="Excluir aula"
+				>
+					<TrashIcon className="h-5 w-5" />
+				</button>
+			)}
 		</>
-	) : null;
+	);
 
 	return (
 		<div className="space-y-6">
@@ -197,7 +169,7 @@ export default function Classes() {
 					Aulas
 				</h1>
 				<button
-					onClick={() => handleOpenModal()}
+					onClick={handleOpenModal}
 					className="btn-gradient flex items-center"
 				>
 					<PlusIcon className="h-5 w-5 mr-2" />
@@ -220,12 +192,11 @@ export default function Classes() {
 			<Modal
 				isOpen={isModalOpen}
 				onClose={handleCloseModal}
-				title={selectedClass ? 'Editar Aula' : 'Nova Aula'}
+				title="Nova Aula"
 				size="xl"
 			>
 				<ClassForm
 					onSubmit={handleSubmit}
-					initialData={selectedClass}
 					isLoading={isLoading}
 					trainings={trainings}
 					instructors={instructors}
