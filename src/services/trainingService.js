@@ -50,6 +50,18 @@ export const getTrainings = async (filters = {}) => {
       training.code.toLowerCase().includes(searchLower)
     );
   }
+
+  if (filters.providers?.length > 0) {
+    filteredTrainings = filteredTrainings.filter(training =>
+      filters.providers.includes(training.provider)
+    );
+  }
+
+  if (filters.classifications?.length > 0) {
+    filteredTrainings = filteredTrainings.filter(training =>
+      filters.classifications.includes(training.classification)
+    );
+  }
   
   return filteredTrainings;
 };
