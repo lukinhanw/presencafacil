@@ -16,11 +16,11 @@ export const selectStylesDark = {
 	}),
 	menuPortal: (base) => ({
 		...base,
-		zIndex: 2 // Increased z-index
+		zIndex: 9999 // Increased z-index to appear above modal
 	}),
 	menu: (base) => ({
 		...base,
-		zIndex: 2, // Increased z-index
+		zIndex: 9999, // Increased z-index to appear above modal
 		backgroundColor: 'rgb(29 34 45)',
 		backdropFilter: 'blur(15px)',
 		border: '1px solid rgba(255, 255, 255, 0.05)',

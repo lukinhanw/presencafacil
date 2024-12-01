@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { loginUser } from '../../services/authService';
+import { showToast } from '../../components/Toast';
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -17,9 +17,9 @@ export default function Login() {
       const userData = await loginUser(data);
       login(userData);
       navigate('/');
-      toast.success('Login realizado com sucesso!');
+      showToast.success('Bem-vindo', 'Login realizado com sucesso!');
     } catch (error) {
-      toast.error(error.message || 'Erro ao realizar login');
+      showToast.error('Erro', error.message || 'Erro ao realizar login');
     } finally {
       setIsLoading(false);
     }

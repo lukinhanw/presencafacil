@@ -3,70 +3,70 @@ import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import DataTable from '../../components/DataTable';
 import Modal from '../../components/Modal';
 import Alert from '../../components/Alert';
-import TrainingForm from '../../components/TrainingForm';
-import TrainingFilters from '../../components/TrainingFilters';
-import { getTrainings, createTraining, updateTraining, deleteTraining } from '../../services/trainingService';
+import EmployeeForm from '../../components/EmployeeForm';
+import EmployeeFilters from '../../components/EmployeeFilters';
+import { getEmployees, createEmployee, updateEmployee, deleteEmployee } from '../../services/employeeService';
 import { useAuth } from '../../contexts/AuthContext';
 import { showToast } from '../../components/Toast';
 
-export default function Trainings() {
-	const [trainings, setTrainings] = useState([]);
+export default function Employees() {
+	const [employees, setEmployees] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [filters, setFilters] = useState({
 		search: '',
-		providers: [],
-		classifications: []
+		units: [],
+		positions: []
 	});
-	const [selectedTraining, setSelectedTraining] = useState(null);
+	const [selectedEmployee, setSelectedEmployee] = useState(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [deleteAlert, setDeleteAlert] = useState({ isOpen: false, trainingId: null });
+	const [deleteAlert, setDeleteAlert] = useState({ isOpen: false, employeeId: null });
 	const { hasRole } = useAuth();
 	const isAdmin = hasRole('ADMIN_ROLE');
 
-	const fetchTrainings = useCallback(async () => {
+	const fetchEmployees = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			const data = await getTrainings({
+			const data = await getEmployees({
 				search: filters.search,
-				providers: filters.providers?.map(p => p.value) || [],
-				classifications: filters.classifications?.map(c => c.value) || []
+				units: filters.units?.map(u => u.value) || [],
+				positions: filters.positions?.map(p => p.value) || []
 			});
-			setTrainings(data);
+			setEmployees(data);
 		} catch (error) {
-			showToast.error('Erro', 'Não foi possível carregar os treinamentos');
+			showToast.error('Erro', 'Não foi possível carregar os colaboradores');
 		} finally {
 			setIsLoading(false);
 		}
 	}, [filters]);
 
 	useEffect(() => {
-		fetchTrainings();
-	}, [fetchTrainings]);
+		fetchEmployees();
+	}, [fetchEmployees]);
 
-	const handleOpenModal = (training = null) => {
-		setSelectedTraining(training);
+	const handleOpenModal = (employee = null) => {
+		setSelectedEmployee(employee);
 		setIsModalOpen(true);
 	};
 
 	const handleCloseModal = () => {
-		setSelectedTraining(null);
+		setSelectedEmployee(null);
 		setIsModalOpen(false);
 	};
 
 	const handleSubmit = async (data) => {
 		try {
 			setIsLoading(true);
-			if (selectedTraining) {
-				await updateTraining(selectedTraining.id, data);
-				showToast.success('Sucesso', 'Treinamento atualizado com sucesso!');
+			if (selectedEmployee) {
+				await updateEmployee(selectedEmployee.id, data);
+				showToast.success('Sucesso', 'Colaborador atualizado com sucesso!');
 			} else {
-				await createTraining(data);
-				showToast.success('Sucesso', 'Treinamento criado com sucesso!');
+				await createEmployee(data);
+				showToast.success('Sucesso', 'Colaborador cadastrado com sucesso!');
 			}
 			handleCloseModal();
-			fetchTrainings();
+			fetchEmployees();
 		} catch (error) {
-			showToast.error('Erro', error.message || 'Erro ao salvar treinamento');
+			showToast.error('Erro', error.message || 'Erro ao salvar colaborador');
 		} finally {
 			setIsLoading(false);
 		}
@@ -75,23 +75,22 @@ export default function Trainings() {
 	const handleDelete = async () => {
 		try {
 			setIsLoading(true);
-			await deleteTraining(deleteAlert.trainingId);
-			showToast.success('Sucesso', 'Treinamento excluído com sucesso!');
-			setDeleteAlert({ isOpen: false, trainingId: null });
-			fetchTrainings();
+			await deleteEmployee(deleteAlert.employeeId);
+			showToast.success('Sucesso', 'Colaborador excluído com sucesso!');
+			setDeleteAlert({ isOpen: false, employeeId: null });
+			fetchEmployees();
 		} catch (error) {
-			showToast.error('Erro', 'Não foi possível excluir o treinamento');
+			showToast.error('Erro', 'Não foi possível excluir o colaborador');
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
 	const columns = [
+		{ key: 'registration', header: 'Matrícula' },
 		{ key: 'name', header: 'Nome' },
-		{ key: 'code', header: 'Código' },
-		{ key: 'duration', header: 'Duração' },
-		{ key: 'provider', header: 'Fornecedor' },
-		{ key: 'classification', header: 'Classificação' }
+		{ key: 'unit', header: 'Unidade' },
+		{ key: 'position', header: 'Cargo' }
 	];
 
 	const actions = (row) => isAdmin ? (
@@ -103,7 +102,7 @@ export default function Trainings() {
 				<PencilIcon className="h-5 w-5" />
 			</button>
 			<button
-				onClick={() => setDeleteAlert({ isOpen: true, trainingId: row.id })}
+				onClick={() => setDeleteAlert({ isOpen: true, employeeId: row.id })}
 				className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
 			>
 				<TrashIcon className="h-5 w-5" />
@@ -115,7 +114,7 @@ export default function Trainings() {
 		<div className="space-y-6">
 			<div className="flex justify-between items-center">
 				<h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-					Treinamentos
+					Colaboradores
 				</h1>
 				{isAdmin && (
 					<button
@@ -123,19 +122,19 @@ export default function Trainings() {
 						className="btn-gradient flex items-center"
 					>
 						<PlusIcon className="h-5 w-5 mr-2" />
-						Novo Treinamento
+						Novo Colaborador
 					</button>
 				)}
 			</div>
 
-			<TrainingFilters
+			<EmployeeFilters
 				filters={filters}
 				onFilterChange={setFilters}
 			/>
 
 			<DataTable
 				columns={columns}
-				data={trainings}
+				data={employees}
 				actions={actions}
 				isLoading={isLoading}
 			/>
@@ -143,22 +142,22 @@ export default function Trainings() {
 			<Modal
 				isOpen={isModalOpen}
 				onClose={handleCloseModal}
-				title={selectedTraining ? 'Editar Treinamento' : 'Novo Treinamento'}
+				title={selectedEmployee ? 'Editar Colaborador' : 'Novo Colaborador'}
 				size="xl"
 			>
-				<TrainingForm
+				<EmployeeForm
 					onSubmit={handleSubmit}
-					initialData={selectedTraining}
+					initialData={selectedEmployee}
 					isLoading={isLoading}
 				/>
 			</Modal>
 
 			<Alert
 				isOpen={deleteAlert.isOpen}
-				onClose={() => setDeleteAlert({ isOpen: false, trainingId: null })}
+				onClose={() => setDeleteAlert({ isOpen: false, employeeId: null })}
 				onConfirm={handleDelete}
-				title="Excluir Treinamento"
-				message="Tem certeza que deseja excluir este treinamento? Esta ação não pode ser desfeita."
+				title="Excluir Colaborador"
+				message="Tem certeza que deseja excluir este colaborador? Esta ação não pode ser desfeita."
 				type="danger"
 			/>
 		</div>

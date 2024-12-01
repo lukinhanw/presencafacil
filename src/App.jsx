@@ -4,6 +4,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Unauthorized from './pages/Unauthorized';
 import Trainings from './pages/Trainings';
+import Employees from './pages/Employees';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         </ProtectedRoute>
       }>
         <Route path="treinamentos" element={<Trainings />} />
+        <Route path="colaboradores" element={<Employees />} />
         {/* Other routes will be added here */}
       </Route>
     </Routes>
