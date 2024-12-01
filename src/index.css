@@ -5,14 +5,10 @@
 @layer base {
 	:root {
 		--background-start: #e2e8f0;
-		/* Tailwind slate-200 */
 		--background-end: #cbd5e1;
-		/* Tailwind slate-300 */
 		--glass-bg: rgba(255, 255, 255, 0.4);
 		--glass-bg-alt: rgba(255, 255, 255, 0.7);
-		/* Less transparent white */
 		--glass-border: rgba(148, 163, 184, 0.2);
-		/* Tailwind slate-400 with opacity */
 		--glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 	}
 
@@ -40,6 +36,25 @@
 	::-webkit-scrollbar-thumb {
 		@apply bg-gray-300 dark:bg-gray-700 rounded-full hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors;
 	}
+
+	/* Add page transition animations */
+	.page-enter {
+		@apply opacity-0 scale-95;
+	}
+
+	.page-enter-active {
+		@apply opacity-100 scale-100;
+		transition: opacity 300ms, transform 300ms;
+	}
+
+	.page-exit {
+		@apply opacity-100 scale-100;
+	}
+
+	.page-exit-active {
+		@apply opacity-0 scale-95;
+		transition: opacity 300ms, transform 300ms;
+	}
 }
 
 @layer components {
@@ -48,7 +63,7 @@
 	}
 
 	.glass-card-alt {
-		@apply bg-[var(--glass-bg-alt)] backdrop-blur-md border border-[var(--glass-border)] shadow-[var(--glass-shadow)] rounded-lg transition-all duration-300;
+		@apply bg-[var(--glass-bg-alt)] backdrop-blur-md border border-[var(--glass-border)] shadow-[var(--glass-shadow)] transition-all duration-300;
 	}
 
 	.sidebar {
