@@ -3,13 +3,13 @@ export const selectStyles = {
 	control: (base, state) => ({
 		...base,
 		backgroundColor: 'rgb(243 244 246 / var(--tw-bg-opacity, 1))', // Tailwind slate-200
-		borderColor: state.isFocused ? 'rgb(14 165 233 / .5)': 'rgb(255 255 255 / 0.05)',
+		borderColor: state.isFocused ? 'rgb(14 165 233 / .5)': 'rgb(209 213 219 / var(--tw-border-opacity, 1))',
 		'&:hover': {
 			borderColor: 'rgb(14 165 233 / .7)' // Increased opacity for better contrast
 		},
 		boxShadow: 'rgb(14 165 233 / .5)',
 		borderWidth: '1px',
-		padding: '1px',
+		padding: '2px',
 		borderRadius: '0.375rem',
 		color: '#1F2937',
 		transition: 'all 200ms ease'
@@ -21,7 +21,7 @@ export const selectStyles = {
 	menu: (base) => ({
 		...base,
 		zIndex: 2, // Increased z-index
-		backgroundColor: 'rgba(255, 255, 255, 0.7)',
+		backgroundColor: '#F3F4F6',
 		backdropFilter: 'blur(20px)',
 		border: '1px solid rgba(255, 255, 255, 0.1)',
 		borderRadius: '0.5rem',

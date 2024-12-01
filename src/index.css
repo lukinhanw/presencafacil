@@ -68,7 +68,7 @@
 	}
 
 	.input-field {
-		@apply w-full px-3 py-2 rounded-md bg-gray-100 dark:bg-white/5 backdrop-blur-sm border border-gray-200/10 dark:border-white/5 focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500/50 outline-none transition-all duration-200 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500;
+		@apply w-full px-3 py-2 rounded-md bg-gray-100 dark:bg-white/5 backdrop-blur-sm border border-gray-300 dark:border-white/5 focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500/50 outline-none transition-all duration-200 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500;
 	}
 
 	.nav-link {

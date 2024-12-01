@@ -43,10 +43,7 @@ export default function Modal({
 							leaveTo="opacity-0 scale-95"
 						>
 							<Dialog.Panel className={`w-full ${sizeClasses[size]} transform overflow-hidden glass-card-alt p-6 text-left align-middle shadow-xl transition-all`}>
-								<Dialog.Title
-									as="div"
-									className="flex justify-between items-center mb-4"
-								>
+								<Dialog.Title as="div" className="flex justify-between items-center mb-4">
 									<h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
 										{title}
 									</h3>

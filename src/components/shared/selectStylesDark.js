@@ -21,7 +21,7 @@ export const selectStylesDark = {
 	menu: (base) => ({
 		...base,
 		zIndex: 2, // Increased z-index
-		backgroundColor: 'rgb(29 34 45 / 80%)',
+		backgroundColor: 'rgb(29 34 45)',
 		backdropFilter: 'blur(15px)',
 		border: '1px solid rgba(255, 255, 255, 0.05)',
 		borderRadius: '0.5rem',

@@ -39,22 +39,24 @@ export default function TrainingForm({ onSubmit, initialData, isLoading }) {
 
 	return (
 		<form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-				<div>
-					<label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-						Nome do Treinamento
-					</label>
-					<input
-						type="text"
-						id="name"
-						{...register('name', { required: 'Nome é obrigatório' })}
-						className="input-field mt-1"
-					/>
-					{errors.name && (
-						<p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
-					)}
-				</div>
+			{/* Name field - full width */}
+			<div className="w-full">
+				<label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+					Nome do Treinamento
+				</label>
+				<input
+					type="text"
+					id="name"
+					{...register('name', { required: 'Nome é obrigatório' })}
+					className="input-field mt-1"
+				/>
+				{errors.name && (
+					<p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
+				)}
+			</div>
 
+			{/* Other fields - 2 columns */}
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<div>
 					<label htmlFor="code" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Código
