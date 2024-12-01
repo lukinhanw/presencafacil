@@ -6,23 +6,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { UNITS } from '../../services/employeeService';
 import { CLASS_TYPES } from '../../services/classService';
-import { PROVIDERS, CLASSIFICATIONS } from '../../services/trainingService';
 import { selectStyles } from '../shared/selectStyles';
 import { selectStylesDark } from '../shared/selectStylesDark';
 
 const unitOptions = UNITS.map(unit => ({
 	value: unit,
 	label: unit
-}));
-
-const providerOptions = PROVIDERS.map(provider => ({
-	value: provider,
-	label: provider
-}));
-
-const classificationOptions = CLASSIFICATIONS.map(classification => ({
-	value: classification,
-	label: classification
 }));
 
 export default function ClassForm({

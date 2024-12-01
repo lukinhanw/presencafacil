@@ -122,9 +122,44 @@ export default function Classes() {
 			cell: (row) => row.training?.code || 'N/A'
 		},
 		{
+			accessorKey: 'training.duration',
+			header: 'Duração',
+			cell: (row) => row.training?.duration || 'N/A'
+		},
+		{
+			accessorKey: 'training.provider',
+			header: 'Fornecedor',
+			cell: (row) => row.training?.provider || 'N/A'
+		},
+		{
+			accessorKey: 'training.classification',
+			header: 'Classificação',
+			cell: (row) => row.training?.classification || 'N/A'
+		},
+		{
 			accessorKey: 'type',
 			header: 'Tipo',
 			cell: (row) => CLASS_TYPES.find(t => t.value === row.type)?.label || row.type
+		},
+		{
+			accessorKey: 'date_start',
+			header: 'Data Início',
+			cell: (row) => row.date_start ? new Date(row.date_start).toLocaleString() : 'N/A'
+		},
+		{
+			accessorKey: 'date_end',
+			header: 'Data Fim',
+			cell: (row) => row.date_end ? new Date(row.date_end).toLocaleString() : 'N/A'
+		},
+		{
+			accessorKey: 'presents',
+			header: 'Presentes',
+			cell: (row) => row.presents || 'N/A'
+		},
+		{
+			accessorKey: 'status',
+			header: 'Status',
+			cell: (row) => row.status || 'N/A'
 		},
 		{
 			accessorKey: 'instructor.name',

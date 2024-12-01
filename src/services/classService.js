@@ -3,8 +3,11 @@ const MOCK_CLASSES = [
 	{
 		id: 1,
 		type: 'Portfolio',
+		date_start: '2021-08-02T14:00:00',
+		date_end: '2021-08-02T18:00:00',
+		presents: 10,
+		status: 'Finalizado',
 		training: {
-			id: 1,
 			name: 'Desenvolvimento React',
 			code: 'TR-001',
 			duration: '40:00',
@@ -18,6 +21,116 @@ const MOCK_CLASSES = [
 			name: 'Carlos Oliveira'
 		},
 		unit: 'Matriz'
+	},
+	{
+		id: 2,
+		type: 'Portfolio',
+		date_start: '2021-09-15T09:00:00',
+		date_end: '',
+		presents: 15,
+		status: 'Em andamento',
+		training: {
+			name: 'Liderança e Gestão de Equipes',
+			code: 'TR-002',
+			duration: '16:00',
+			provider: 'RH Treinamentos',
+			content: 'Habilidades de liderança, comunicação efetiva, gestão de conflitos',
+			classification: 'Comportamental',
+			objective: 'Desenvolver habilidades de liderança'
+		},
+		instructor: {
+			id: 2,
+			name: 'Ana Silva'
+		},
+		unit: 'Filial SP'
+	},
+	{
+		id: 3,
+		type: 'DDS',
+		date_start: '2021-10-01T13:00:00',
+		date_end: '',
+		presents: 25,
+		status: 'Em andamento',
+		training: {
+			name: 'Excel Avançado',
+			code: 'TR-003',
+			duration: '20:00',
+			provider: 'Microsoft',
+			content: 'Fórmulas avançadas, Macros, VBA',
+			classification: 'Ferramentas',
+			objective: 'Aprofundar conhecimentos em Excel'
+		},
+		instructor: {
+			id: 3,
+			name: 'Roberto Santos'
+		},
+		unit: 'Virtual'
+	},
+	{
+		id: 4,
+		type: 'Others',
+		date_start: '2021-11-10T08:00:00',
+		date_end: '',
+		presents: 20,
+		status: 'Em andamento',
+		training: {
+			name: 'Segurança do Trabalho',
+			code: 'TR-004',
+			duration: '24:00',
+			provider: 'SENAI',
+			content: 'NRs, EPIs, Prevenção de acidentes',
+			classification: 'Segurança',
+			objective: 'Capacitar em normas de segurança'
+		},
+		instructor: {
+			id: 4,
+			name: 'Marina Costa'
+		},
+		unit: 'Filial RJ'
+	},
+	{
+		id: 5,
+		type: 'External',
+		date_start: '2021-12-05T09:00:00',
+		date_end: '',
+		presents: 18,
+		status: 'Em andamento',
+		training: {
+			name: 'Marketing Digital',
+			code: 'TR-005',
+			duration: '30:00',
+			provider: 'Digital Academy',
+			content: 'SEO, Redes Sociais, Analytics',
+			classification: 'Marketing',
+			objective: 'Desenvolver estratégias de marketing digital'
+		},
+		instructor: {
+			id: 5,
+			name: 'Paulo Mendes'
+		},
+		unit: 'Matriz'
+	},
+	{
+		id: 6,
+		type: 'External',
+		date_start: '2022-01-15T14:00:00',
+		date_end: '',
+		presents: 30,
+		status: 'Em andamento',
+		training: {
+			name: 'Design Thinking',
+			code: 'TR-006',
+			duration: '12:00',
+			provider: 'Innovation Lab',
+			content: 'Metodologias ágeis, Design Sprint, Prototipação',
+			classification: 'Inovação',
+			objective: 'Aplicar métodos de design thinking'
+		},
+		instructor: {
+			id: 6,
+			name: 'Lucia Ferreira'
+		},
+		unit: 'Virtual'
 	}
 ];
 

@@ -6,37 +6,37 @@ const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+	const [user, setUser] = useState(null);
+	const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const storedUser = getStoredAuth();
-    if (storedUser) {
-      setUser(storedUser);
-    }
-    setLoading(false);
-  }, []);
+	useEffect(() => {
+		const storedUser = getStoredAuth();
+		if (storedUser) {
+			setUser(storedUser);
+		}
+		setLoading(false);
+	}, []);
 
-  const login = (userData) => {
-    setUser(userData);
-  };
+	const login = (userData) => {
+		setUser(userData);
+	};
 
-  const logout = () => {
-    setUser(null);
-    logoutService();
-  };
+	const logout = () => {
+		setUser(null);
+		logoutService();
+	};
 
-  const hasRole = (role) => {
-    return user?.roles?.includes(role);
-  };
+	const hasRole = (role) => {
+		return user?.roles?.includes(role);
+	};
 
-  if (loading) {
-    return null; // Or a loading spinner
-  }
+	if (loading) {
+		return null; // Or a loading spinner
+	}
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout, hasRole }}>
-      {children}
-    </AuthContext.Provider>
-  );
+	return (
+		<AuthContext.Provider value={{ user, login, logout, hasRole }}>
+			{children}
+		</AuthContext.Provider>
+	);
 };
