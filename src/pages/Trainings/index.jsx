@@ -87,11 +87,31 @@ export default function Trainings() {
 	};
 
 	const columns = [
-		{ key: 'name', header: 'Nome' },
-		{ key: 'code', header: 'Código' },
-		{ key: 'duration', header: 'Duração' },
-		{ key: 'provider', header: 'Fornecedor' },
-		{ key: 'classification', header: 'Classificação' }
+		{
+			accessorKey: 'name',
+			header: 'Nome',
+			cell: (row) => row.name
+		},
+		{
+			accessorKey: 'code',
+			header: 'Código',
+			cell: (row) => row.code
+		},
+		{
+			accessorKey: 'duration',
+			header: 'Duração',
+			cell: (row) => row.duration
+		},
+		{
+			accessorKey: 'provider',
+			header: 'Fornecedor',
+			cell: (row) => row.provider
+		},
+		{
+			accessorKey: 'classification',
+			header: 'Classificação',
+			cell: (row) => row.classification
+		}
 	];
 
 	const actions = (row) => isAdmin ? (

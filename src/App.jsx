@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import Unauthorized from './pages/Unauthorized';
 import Trainings from './pages/Trainings';
 import Employees from './pages/Employees';
+import Instructors from './pages/Instructors';
+import Classes from './pages/Classes';
 
 function App() {
   return (
@@ -18,7 +20,8 @@ function App() {
       }>
         <Route path="treinamentos" element={<Trainings />} />
         <Route path="colaboradores" element={<Employees />} />
-        {/* Other routes will be added here */}
+        <Route path="instrutores" element={<Instructors />} />
+        <Route path="aulas" element={<Classes />} />
       </Route>
     </Routes>
   );

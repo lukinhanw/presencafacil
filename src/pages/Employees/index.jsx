@@ -87,10 +87,26 @@ export default function Employees() {
 	};
 
 	const columns = [
-		{ key: 'registration', header: 'Matrícula' },
-		{ key: 'name', header: 'Nome' },
-		{ key: 'unit', header: 'Unidade' },
-		{ key: 'position', header: 'Cargo' }
+		{
+			accessorKey: 'registration',
+			header: 'Matrícula',
+			cell: (row) => row.registration
+		},
+		{
+			accessorKey: 'name',
+			header: 'Nome',
+			cell: (row) => row.name
+		},
+		{
+			accessorKey: 'unit',
+			header: 'Unidade',
+			cell: (row) => row.unit
+		},
+		{
+			accessorKey: 'position',
+			header: 'Cargo',
+			cell: (row) => row.position
+		}
 	];
 
 	const actions = (row) => isAdmin ? (

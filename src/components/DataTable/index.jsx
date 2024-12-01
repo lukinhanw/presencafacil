@@ -35,7 +35,7 @@ export default function DataTable({
 						<tr className="bg-gray-50/50 dark:bg-gray-800/50">
 							{columns.map((column) => (
 								<th
-									key={column.key}
+									key={column.accessorKey}
 									className="px-6 py-4 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider"
 								>
 									{column.header}
@@ -68,10 +68,10 @@ export default function DataTable({
 								>
 									{columns.map((column) => (
 										<td
-											key={column.key}
+											key={column.accessorKey}
 											className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200"
 										>
-											{column.render ? column.render(row[column.key], row) : row[column.key]}
+											{column.cell ? column.cell(row) : getNestedValue(row, column.accessorKey)}
 										</td>
 									))}
 									{actions && (
@@ -132,4 +132,9 @@ export default function DataTable({
 			)}
 		</div>
 	);
+}
+
+// Adicione esta função auxiliar para acessar propriedades aninhadas
+function getNestedValue(obj, path) {
+	return path.split('.').reduce((value, key) => value && value[key], obj);
 }
