@@ -11,6 +11,7 @@ import { getInstructors } from '../../services/instructorService';
 import { useAuth } from '../../contexts/AuthContext';
 import { showToast } from '../../components/Toast';
 import { useNavigate } from 'react-router-dom';
+import { formatDateTime } from '../../utils/dateUtils';
 
 export default function Classes() {
 	const [classes, setClasses] = useState([]);
@@ -127,12 +128,12 @@ export default function Classes() {
 		{
 			accessorKey: 'date_start',
 			header: 'Data Início',
-			cell: (row) => row.date_start ? new Date(row.date_start).toLocaleString() : 'N/A'
+			cell: (row) => formatDateTime(row.date_start)
 		},
 		{
 			accessorKey: 'presents',
 			header: 'Presentes',
-			cell: (row) => row.presents || 'N/A'
+			cell: (row) => row.presents || 0
 		},
 		{
 			accessorKey: 'instructor.name',

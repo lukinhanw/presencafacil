@@ -48,6 +48,9 @@ const MOCK_CLASSES = [
 	}
 ];
 
+// Mock tokens for invite links
+const INVITE_TOKENS = new Map();
+
 export const CLASS_TYPES = [
 	{ value: 'Portfolio', label: 'Portfólio' },
 	{ value: 'External', label: 'Externos' },
@@ -192,8 +195,27 @@ export const generateInviteLink = async (classId) => {
 	if (!classData) throw new Error('Aula não encontrada');
 
 	const token = Math.random().toString(36).substring(2, 15);
+	INVITE_TOKENS.set(token, {
+		classId: parseInt(classId),
+		expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+	});
 
 	return `${window.location.origin}/aulas/${classId}/join/${token}`;
+};
+
+export const validateInviteToken = async (classId, token) => {
+	await new Promise(resolve => setTimeout(resolve, 500));
+
+	const tokenData = INVITE_TOKENS.get(token);
+	if (!tokenData) return false;
+
+	if (tokenData.classId !== parseInt(classId)) return false;
+	if (tokenData.expiresAt < new Date()) {
+		INVITE_TOKENS.delete(token);
+		return false;
+	}
+
+	return true;
 };
 
 export const registerAttendanceByCard = async (classId, cardId) => {

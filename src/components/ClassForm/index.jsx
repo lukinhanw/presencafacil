@@ -26,7 +26,11 @@ export default function ClassForm({
 	const stylesSelect = isDark ? selectStylesDark : selectStyles;
 
 	const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm({
-		defaultValues: initialData || {}
+		defaultValues: {
+			...initialData,
+			date_start: new Date().toISOString(),
+			presents: 0
+		}
 	});
 
 	const selectedType = watch('type');
@@ -49,7 +53,9 @@ export default function ClassForm({
 			instructor: {
 				id: data.instructor.value,
 				name: data.instructor.label
-			}
+			},
+			date_start: new Date().toISOString(),
+			presents: 0
 		};
 
 		if (data.type.value === 'Portfolio') {
@@ -163,6 +169,7 @@ export default function ClassForm({
 							value={trainings.find(t => t.id === watch('training')?.value)?.content || ''}
 							readOnly
 							className="input-field mt-1"
+							rows={4}
 						/>
 					</div>
 					<div>
@@ -184,6 +191,7 @@ export default function ClassForm({
 							value={trainings.find(t => t.id === watch('training')?.value)?.objective || ''}
 							readOnly
 							className="input-field mt-1"
+							rows={4}
 						/>
 					</div>
 				</div>
@@ -257,7 +265,7 @@ export default function ClassForm({
 						<p className="mt-1 text-sm text-red-500">{errors.objective.message}</p>
 					)}
 				</div>
-				</>
+			</>
 		);
 
 		if (type === 'External') {
@@ -308,7 +316,7 @@ export default function ClassForm({
 			);
 		}
 
-		if (type === 'DDS') {
+		if (type === 'DDS' || type === 'Others') {
 			return (
 				<div className="space-y-6">
 					{commonFields}
@@ -318,37 +326,7 @@ export default function ClassForm({
 						</label>
 						<input
 							type="text"
-							value="DDS"
-							readOnly
-							className="input-field mt-1"
-						/>
-					</div>
-					<div>
-						<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-							Duração
-						</label>
-						<input
-							type="text"
-							value="00:40"
-							readOnly
-							className="input-field mt-1"
-						/>
-					</div>
-				</div>
-			);
-		}
-
-		if (type === 'Others') {
-			return (
-				<div className="space-y-6">
-					{commonFields}
-					<div>
-						<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-							Código
-						</label>
-						<input
-							type="text"
-							value="OUTROS"
+							value={type === 'DDS' ? 'DDS' : 'OUTROS'}
 							readOnly
 							className="input-field mt-1"
 						/>
@@ -372,7 +350,7 @@ export default function ClassForm({
 	return (
 		<form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-				<div>
+				<div className="col-span-1">
 					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Tipo
 					</label>
@@ -396,8 +374,8 @@ export default function ClassForm({
 					)}
 				</div>
 
-				{hasRole('ADMIN_ROLE') ? (
-					<div>
+				{hasRole('ADMIN_ROLE') && (
+					<div className="col-span-1">
 						<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 							Instrutor
 						</label>
@@ -421,9 +399,9 @@ export default function ClassForm({
 							<p className="mt-1 text-sm text-red-500">{errors.instructor.message}</p>
 						)}
 					</div>
-				) : null}
+				)}
 
-				<div>
+				<div className="col-span-1">
 					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Unidade
 					</label>

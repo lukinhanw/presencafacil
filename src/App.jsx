@@ -8,27 +8,29 @@ import Employees from './pages/Employees';
 import Instructors from './pages/Instructors';
 import Classes from './pages/Classes';
 import ClassInstance from './pages/ClassInstance';
+import Join from './pages/Join';
 
 function App() {
-	return (
-		<Routes>
-			<Route path="/login" element={<Login />} />
-			<Route path="/unauthorized" element={<Unauthorized />} />
-			<Route path="/" element={
-				<ProtectedRoute>
-					<Layout />
-				</ProtectedRoute>
-			}>
-				<Route path="treinamentos" element={<Trainings />} />
-				<Route path="colaboradores" element={<Employees />} />
-				<Route path="instrutores" element={<Instructors />} />
-				<Route path="aulas">
-					<Route index element={<Classes />} />
-					<Route path=":id" element={<ClassInstance />} />
-				</Route>
-			</Route>
-		</Routes>
-	);
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="/aulas/:id/join/:token" element={<Join />} />
+      <Route path="/" element={
+        <ProtectedRoute>
+          <Layout />
+        </ProtectedRoute>
+      }>
+        <Route path="treinamentos" element={<Trainings />} />
+        <Route path="colaboradores" element={<Employees />} />
+        <Route path="instrutores" element={<Instructors />} />
+        <Route path="aulas">
+          <Route index element={<Classes />} />
+          <Route path=":id" element={<ClassInstance />} />
+        </Route>
+      </Route>
+    </Routes>
+  );
 }
 
 export default App;
