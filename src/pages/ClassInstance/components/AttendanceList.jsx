@@ -55,7 +55,7 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 								Tipo
 							</th>
 							{!isFinished && (
-								<th className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/6">
+								<th className="px-6 py-4 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/6">
 									Ações
 								</th>
 							)}
@@ -71,7 +71,7 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 									{attendee.registration}
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
-									{new Date(attendee.timestamp).toLocaleTimeString()}
+									{new Date(attendee.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
 									{attendee.type}

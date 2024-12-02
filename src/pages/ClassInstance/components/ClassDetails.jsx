@@ -2,9 +2,6 @@ export default function ClassDetails({ classData }) {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-					Informações do Treinamento
-				</h3>
 				<dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div>
 						<dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Nome</dt>

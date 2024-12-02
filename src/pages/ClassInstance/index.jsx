@@ -66,65 +66,56 @@ export default function ClassInstance() {
 	const finished = isClassFinished(classData);
 
 	return (
-		<div className="space-y-8">
+		<div className="space-y-6">
 			<ClassHeader
 				classData={classData}
 				onOpenDetails={() => setIsDetailsModalOpen(true)}
-				onFinishClass={() => setFinishAlert(true)}
+				onFinishclassName={() => setFinishAlert(true)}
 				isFinished={finished}
 			/>
 
-			<AttendanceStats attendees={classData.attendees} />
-
-			{!finished && (
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-					<button
-						onClick={() => setIsManualModalOpen(true)}
-						className="glass-card p-6 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 rounded-xl shadow-md hover:shadow-lg flex flex-col items-center"
-					>
-						<div className="flex items-center gap-3 mb-3">
-							<UserPlusIcon className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-							<h3 className="font-medium">Presença Manual</h3>
-						</div>
-						<p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-							Registrar presença manualmente
-						</p>
-					</button>
-
-					<button
-						onClick={() => setIsInviteModalOpen(true)}
-						className="glass-card p-6 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 rounded-xl shadow-md hover:shadow-lg flex flex-col items-center"
-					>
-						<div className="flex items-center gap-3 mb-3">
-							<QrCodeIcon className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-							<h3 className="font-medium">Link de Convite</h3>
-						</div>
-						<p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-							Gerar link para auto registro
-						</p>
-					</button>
-
-					<button
-						onClick={() => setIsNFCModalOpen(true)}
-						className="glass-card p-6 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 rounded-xl shadow-md hover:shadow-lg flex flex-col items-center"
-					>
-						<div className="flex items-center gap-3 mb-3">
-							<CreditCardIcon className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-							<h3 className="font-medium">Cartão NFC</h3>
-						</div>
-						<p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-							Registrar via cartão NFC
-						</p>
-					</button>
+			<div className="flex flex-col md:flex-row gap-6">
+				<div className="w-full md:w-3/4">
+					<AttendanceList
+						classId={id}
+						attendees={classData.attendees}
+						onUpdate={fetchClassData}
+						isFinished={finished}
+					/>
 				</div>
-			)}
 
-			<AttendanceList
-				classId={id}
-				attendees={classData.attendees}
-				onUpdate={fetchClassData}
-				isFinished={finished}
-			/>
+				<div className="w-full md:w-1/4 space-y-4">
+					<AttendanceStats attendees={classData.attendees} />
+
+					{!finished && (
+						<div className="glass-card p-3 space-y-2">
+							<button
+								onClick={() => setIsManualModalOpen(true)}
+								className="w-full btn-gradient py-2 flex items-center justify-center gap-2 text-sm"
+							>
+								<UserPlusIcon className="h-4 w-4" />
+								<span>Registrar Presença</span>
+							</button>
+
+							<button
+								onClick={() => setIsInviteModalOpen(true)}
+								className="w-full btn-gradient py-2 flex items-center justify-center gap-2 text-sm"
+							>
+								<QrCodeIcon className="h-4 w-4" />
+								<span>Gerar Link</span>
+							</button>
+
+							<button
+								onClick={() => setIsNFCModalOpen(true)}
+								className="w-full btn-gradient py-2 flex items-center justify-center gap-2 text-sm"
+							>
+								<CreditCardIcon className="h-4 w-4" />
+								<span>Cartão NFC</span>
+							</button>
+						</div>
+					)}
+				</div>
+			</div>
 
 			<Modal
 				isOpen={isDetailsModalOpen}
