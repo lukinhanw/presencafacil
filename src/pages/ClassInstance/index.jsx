@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-	InformationCircleIcon,
 	UserPlusIcon,
 	QrCodeIcon,
 	CreditCardIcon
@@ -14,7 +13,10 @@ import AttendanceList from './components/AttendanceList';
 import ManualAttendance from './components/ManualAttendance';
 import InviteLink from './components/InviteLink';
 import NFCReader from './components/NFCReader';
+import ClassHeader from './components/ClassHeader';
+import AttendanceStats from './components/AttendanceStats';
 import { showToast } from '../../components/Toast';
+import { isClassFinished } from '../../utils/dateUtils';
 
 export default function ClassInstance() {
 	const { id } = useParams();
@@ -54,92 +56,76 @@ export default function ClassInstance() {
 	};
 
 	if (isLoading) {
-		return <div>Carregando...</div>;
+		return (
+			<div className="flex items-center justify-center min-h-[400px]">
+				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+			</div>
+		);
 	}
 
+	const finished = isClassFinished(classData);
+
 	return (
-		<div className="space-y-6">
-			{/* Header */}
-			<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-				<div>
-					<h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-						{classData.training.name}
-					</h1>
-					<div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-						<span>Instrutor: {classData.instructor.name}</span>
-						<span>•</span>
-						<span>Início: {new Date(classData.date_start).toLocaleString()}</span>
-					</div>
-				</div>
+		<div className="space-y-8">
+			<ClassHeader
+				classData={classData}
+				onOpenDetails={() => setIsDetailsModalOpen(true)}
+				onFinishClass={() => setFinishAlert(true)}
+				isFinished={finished}
+			/>
 
-				<div className="flex flex-wrap gap-2">
-					<button
-						onClick={() => setIsDetailsModalOpen(true)}
-						className="btn-gradient-outline"
-					>
-						<span className="flex items-center">
-							<InformationCircleIcon className="h-5 w-5 mr-2" />
-							Detalhes
-						</span>
-					</button>
-					{!classData.date_end && (
-						<button
-							onClick={() => setFinishAlert(true)}
-							className="btn-gradient"
-						>
-							Finalizar Aula
-						</button>
-					)}
-				</div>
-			</div>
+			<AttendanceStats attendees={classData.attendees} />
 
-			{/* Attendance Methods */}
-			{!classData.date_end && (
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+			{!finished && (
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 					<button
 						onClick={() => setIsManualModalOpen(true)}
-						className="glass-card p-4 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+						className="glass-card p-6 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 rounded-xl shadow-md hover:shadow-lg flex flex-col items-center"
 					>
-						<UserPlusIcon className="h-8 w-8 mb-2 text-primary-600 dark:text-primary-400" />
-						<h3 className="font-medium">Presença Manual</h3>
-						<p className="text-sm text-gray-600 dark:text-gray-400">
+						<div className="flex items-center gap-3 mb-3">
+							<UserPlusIcon className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+							<h3 className="font-medium">Presença Manual</h3>
+						</div>
+						<p className="text-sm text-gray-600 dark:text-gray-400 text-center">
 							Registrar presença manualmente
 						</p>
 					</button>
 
 					<button
 						onClick={() => setIsInviteModalOpen(true)}
-						className="glass-card p-4 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+						className="glass-card p-6 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 rounded-xl shadow-md hover:shadow-lg flex flex-col items-center"
 					>
-						<QrCodeIcon className="h-8 w-8 mb-2 text-primary-600 dark:text-primary-400" />
-						<h3 className="font-medium">Link de Convite</h3>
-						<p className="text-sm text-gray-600 dark:text-gray-400">
+						<div className="flex items-center gap-3 mb-3">
+							<QrCodeIcon className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+							<h3 className="font-medium">Link de Convite</h3>
+						</div>
+						<p className="text-sm text-gray-600 dark:text-gray-400 text-center">
 							Gerar link para auto registro
 						</p>
 					</button>
 
 					<button
 						onClick={() => setIsNFCModalOpen(true)}
-						className="glass-card p-4 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+						className="glass-card p-6 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 rounded-xl shadow-md hover:shadow-lg flex flex-col items-center"
 					>
-						<CreditCardIcon className="h-8 w-8 mb-2 text-primary-600 dark:text-primary-400" />
-						<h3 className="font-medium">Cartão NFC</h3>
-						<p className="text-sm text-gray-600 dark:text-gray-400">
+						<div className="flex items-center gap-3 mb-3">
+							<CreditCardIcon className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+							<h3 className="font-medium">Cartão NFC</h3>
+						</div>
+						<p className="text-sm text-gray-600 dark:text-gray-400 text-center">
 							Registrar via cartão NFC
 						</p>
 					</button>
 				</div>
 			)}
 
-			{/* Attendance List */}
 			<AttendanceList
 				classId={id}
 				attendees={classData.attendees}
 				onUpdate={fetchClassData}
-				isFinished={!!classData.date_end}
+				isFinished={finished}
 			/>
 
-			{/* Modals */}
 			<Modal
 				isOpen={isDetailsModalOpen}
 				onClose={() => setIsDetailsModalOpen(false)}
@@ -181,9 +167,7 @@ export default function ClassInstance() {
 			>
 				<NFCReader
 					classId={id}
-					onSuccess={() => {
-						fetchClassData();
-					}}
+					onSuccess={fetchClassData}
 				/>
 			</Modal>
 
