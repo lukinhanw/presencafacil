@@ -1,4 +1,4 @@
-import ThemeToggle from '../ThemeToggle';
+import ThemeToggle from '../General/themeToggle';
 import UserMenu from './UserMenu';
 
 export default function DashboardHeader() {

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import ThemeToggle from '../ThemeToggle';
+import ThemeToggle from '../General/themeToggle';
 import UserMenu from './UserMenu';
 import Breadcrumb from './Breadcrumb';
 

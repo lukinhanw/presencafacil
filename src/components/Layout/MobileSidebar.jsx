@@ -9,7 +9,7 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
-import ThemeToggle from '../ThemeToggle';
+import ThemeToggle from '../General/themeToggle';
 import LogoutConfirmation from './LogoutConfirmation';
 
 const navigation = [
