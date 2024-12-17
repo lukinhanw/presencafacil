@@ -9,6 +9,7 @@ import Instructors from './pages/instructors';
 import Classes from './pages/classes';
 import ClassInstance from './pages/classInstance';
 import Join from './pages/join';
+import Support from './pages/support';
 
 function App() {
 	return (
@@ -28,6 +29,7 @@ function App() {
 					<Route index element={<Classes />} />
 					<Route path=":id" element={<ClassInstance />} />
 				</Route>
+				<Route path="suporte" element={<Support />} />
 			</Route>
 		</Routes>
 	);
