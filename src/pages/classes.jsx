@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { FiUsers, FiClock, FiMapPin, FiAward, FiPlus, FiTrash2, FiArrowRight } from 'react-icons/fi';
 import Modal from '../components/General/modal';
 import Alert from '../components/General/alert';
-import ClassForm from '../components/Class/classForm';
-import ClassFilters from '../components/Class/classFilters';
+import ClassForm from '../components/Class/ClassForm';
+import ClassFilters from '../components/Class/ClassFilters';
 import { getClasses, createClass, deleteClass, CLASS_TYPES } from '../services/classService';
 import { getTrainings } from '../services/trainingService';
 import { getInstructors } from '../services/instructorService';
@@ -152,7 +152,17 @@ export default function Classes() {
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{[1, 2, 3, 4, 5, 6].map((i) => (
 						<div key={i} className="animate-pulse">
-							<div className="glass-card h-64"></div>
+							<div className="glass-card h-64 p-4">
+								{/* Imagem */}
+								<div className="w-full h-32 bg-gray-300/30 rounded-lg mb-4"></div>
+								{/* Título */}
+								<div className="h-4 bg-gray-300/30 rounded w-3/4 mb-4"></div>
+								{/* Linhas de texto */}
+								<div className="space-y-3">
+									<div className="h-3 bg-gray-300/30 rounded"></div>
+									<div className="h-3 bg-gray-300/30 rounded w-5/6"></div>
+								</div>
+							</div>
 						</div>
 					))}
 				</div>
@@ -175,7 +185,7 @@ export default function Classes() {
 							variants={item}
 							className={`
 								relative overflow-hidden rounded-xl
-								${isDark ? 'bg-gray-800/50' : 'bg-white/50'}
+								${isDark ? 'bg-gray-800/50' : 'bg-gray-100/50'}
 								backdrop-blur-lg border border-gray-200 dark:border-gray-700
 								hover:shadow-lg transition-all duration-300
 								group

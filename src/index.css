@@ -4,20 +4,20 @@
 
 @layer base {
 	:root {
-		--background-start: #e2e8f0;
-		--background-end: #cbd5e1;
-		--glass-bg: rgba(255, 255, 255, 0.4);
+		--background-start: #ffffff;
+		--background-end: #d8dee5;
+		--glass-bg: rgba(255, 255, 255, 1);
 		--glass-bg-alt: rgba(255, 255, 255, 1);
-		--glass-border: rgba(148, 163, 184, 0.2);
-		--glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+		--glass-border: rgba(148, 163, 184, 0.5);
+		--glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 	}
 
 	.dark {
 		--background-start: #0f172a;
 		--background-end: #1e293b;
-		--glass-bg: rgba(255, 255, 255, 0.02);
-		--glass-bg-alt: rgb(29 34 45 / 1);
-		--glass-border: rgba(255, 255, 255, 0.05);
+		--glass-bg: rgba(30, 41, 59, 1);
+		--glass-bg-alt: rgba(30, 41, 59, 1);
+		--glass-border: rgba(55, 65, 81, 1);
 		--glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
 	}
 
@@ -59,15 +59,16 @@
 
 @layer components {
 	.glass-card {
-		@apply bg-[var(--glass-bg)] backdrop-blur-md border border-[var(--glass-border)] shadow-[var(--glass-shadow)] rounded-lg transition-all duration-300;
+		@apply bg-[var(--glass-bg)] border border-[var(--glass-border)] shadow-[var(--glass-shadow)] rounded-lg transition-all duration-300;
 	}
 
 	.glass-card-alt {
-		@apply bg-[var(--glass-bg-alt)] backdrop-blur-md border rounded-md border-[var(--glass-border)] shadow-[var(--glass-shadow)] transition-all duration-300;
+		@apply relative bg-[var(--glass-bg-alt)] border rounded-lg border-[var(--glass-border)] 
+		shadow-[var(--glass-shadow)] transition-all duration-300;
 	}
 
 	.sidebar {
-		@apply bg-white/[0.02] backdrop-blur-xl border-r border-white/5 shadow-lg;
+		@apply bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-lg;
 	}
 
 	.btn-gradient {
@@ -129,7 +130,7 @@
 
 /* Glassmorphism utilities */
 .glass-effect {
-	@apply bg-clip-padding backdrop-filter backdrop-blur-xl;
+	@apply bg-white dark:bg-gray-800;
 }
 
 /* Animation utilities */
@@ -175,4 +176,10 @@
 
 .animate-leave {
   animation: leave 0.15s ease-in forwards;
+}
+
+@layer utilities {
+  .max-w-8xl {
+    max-width: 1440px;
+  }
 }

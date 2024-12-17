@@ -17,6 +17,7 @@ import ClassHeader from '../components/ClassInstance/ClassHeader';
 import AttendanceStats from '../components/ClassInstance/AttendanceStats';
 import { showToast } from '../components/General/toast';
 import { isClassFinished } from '../utils/dateUtils';
+import { motion } from 'framer-motion';
 
 export default function ClassInstance() {
 	const { id } = useParams();
@@ -65,56 +66,104 @@ export default function ClassInstance() {
 
 	const finished = isClassFinished(classData);
 
+	// Variantes de animação
+	const containerVariants = {
+		hidden: { opacity: 0 },
+		visible: {
+			opacity: 1,
+			transition: {
+				staggerChildren: 0.1,
+				delayChildren: 0.2
+			}
+		}
+	};
+
+	const itemVariants = {
+		hidden: { opacity: 0, y: 20 },
+		visible: {
+			opacity: 1,
+			y: 0,
+			transition: {
+				type: "spring",
+				stiffness: 100,
+				damping: 12
+			}
+		}
+	};
+
 	return (
-		<div className="space-y-6">
-			<ClassHeader
-				classData={classData}
-				onOpenDetails={() => setIsDetailsModalOpen(true)}
-				onFinishclassName={() => setFinishAlert(true)}
-				isFinished={finished}
-			/>
+		<motion.div 
+			className="space-y-6"
+			initial="hidden"
+			animate="visible"
+			variants={containerVariants}
+		>
+			<motion.div variants={itemVariants}>
+				<ClassHeader
+					classData={classData}
+					onOpenDetails={() => setIsDetailsModalOpen(true)}
+					onFinishclassName={() => setFinishAlert(true)}
+					isFinished={finished}
+				/>
+			</motion.div>
 
 			<div className="flex flex-col md:flex-row gap-6">
-				<div className="w-full md:w-3/4">
+				<motion.div 
+					className="w-full md:w-3/4"
+					variants={itemVariants}
+				>
 					<AttendanceList
 						classId={id}
 						attendees={classData.attendees}
 						onUpdate={fetchClassData}
 						isFinished={finished}
 					/>
-				</div>
+				</motion.div>
 
-				<div className="w-full md:w-1/4 space-y-4">
+				<motion.div 
+					className="w-full md:w-1/4 space-y-4"
+					variants={itemVariants}
+				>
 					<AttendanceStats attendees={classData.attendees} />
 
 					{!finished && (
-						<div className="glass-card p-3 space-y-2">
-							<button
+						<motion.div 
+							className="glass-card p-3 space-y-2"
+							whileHover={{ scale: 1.02 }}
+							transition={{ type: "spring", stiffness: 400, damping: 10 }}
+						>
+							<motion.button
 								onClick={() => setIsManualModalOpen(true)}
 								className="w-full btn-gradient py-2 flex items-center justify-center gap-2 text-sm"
+								whileHover={{ scale: 1.05 }}
+								whileTap={{ scale: 0.95 }}
 							>
 								<UserPlusIcon className="h-4 w-4" />
 								<span>Registrar Presença</span>
-							</button>
+							</motion.button>
 
-							<button
+							<motion.button
 								onClick={() => setIsInviteModalOpen(true)}
 								className="w-full btn-gradient py-2 flex items-center justify-center gap-2 text-sm"
+								whileHover={{ scale: 1.05 }}
+								whileTap={{ scale: 0.95 }}
 							>
 								<QrCodeIcon className="h-4 w-4" />
 								<span>Gerar Link</span>
-							</button>
+							</motion.button>
 
-							<button
+							<motion.button
 								onClick={() => setIsNFCModalOpen(true)}
 								className="w-full btn-gradient py-2 flex items-center justify-center gap-2 text-sm"
+								whileHover={{ scale: 1.05 }}
+								whileTap={{ scale: 0.95 }}
 							>
 								<CreditCardIcon className="h-4 w-4" />
 								<span>Cartão NFC</span>
-							</button>
-						</div>
+							</motion.button>
+						</motion.div>
 					)}
-				</div>
+				</motion.div>
 			</div>
 
 			<Modal
@@ -170,6 +219,6 @@ export default function ClassInstance() {
 				message="Tem certeza que deseja finalizar esta aula? Após finalizada, não será possível registrar mais presenças."
 				type="warning"
 			/>
-		</div>
+		</motion.div>
 	);
 }
