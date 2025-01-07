@@ -31,7 +31,7 @@ const MOCK_TICKETS = [
         priority: 'medium',
         category: 'doubt',
         userId: 2,
-        userName: 'Maria Santos',
+        userName: 'Instrutor',
         createdAt: '2024-03-19T15:30:00Z',
         updatedAt: '2024-03-20T09:00:00Z',
         messages: [

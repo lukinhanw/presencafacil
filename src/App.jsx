@@ -10,6 +10,7 @@ import Classes from './pages/classes';
 import ClassInstance from './pages/classInstance';
 import Join from './pages/join';
 import Support from './pages/support';
+import Profile from './pages/profile';
 
 function App() {
 	return (
@@ -30,6 +31,7 @@ function App() {
 					<Route path=":id" element={<ClassInstance />} />
 				</Route>
 				<Route path="suporte" element={<Support />} />
+				<Route path="perfil" element={<Profile />} />
 			</Route>
 		</Routes>
 	);

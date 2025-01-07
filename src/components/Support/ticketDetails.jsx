@@ -18,12 +18,13 @@ export default function TicketDetails({ ticket, onAddMessage, onUpdateStatus, is
         e.preventDefault();
         if (!newMessage.trim()) return;
 
-        await onAddMessage(ticket.id, {
-            message: newMessage,
-            attachments
-        });
-        setNewMessage('');
-        setAttachments(null);
+        try {
+            await onAddMessage(ticket.id, newMessage, attachments);
+            setNewMessage('');
+            setAttachments(null);
+        } catch (error) {
+            console.error('Erro ao enviar mensagem:', error);
+        }
     };
 
     const handleFileChange = (e) => {
@@ -54,7 +55,7 @@ export default function TicketDetails({ ticket, onAddMessage, onUpdateStatus, is
                             onChange={(option) => onUpdateStatus(ticket.id, option.value)}
                             options={TICKET_STATUS}
                             styles={stylesSelect}
-                            className="w-40"
+                            className="w-52"
                             classNamePrefix="select"
                         />
                     )}
@@ -126,12 +127,12 @@ export default function TicketDetails({ ticket, onAddMessage, onUpdateStatus, is
                         <motion.button
                             type="submit"
                             disabled={!newMessage.trim()}
-                            className="btn-primary flex items-center gap-2"
+                            className="btn-gradient flex items-center gap-2"
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                         >
-                            <FiSend className="h-4 w-4 text-gray-500 dark:text-gray-100" />
-                            <span className="text-sm text-gray-500 dark:text-gray-100">Enviar</span>
+                            <FiSend className="h-4 w-4 text-gray-100 dark:text-gray-100" />
+                            <span className="text-sm text-gray-100 dark:text-gray-100">Enviar</span>
                         </motion.button>
                     </div>
                 </form>

@@ -80,13 +80,14 @@ export default function Support() {
         }
     };
 
-    const handleAddMessage = async (ticketId, message) => {
+    const handleAddMessage = async (ticketId, message, attachments) => {
         try {
             await addMessage(ticketId, {
-                message,
+                message: message,
                 userId: user.id,
                 userName: user.name,
-                isSupport: isAdmin
+                isSupport: isAdmin,
+                attachments: attachments
             });
             const updatedTicket = await getTicketById(ticketId);
             setSelectedTicket(updatedTicket);
@@ -156,7 +157,7 @@ export default function Support() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="glass-card p-6"
+                className="glass-card border-none"
             >
                 <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
                     {isAdmin ? 'Todos os Tickets' : 'Meus Tickets'}
@@ -172,7 +173,7 @@ export default function Support() {
                 isOpen={isNewTicketModalOpen}
                 onClose={() => setIsNewTicketModalOpen(false)}
                 title="Novo Ticket"
-                size="xl"
+                size="xxxl"
             >
                 <TicketForm 
                     onSubmit={(data) => {
@@ -187,7 +188,7 @@ export default function Support() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 title={`Ticket #${selectedTicket?.id}`}
-                size="xl"
+                size="xxxl"
             >
                 {selectedTicket && (
                     <TicketDetails

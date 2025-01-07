@@ -1,91 +1,67 @@
-// Mock user data
+const AUTH_KEY = '@presenca:auth';
+
+// Mock de usuários
 const MOCK_USERS = [
-  {
-    id: 1,
-    email: 'admin@example.com',
-    password: 'admin123',
-    name: 'Administrador',
-    roles: ['ADMIN_ROLE']
-  },
-  {
-    id: 2,
-    email: 'instructor@example.com',
-    password: 'instructor123',
-    name: 'Instrutor',
-    roles: ['INSTRUCTOR_ROLE']
-  }
+	{
+		id: 1,
+		name: 'Admin',
+		email: 'admin@example.com',
+		password: 'senha123',
+		roles: ['ADMIN_ROLE'],
+		position: 'Administrador do Sistema',
+		unit: 'Matriz',
+		registration: 'ADM001',
+		avatar: null
+	},
+	{
+		id: 2,
+		name: 'Instrutor',
+		email: 'instrutor@example.com',
+		password: 'senha123',
+		roles: ['INSTRUCTOR_ROLE'],
+		position: 'Instrutor de Treinamentos',
+		unit: 'Filial 1',
+		registration: 'INS001',
+		avatar: null
+	}
 ];
 
-const TOKEN_KEY = 'auth_token';
-const USER_KEY = 'user_data';
-const REMEMBER_KEY = 'remember_me';
-
-const generateToken = (user) => {
-  // In a real app, this would be a JWT token
-  return btoa(JSON.stringify({
-    id: user.id,
-    email: user.email,
-    exp: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days
-  }));
-};
-
-const isTokenValid = (token) => {
-  try {
-    const decoded = JSON.parse(atob(token));
-    return decoded.exp > Date.now();
-  } catch {
-    return false;
-  }
-};
-
-export const loginUser = async ({ email, password, rememberMe }) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  const user = MOCK_USERS.find(u => u.email === email && u.password === password);
-
-  if (!user) {
-    throw new Error('Credenciais inválidas');
-  }
-
-  // Remove password from response
-  const { password: _, ...userWithoutPassword } = user;
-  
-  // Generate authentication token
-  const token = generateToken(user);
-
-  // Store authentication data
-  if (rememberMe) {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(userWithoutPassword));
-    localStorage.setItem(REMEMBER_KEY, 'true');
-  } else {
-    sessionStorage.setItem(TOKEN_KEY, token);
-    sessionStorage.setItem(USER_KEY, JSON.stringify(userWithoutPassword));
-    localStorage.removeItem(REMEMBER_KEY);
-  }
-
-  return userWithoutPassword;
-};
-
-export const logout = () => {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
-  localStorage.removeItem(REMEMBER_KEY);
-  sessionStorage.removeItem(TOKEN_KEY);
-  sessionStorage.removeItem(USER_KEY);
+export const setStoredAuth = (userData) => {
+	localStorage.setItem(AUTH_KEY, JSON.stringify(userData));
 };
 
 export const getStoredAuth = () => {
-  const remembered = localStorage.getItem(REMEMBER_KEY) === 'true';
-  const storage = remembered ? localStorage : sessionStorage;
-  
-  const token = storage.getItem(TOKEN_KEY);
-  if (!token || !isTokenValid(token)) {
-    logout();
-    return null;
-  }
+	const storedData = localStorage.getItem(AUTH_KEY);
+	return storedData ? JSON.parse(storedData) : null;
+};
 
-  const userData = storage.getItem(USER_KEY);
-  return userData ? JSON.parse(userData) : null;
+export const removeStoredAuth = () => {
+	localStorage.removeItem(AUTH_KEY);
+};
+
+export const login = async (credentials) => {
+	// Simula uma chamada à API
+	await new Promise(resolve => setTimeout(resolve, 500));
+
+	// Encontra o usuário com as credenciais fornecidas
+	const user = MOCK_USERS.find(u => 
+		u.email === credentials.email && 
+		u.password === credentials.password
+	);
+
+	if (!user) {
+		throw new Error('Credenciais inválidas');
+	}
+
+	// Remove a senha antes de retornar os dados do usuário
+	const { password, ...userWithoutPassword } = user;
+	
+	// Armazena os dados do usuário
+	setStoredAuth(userWithoutPassword);
+	
+	return userWithoutPassword;
+};
+
+export const logout = () => {
+	removeStoredAuth();
 };

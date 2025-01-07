@@ -113,13 +113,13 @@ export default function TicketForm({ onSubmit, isLoading }) {
                     accept=".jpg,.jpeg,.png,.pdf"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                    Formatos aceitos: JPG, PNG, PDF. Tamanho máximo: 5MB por arquivo
+                    Formas aceitos: JPG, PNG, PDF. Tamanho máximo: 5MB por arquivo
                 </p>
             </div>
 
             <motion.button
                 type="submit"
-                className="btn-primary w-full"
+                className="btn-gradient w-full"
                 disabled={isLoading}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

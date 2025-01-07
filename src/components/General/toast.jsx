@@ -21,7 +21,7 @@ const colors = {
 };
 
 const backgrounds = {
-	success: 'bg-green-50 dark:bg-green-500/80 backdrop-blur-sm',
+	success: 'bg-slate-50 dark:bg-slate-500/80 backdrop-blur-sm',
 	error: 'bg-red-50 dark:bg-red-500/80 backdrop-blur-sm',
 	warning: 'bg-yellow-50 dark:bg-yellow-500/80 backdrop-blur-sm',
 	info: 'bg-blue-50 dark:bg-blue-500/80 backdrop-blur-sm',
