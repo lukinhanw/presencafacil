@@ -11,6 +11,7 @@ import ClassInstance from './pages/classInstance';
 import Join from './pages/join';
 import Support from './pages/support';
 import Profile from './pages/profile';
+import Reports from './pages/reports';
 
 function App() {
 	return (
@@ -33,6 +34,14 @@ function App() {
 				<Route path="suporte" element={<Support />} />
 				<Route path="perfil" element={<Profile />} />
 			</Route>
+			<Route 
+				path="/relatorios" 
+				element={
+					<ProtectedRoute roles={['ADMIN_ROLE']}>
+						<Reports />
+					</ProtectedRoute>
+				} 
+			/>
 		</Routes>
 	);
 }
