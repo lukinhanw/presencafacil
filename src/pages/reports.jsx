@@ -36,7 +36,11 @@ export default function Reports() {
         try {
             setIsLoading(true);
             const reportData = await generateReport(reportType, reportFilters);
-            const result = await downloadReport(reportData);
+            const dataWithFormat = {
+                ...reportData,
+                format: reportFilters.format
+            };
+            const result = await downloadReport(dataWithFormat);
             showToast.success('Sucesso', result.message);
         } catch (error) {
             showToast.error('Erro', 'Erro ao gerar relatório');
@@ -46,56 +50,72 @@ export default function Reports() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-            >
-                <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <DocumentChartBarIcon className="h-8 w-8" />
-                        Relatórios
-                    </h1>
-                </div>
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                    Relatórios
+                </h1>
+            </div>
 
-                <div className="glass-card p-6">
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Tipo de Relatório
-                                </label>
-                                <Select
-                                    options={REPORT_TYPES}
-                                    value={selectedType}
-                                    onChange={handleTypeChange}
-                                    styles={stylesSelect}
-                                    placeholder="Selecione o tipo"
-                                    isClearable
-                                />
-                            </div>
-                        </div>
-
-                        {selectedType && (
-                            <ReportFilters
-                                type={selectedType.value}
-                                onFilter={setFilters}
-                                onGenerate={() => handleGenerateReport(selectedType.value, filters)}
-                                isLoading={isLoading}
-                            />
-                        )}
+            <div className="space-y-4">
+                <div className='glass-card p-4 space-y-4'>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Tipo de Relatório
+                    </label>
+                    <div className="w-full md:w-72">
+                        <Select
+                            options={REPORT_TYPES}
+                            value={selectedType}
+                            onChange={handleTypeChange}
+                            styles={stylesSelect}
+                            placeholder="Selecione o tipo"
+                            isClearable
+                        />
                     </div>
                 </div>
 
-                {reports.length > 0 && (
+                {selectedType && (
+                    <ReportFilters
+                        type={selectedType.value}
+                        onFilter={setFilters}
+                        onGenerate={(filters) => handleGenerateReport(selectedType.value, filters)}
+                        isLoading={isLoading}
+                    />
+                )}
+            </div>
+
+            {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="animate-pulse">
+                            <div className="glass-card h-48 p-4">
+                                <div className="h-6 bg-gray-300/30 rounded w-3/4 mb-4"></div>
+                                <div className="space-y-3">
+                                    <div className="h-4 bg-gray-300/30 rounded"></div>
+                                    <div className="h-4 bg-gray-300/30 rounded w-5/6"></div>
+                                    <div className="h-4 bg-gray-300/30 rounded w-4/6"></div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : reports.length === 0 && selectedType ? (
+                <div className="flex flex-col items-center justify-center py-12 glass-card">
+                    <DocumentChartBarIcon className="h-12 w-12 text-gray-400 mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400 text-lg">
+                        Nenhum relatório encontrado
+                    </p>
+                </div>
+            ) : (
+                reports.length > 0 && (
                     <ReportList
                         reports={reports}
                         onGenerate={handleGenerateReport}
                         isLoading={isLoading}
                     />
-                )}
-            </motion.div>
+                )
+            )}
+
         </div>
     );
 } 

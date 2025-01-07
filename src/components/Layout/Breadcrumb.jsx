@@ -7,7 +7,8 @@ const routeNames = {
 	'/treinamentos': 'Treinamentos',
 	'/colaboradores': 'Colaboradores',
 	'/instrutores': 'Instrutores',
-	'/suporte': 'Suporte'
+	'/suporte': 'Suporte',
+	'/relatorios': 'Relatórios'
 };
 
 export default function Breadcrumb() {

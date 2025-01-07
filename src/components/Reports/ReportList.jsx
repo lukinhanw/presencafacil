@@ -1,9 +1,13 @@
 import { motion } from 'framer-motion';
-import { DocumentChartBarIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { DocumentChartBarIcon, ClockIcon, DocumentArrowDownIcon, TableCellsIcon } from '@heroicons/react/24/outline';
 
 export default function ReportList({ reports, onGenerate, isLoading }) {
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleString('pt-BR');
+    };
+
+    const handleGenerate = (type, format) => {
+        onGenerate(type, { format });
     };
 
     return (
@@ -33,13 +37,24 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                         Última geração: {formatDate(report.lastGenerated)}
                     </div>
 
-                    <div className="flex justify-end">
+                    <div className="flex justify-end gap-2">
                         <button
-                            onClick={() => onGenerate(report.type)}
+                            onClick={() => handleGenerate(report.type, 'pdf')}
                             disabled={isLoading}
-                            className="btn-gradient"
+                            className="btn-gradient flex items-center justify-center gap-2"
+                            title="Exportar como PDF"
                         >
-                            {isLoading ? 'Gerando...' : 'Gerar'}
+                            <DocumentArrowDownIcon className="h-5 w-5" />
+                            {isLoading ? 'Gerando...' : 'PDF'}
+                        </button>
+                        <button
+                            onClick={() => handleGenerate(report.type, 'excel')}
+                            disabled={isLoading}
+                            className="btn-gradient-green flex items-center justify-center gap-2"
+                            title="Exportar como Excel"
+                        >
+                            <TableCellsIcon className="h-5 w-5" />
+                            {isLoading ? 'Gerando...' : 'Excel'}
                         </button>
                     </div>
                 </motion.div>

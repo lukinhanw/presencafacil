@@ -127,24 +127,80 @@ const generatePDF = (reportData) => {
 };
 
 const generateExcel = (reportData) => {
-    const ws = XLSX.utils.json_to_sheet(reportData.data);
+    // Preparar os dados para o Excel
+    const worksheetData = reportData.data.map(item => {
+        // Mapear os dados de acordo com o tipo de relatório
+        switch (reportData.type) {
+            case 'attendance':
+                return {
+                    'ID': item.id,
+                    'Treinamento': item.name,
+                    'Presença (%)': item.value,
+                    'Status': item.status
+                };
+            case 'workload':
+                return {
+                    'ID': item.id,
+                    'Colaborador': item.name,
+                    'Carga Horária': item.value,
+                    'Cargo': item.cargo
+                };
+            case 'instructor':
+                return {
+                    'ID': item.id,
+                    'Instrutor': item.name,
+                    'Avaliação': item.value,
+                    'Nº Avaliações': item.avaliacoes
+                };
+            case 'certification':
+                return {
+                    'ID': item.id,
+                    'Unidade': item.name,
+                    'Total Certificados': item.value,
+                    'Status': item.certificados
+                };
+            default:
+                return item;
+        }
+    });
+
+    // Criar planilha
+    const ws = XLSX.utils.json_to_sheet(worksheetData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Relatório");
+    
+    // Adicionar metadados
+    wb.Props = {
+        Title: reportData.title,
+        Subject: "Relatório de Treinamentos",
+        Author: "Sistema de Treinamentos",
+        CreatedDate: new Date()
+    };
+    
+    // Adicionar planilha ao workbook
+    XLSX.utils.book_append_sheet(wb, ws, reportData.title);
+    
+    // Ajustar largura das colunas
+    const colWidths = Object.keys(worksheetData[0] || {}).map(key => ({
+        wch: Math.max(key.length, 15)
+    }));
+    ws['!cols'] = colWidths;
+
     return wb;
 };
 
-export const downloadReport = async (reportData, format = 'pdf') => {
+export const downloadReport = async (reportData) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     try {
-        const fileName = `relatorio_${reportData.type}_${new Date().getTime()}.${format}`;
+        const format = reportData.format;
+        const fileName = `relatorio_${reportData.type}_${new Date().getTime()}.${format === 'excel' ? 'xlsx' : 'pdf'}`;
         
-        if (format === 'pdf') {
-            const doc = generatePDF(reportData);
-            doc.save(fileName);
-        } else if (format === 'xlsx') {
+        if (format === 'excel') {
             const wb = generateExcel(reportData);
             XLSX.writeFile(wb, fileName);
+        } else {
+            const doc = generatePDF(reportData);
+            doc.save(fileName);
         }
         
         return {

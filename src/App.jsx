@@ -33,15 +33,15 @@ function App() {
 				</Route>
 				<Route path="suporte" element={<Support />} />
 				<Route path="perfil" element={<Profile />} />
+				<Route
+					path="/relatorios"
+					element={
+						<ProtectedRoute roles={['ADMIN_ROLE']}>
+							<Reports />
+						</ProtectedRoute>
+					}
+				/>
 			</Route>
-			<Route 
-				path="/relatorios" 
-				element={
-					<ProtectedRoute roles={['ADMIN_ROLE']}>
-						<Reports />
-					</ProtectedRoute>
-				} 
-			/>
 		</Routes>
 	);
 }
