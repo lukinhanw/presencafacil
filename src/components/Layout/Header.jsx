@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import UserDropdown from './UserDropdown';
 import LogoutConfirmation from './LogoutConfirmation';
-import Breadcrumb from './Breadcrumb';
+import Logo from './Logo';
+import PageIndicator from './PageIndicator';
 
 export default function Header() {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { user } = useAuth();
 	const [showLogoutModal, setShowLogoutModal] = useState(false);
+	const isDashboard = location.pathname === '/';
 
 	const handleLogout = () => {
 		setShowLogoutModal(true);
@@ -22,22 +24,24 @@ export default function Header() {
 	return (
 		<>
 			<header className="fixed top-0 left-0 right-0 z-30">
-				{/* Barra superior com gradiente */}
-				<div className="h-1 bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-500" />
+				{/* Barra superior com gradiente animado */}
+				<div className="h-1 bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-500 animate-gradient-x" />
 				
-				<div className="bg-gray-800 dark:bg-gray-900 shadow-sm border-b border-gray-700 dark:border-gray-800">
+				<div className="bg-gray-800 dark:bg-gray-900 shadow-lg border-b border-gray-700 dark:border-gray-800">
 					<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 						<div className="flex justify-between items-center h-16">
 							<div className="flex items-center space-x-4">
-								<button
-									onClick={() => navigate(-1)}
-									className="flex items-center space-x-2 text-gray-300 hover:text-primary-400 transition-colors duration-300"
-								>
-									<ArrowLeftIcon className="h-5 w-5" />
-									<span>Voltar</span>
-								</button>
+								<Logo />
 								<div className="hidden md:block h-6 w-px bg-gray-700" />
-								<Breadcrumb />
+								{isDashboard ? (
+									<div className="hidden md:flex items-center space-x-2">
+										<span className="px-3 py-1 rounded-full bg-primary-500/10 text-primary-400 text-sm font-medium">
+											Dashboard
+										</span>
+									</div>
+								) : (
+									<PageIndicator />
+								)}
 							</div>
 
 							{/* Perfil e Menu */}
