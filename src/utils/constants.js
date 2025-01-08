@@ -1,8 +1,10 @@
 export const UNITS = [
-    'Matriz',
-    'Filial 1',
-    'Filial 2',
-    'Filial 3'
+    'MATRIZ',
+    'FILIAL SP',
+    'FILIAL RJ',
+    'BOQUEIRÃO',
+    'PORTÃO',
+    'SANTA QUITÉRIA'
 ];
 
 export const POSITIONS = [

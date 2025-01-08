@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { useTheme } from '../contexts/ThemeContext';
 import { showToast } from '../components/General/toast';
-import { REPORT_TYPES, getReports, generateReport, downloadReport } from '../services/reportService';
+import { REPORT_TYPES, getReports, downloadReport } from '../services/reportService';
 import { selectStyles } from '../components/Shared/selectStyles';
 import { selectStylesDark } from '../components/Shared/selectStylesDark';
-import { DocumentChartBarIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { DocumentChartBarIcon } from '@heroicons/react/24/outline';
 import ReportFilters from '../components/Reports/ReportFilters';
 import ReportList from '../components/Reports/ReportList';
+import { getClasses } from '../services/classService';
 
 export default function Reports() {
     const { isDark } = useTheme();
@@ -16,14 +16,14 @@ export default function Reports() {
     const [isLoading, setIsLoading] = useState(false);
     const [reports, setReports] = useState([]);
     const [filters, setFilters] = useState({});
+    const [allClasses, setAllClasses] = useState([]);
 
     const stylesSelect = isDark ? selectStylesDark : selectStyles;
 
-    const handleTypeChange = async (option) => {
-        setSelectedType(option);
+    const fetchReports = async (currentFilters) => {
         try {
             setIsLoading(true);
-            const data = await getReports({ type: option?.value });
+            const data = await getReports(currentFilters);
             setReports(data);
         } catch (error) {
             showToast.error('Erro', 'Erro ao carregar relatórios');
@@ -32,15 +32,30 @@ export default function Reports() {
         }
     };
 
-    const handleGenerateReport = async (reportType, reportFilters) => {
+    const handleTypeChange = async (option) => {
+        setSelectedType(option);
+        if (option) {
+            const newFilters = { ...filters, type: option.value };
+            setFilters(newFilters);
+            await fetchReports(newFilters);
+        } else {
+            setReports([]);
+        }
+    };
+
+    const handleFilterChange = async (newFilters) => {
+        const updatedFilters = { ...filters, ...newFilters };
+        setFilters(updatedFilters);
+        await fetchReports(updatedFilters);
+    };
+
+    const handleGenerateReport = async (reportData) => {
         try {
             setIsLoading(true);
-            const reportData = await generateReport(reportType, reportFilters);
-            const dataWithFormat = {
-                ...reportData,
-                format: reportFilters.format
-            };
-            const result = await downloadReport(dataWithFormat);
+            const result = await downloadReport({
+                type: selectedType.value,
+                ...reportData
+            });
             showToast.success('Sucesso', result.message);
         } catch (error) {
             showToast.error('Erro', 'Erro ao gerar relatório');
@@ -48,6 +63,18 @@ export default function Reports() {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        const loadAllClasses = async () => {
+            try {
+                const data = await getClasses({});
+                setAllClasses(data);
+            } catch (error) {
+                console.error('Erro ao carregar classes:', error);
+            }
+        };
+        loadAllClasses();
+    }, []);
 
     return (
         <div className="space-y-6">
@@ -77,45 +104,31 @@ export default function Reports() {
                 {selectedType && (
                     <ReportFilters
                         type={selectedType.value}
-                        onFilter={setFilters}
-                        onGenerate={(filters) => handleGenerateReport(selectedType.value, filters)}
+                        onFilter={handleFilterChange}
                         isLoading={isLoading}
+                        classes={allClasses}
                     />
                 )}
-            </div>
 
-            {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="animate-pulse">
-                            <div className="glass-card h-48 p-4">
-                                <div className="h-6 bg-gray-300/30 rounded w-3/4 mb-4"></div>
-                                <div className="space-y-3">
-                                    <div className="h-4 bg-gray-300/30 rounded"></div>
-                                    <div className="h-4 bg-gray-300/30 rounded w-5/6"></div>
-                                    <div className="h-4 bg-gray-300/30 rounded w-4/6"></div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ) : reports.length === 0 && selectedType ? (
-                <div className="flex flex-col items-center justify-center py-12 glass-card">
-                    <DocumentChartBarIcon className="h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400 text-lg">
-                        Nenhum relatório encontrado
-                    </p>
-                </div>
-            ) : (
-                reports.length > 0 && (
+                {isLoading ? (
+                    <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                    </div>
+                ) : reports.length > 0 ? (
                     <ReportList
                         reports={reports}
                         onGenerate={handleGenerateReport}
                         isLoading={isLoading}
                     />
-                )
-            )}
-
+                ) : selectedType && (
+                    <div className="flex flex-col items-center justify-center py-12 glass-card">
+                        <DocumentChartBarIcon className="h-12 w-12 text-gray-400 mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400 text-lg">
+                            Nenhum relatório encontrado
+                        </p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 } 

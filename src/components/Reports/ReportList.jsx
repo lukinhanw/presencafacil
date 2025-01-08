@@ -1,64 +1,155 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { DocumentChartBarIcon, ClockIcon, DocumentArrowDownIcon, TableCellsIcon } from '@heroicons/react/24/outline';
+import { DocumentChartBarIcon, ClockIcon, TableCellsIcon } from '@heroicons/react/24/outline';
+import { formatDateTimeHourMin } from '../../utils/dateUtils';
 
 export default function ReportList({ reports, onGenerate, isLoading }) {
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleString('pt-BR');
+    const [selectedClasses, setSelectedClasses] = useState([]);
+
+    const handleSelectClass = (classData) => {
+        if (selectedClasses.find(c => c.id === classData.id)) {
+            setSelectedClasses(selectedClasses.filter(c => c.id !== classData.id));
+        } else {
+            setSelectedClasses([...selectedClasses, classData]);
+        }
     };
 
-    const handleGenerate = (type, format) => {
-        onGenerate(type, { format });
+    const handleGenerateSelected = (format) => {
+        onGenerate({ selectedClasses, format });
     };
 
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {reports.map((report) => (
-                <motion.div
-                    key={report.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="glass-card p-6 space-y-4"
+    const renderClassCard = (classData) => (
+        <motion.div
+            key={classData.id}
+            className="glass-card p-6 space-y-4"
+        >
+            <div className="flex items-start justify-between">
+                <input
+                    type="checkbox"
+                    checked={selectedClasses.some(c => c.id === classData.id)}
+                    onChange={() => handleSelectClass(classData)}
+                    className="h-5 w-5"
+                />
+                <div className="ml-3 flex-1">
+                    <h3 className="text-lg font-medium">
+                        {classData.training?.name || 'Sem nome'}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                        {classData.training?.code || 'Sem código'}
+                    </p>
+                </div>
+            </div>
+
+            <div className="text-sm space-y-1">
+                <p>Instrutor: {classData.instructor?.name || 'Não definido'}</p>
+                <p>Unidade: {classData.unit || 'Não definida'}</p>
+                <p>Data: {formatDateTimeHourMin(classData.date_start)}</p>
+                <p>Presentes: {classData.attendees?.length || 0}</p>
+            </div>
+
+            <div className="flex gap-2">
+                <button
+                    onClick={() => onGenerate({ classData, format: 'pdf' })}
+                    disabled={isLoading}
+                    className="btn-gradient flex-1 flex items-center justify-center gap-2"
                 >
-                    <div className="flex items-start justify-between">
-                        <div className="flex items-center space-x-3">
-                            <DocumentChartBarIcon className="h-6 w-6 text-primary-500" />
-                            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                                {report.title}
-                            </h3>
-                        </div>
-                    </div>
+                    <DocumentChartBarIcon className="h-5 w-5" />
+                    {isLoading ? 'Gerando...' : 'PDF'}
+                </button>
+                <button
+                    onClick={() => onGenerate({ classData, format: 'excel' })}
+                    disabled={isLoading}
+                    className="btn-gradient-green flex-1 flex items-center justify-center gap-2"
+                >
+                    <TableCellsIcon className="h-5 w-5" />
+                    {isLoading ? 'Gerando...' : 'Excel'}
+                </button>
+            </div>
+        </motion.div>
+    );
 
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+    const renderReportCard = (report) => (
+        <motion.div
+            key={report.id}
+            className="glass-card p-6 space-y-4"
+        >
+            <div className="flex items-start justify-between">
+                <div className="flex-1">
+                    <h3 className="text-lg font-medium">
+                        {report.title}
+                    </h3>
+                    <p className="text-sm text-gray-500">
                         {report.description}
                     </p>
+                </div>
+            </div>
 
-                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                        <ClockIcon className="h-4 w-4 mr-1" />
-                        Última geração: {formatDate(report.lastGenerated)}
+            <div className="text-sm space-y-1">
+                <p>Última geração: {formatDateTimeHourMin(report.lastGenerated)}</p>
+            </div>
+
+            <button
+                onClick={() => onGenerate({ reportId: report.id })}
+                disabled={isLoading}
+                className="btn-gradient w-full"
+            >
+                {isLoading ? 'Gerando...' : 'Gerar Relatório'}
+            </button>
+        </motion.div>
+    );
+
+    return (
+        <div className="space-y-4">
+            {reports.length > 0 && (
+                <div className="flex justify-end gap-2">
+                    <div className="flex gap-2">
+                        {selectedClasses.length > 0 && (
+                            <>
+                                <button
+                                    onClick={() => handleGenerateSelected('pdf')}
+                                    disabled={isLoading}
+                                    className="btn-gradient flex items-center gap-2"
+                                >
+                                    <DocumentChartBarIcon className="h-5 w-5" />
+                                    {isLoading ? 'Gerando...' : `PDF (${selectedClasses.length})`}
+                                </button>
+                                <button
+                                    onClick={() => handleGenerateSelected('excel')}
+                                    disabled={isLoading}
+                                    className="btn-gradient-green flex items-center gap-2"
+                                >
+                                    <TableCellsIcon className="h-5 w-5" />
+                                    {isLoading ? 'Gerando...' : `Excel (${selectedClasses.length})`}
+                                </button>
+                            </>
+                        )}
                     </div>
-
-                    <div className="flex justify-end gap-2">
+                    <div className="flex gap-2">
                         <button
-                            onClick={() => handleGenerate(report.type, 'pdf')}
+                            onClick={() => onGenerate({ allClasses: reports, format: 'pdf' })}
                             disabled={isLoading}
-                            className="btn-gradient flex items-center justify-center gap-2"
-                            title="Exportar como PDF"
+                            className="btn-gradient-secondary flex items-center gap-2"
                         >
-                            <DocumentArrowDownIcon className="h-5 w-5" />
-                            {isLoading ? 'Gerando...' : 'PDF'}
+                            <DocumentChartBarIcon className="h-5 w-5" />
+                            {isLoading ? 'Gerando...' : `PDF (${reports.length})`}
                         </button>
                         <button
-                            onClick={() => handleGenerate(report.type, 'excel')}
+                            onClick={() => onGenerate({ allClasses: reports, format: 'excel' })}
                             disabled={isLoading}
-                            className="btn-gradient-green flex items-center justify-center gap-2"
-                            title="Exportar como Excel"
+                            className="btn-gradient-secondary flex items-center gap-2"
                         >
                             <TableCellsIcon className="h-5 w-5" />
-                            {isLoading ? 'Gerando...' : 'Excel'}
+                            {isLoading ? 'Gerando...' : `Excel (${reports.length})`}
                         </button>
                     </div>
-                </motion.div>
-            ))}
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {reports.map((item) => (
+                    item.training ? renderClassCard(item) : renderReportCard(item)
+                ))}
+            </div>
         </div>
     );
 } 

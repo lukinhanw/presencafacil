@@ -3,8 +3,8 @@ const MOCK_CLASSES = [
 	{
 		id: 1,
 		type: 'Portfolio',
-		date_start: '2021-08-02T14:00:00',
-		date_end: '2021-08-02T18:00:00',
+		date_start: '2024-03-15T14:00:00',
+		date_end: '2024-03-15T18:00:00',
 		presents: 10,
 		status: 'Finalizado',
 		training: {
@@ -52,7 +52,7 @@ const MOCK_CLASSES = [
 	{
 		id: 2,
 		type: 'Portfolio',
-		date_start: '2021-09-15T09:00:00',
+		date_start: '2024-03-20T09:00:00',
 		date_end: '',
 		presents: 15,
 		status: 'Em andamento',
@@ -88,6 +88,55 @@ const MOCK_CLASSES = [
 				position: 'Vendedor'
 			}
 		]
+	},
+	{
+		id: 3,
+		type: 'External',
+		date_start: '2024-03-10T13:00:00',
+		date_end: '2024-03-10T17:00:00',
+		presents: 10,
+		status: 'Finalizado',
+		training: {
+			name: 'Desenvolvimento React',
+			code: 'TR-001',
+			duration: '40:00',
+			provider: 'Udemy',
+			content: 'Fundamentos do React, Hooks, Context API, Redux',
+			classification: 'Tecnologia',
+			objective: 'Capacitar desenvolvedores em React.js'
+		},
+		instructor: {
+			id: 1,
+			name: 'Carlos Oliveira'
+		},
+		unit: 'Matriz',
+		attendees: [
+			{
+				id: 101,
+				name: 'João Silva',
+				registration: 'REG-001',
+				timestamp: '2021-08-02T14:05:00',
+				early_leave: false,
+				position: 'Desenvolvedor'
+			},
+			{
+				id: 102,
+				name: 'Maria Santos',
+				registration: 'REG-002',
+				timestamp: '2021-08-02T14:03:00',
+				early_leave: true,
+				early_leave_time: '2021-08-02T17:30:00',
+				position: 'Analista'
+			},
+			{
+				id: 103,
+				name: 'Pedro Oliveira',
+				registration: 'REG-003',
+				timestamp: '2021-08-02T14:10:00',
+				early_leave: false,
+				position: 'Vendedor'
+			}
+		]
 	}
 ];
 
@@ -106,6 +155,7 @@ export const getClasses = async (filters = {}) => {
 
 	let filteredClasses = [...MOCK_CLASSES];
 
+	// Filtro por texto (busca em nome do treinamento, código ou instrutor)
 	if (filters.search) {
 		const searchLower = filters.search.toLowerCase();
 		filteredClasses = filteredClasses.filter(cls =>
@@ -115,15 +165,58 @@ export const getClasses = async (filters = {}) => {
 		);
 	}
 
+	// Filtro por tipos
 	if (filters.types?.length > 0) {
+		const typeValues = filters.types.map(t => t.value);
 		filteredClasses = filteredClasses.filter(cls =>
-			filters.types.includes(cls.type)
+			typeValues.includes(cls.type)
 		);
 	}
 
+	// Filtro por unidades
 	if (filters.units?.length > 0) {
+		const unitValues = filters.units.map(u => u.value);
 		filteredClasses = filteredClasses.filter(cls =>
-			filters.units.includes(cls.unit)
+			unitValues.includes(cls.unit)
+		);
+	}
+
+	// Filtro por período
+	if (filters.startDate || filters.endDate) {
+		filteredClasses = filteredClasses.filter(cls => {
+			const classDate = new Date(cls.date_start);
+			
+			// Remover o horário das datas para comparar apenas as datas
+			const classDateOnly = new Date(classDate.getFullYear(), classDate.getMonth(), classDate.getDate());
+			
+			if (filters.startDate) {
+				const startDate = new Date(filters.startDate);
+				const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+				if (classDateOnly < startDateOnly) return false;
+			}
+			
+			if (filters.endDate) {
+				const endDate = new Date(filters.endDate);
+				const endDateOnly = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+				if (classDateOnly > endDateOnly) return false;
+			}
+			
+			return true;
+		});
+	}
+
+	// Filtro por instrutor
+	if (filters.instructor) {
+		filteredClasses = filteredClasses.filter(cls =>
+			cls.instructor.id === filters.instructor
+		);
+	}
+
+	// Filtro por fornecedor
+	if (filters.provider) {
+		const providerLower = filters.provider.toLowerCase();
+		filteredClasses = filteredClasses.filter(cls =>
+			cls.training.provider.toLowerCase().includes(providerLower)
 		);
 	}
 
