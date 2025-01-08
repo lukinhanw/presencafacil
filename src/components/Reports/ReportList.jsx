@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { DocumentChartBarIcon, ClockIcon, TableCellsIcon } from '@heroicons/react/24/outline';
+import { DocumentChartBarIcon, ClockIcon, TableCellsIcon, UserIcon, BuildingOfficeIcon, CalendarIcon, UsersIcon } from '@heroicons/react/24/outline';
 import { formatDateTimeHourMin } from '../../utils/dateUtils';
 
 export default function ReportList({ reports, onGenerate, isLoading }) {
@@ -40,11 +40,23 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                 </div>
             </div>
 
-            <div className="text-sm space-y-1 text-gray-700 dark:text-gray-300">
-                <p>Instrutor: {classData.instructor?.name || 'Não definido'}</p>
-                <p>Unidade: {classData.unit || 'Não definida'}</p>
-                <p>Data: {formatDateTimeHourMin(classData.date_start)}</p>
-                <p>Presentes: {classData.attendees?.length || 0}</p>
+            <div className="grid grid-cols-2 gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <div className="flex items-center gap-2">
+                    <UserIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                    <span>{classData.instructor?.name || 'Não definido'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <BuildingOfficeIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                    <span>{classData.unit || 'Não definida'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                    <span>{formatDateTimeHourMin(classData.date_start)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <UsersIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                    <span>{classData.attendees?.length || 0} presentes</span>
+                </div>
             </div>
 
             <div className="flex gap-2">
