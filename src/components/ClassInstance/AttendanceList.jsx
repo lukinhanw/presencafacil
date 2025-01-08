@@ -42,17 +42,17 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 				<table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
 					<thead>
 						<tr className="bg-gray-50/80 dark:bg-gray-800/80">
-							<th className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/3">
-								Colaborador
-							</th>
 							<th className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/6">
 								Matrícula
+							</th>
+							<th className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/3">
+								Colaborador
 							</th>
 							<th className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/6">
 								Horário
 							</th>
 							<th className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/6">
-								Tipo
+								Cargo
 							</th>
 							{!isFinished && (
 								<th className="px-6 py-4 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/6">
@@ -65,16 +65,16 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 						{attendees.map((attendee) => (
 							<tr key={attendee.id} className="hover:bg-gray-50/80 dark:hover:bg-gray-800/80 transition-colors duration-150">
 								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
-									{attendee.name}
+									{attendee.registration}
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
-									{attendee.registration}
+									{attendee.name}
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
 									{new Date(attendee.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
-									{attendee.type}
+									{attendee.position}
 								</td>
 								{!isFinished && (
 									<td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

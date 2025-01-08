@@ -21,7 +21,33 @@ const MOCK_CLASSES = [
 			name: 'Carlos Oliveira'
 		},
 		unit: 'Matriz',
-		attendees: []
+		attendees: [
+			{
+				id: 101,
+				name: 'João Silva',
+				registration: 'REG-001',
+				timestamp: '2021-08-02T14:05:00',
+				early_leave: false,
+				position: 'Desenvolvedor'
+			},
+			{
+				id: 102,
+				name: 'Maria Santos',
+				registration: 'REG-002',
+				timestamp: '2021-08-02T14:03:00',
+				early_leave: true,
+				early_leave_time: '2021-08-02T17:30:00',
+				position: 'Analista'
+			},
+			{
+				id: 103,
+				name: 'Pedro Oliveira',
+				registration: 'REG-003',
+				timestamp: '2021-08-02T14:10:00',
+				early_leave: false,
+				position: 'Vendedor'
+			}
+		]
 	},
 	{
 		id: 2,
@@ -44,7 +70,24 @@ const MOCK_CLASSES = [
 			name: 'Ana Silva'
 		},
 		unit: 'Filial SP',
-		attendees: []
+		attendees: [
+			{
+				id: 201,
+				name: 'Ana Costa',
+				registration: 'REG-004',
+				timestamp: '2021-09-15T09:02:00',
+				early_leave: false,
+				position: 'Gerente'
+			},
+			{
+				id: 202,
+				name: 'Lucas Ferreira',
+				registration: 'REG-005',
+				timestamp: '2021-09-15T09:05:00',
+				early_leave: false,
+				position: 'Vendedor'
+			}
+		]
 	}
 ];
 
