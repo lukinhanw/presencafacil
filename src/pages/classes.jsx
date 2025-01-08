@@ -149,18 +149,70 @@ export default function Classes() {
 			/>
 
 			{isLoading ? (
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{[1, 2, 3, 4, 5, 6].map((i) => (
-						<div key={i} className="animate-pulse">
-							<div className="glass-card h-64 p-4">
-								{/* Imagem */}
-								<div className="w-full h-32 bg-gray-300/30 rounded-lg mb-4"></div>
-								{/* Título */}
-								<div className="h-4 bg-gray-300/30 rounded w-3/4 mb-4"></div>
-								{/* Linhas de texto */}
-								<div className="space-y-3">
-									<div className="h-3 bg-gray-300/30 rounded"></div>
-									<div className="h-3 bg-gray-300/30 rounded w-5/6"></div>
+				<div className="grid grid-cols-1 gap-4">
+					{[1, 2, 3, 4].map((i) => (
+						<div 
+							key={i} 
+							className={`
+								relative overflow-hidden rounded-lg
+								${isDark 
+									? 'bg-gray-800/60' 
+									: 'bg-gray-50/95'
+								}
+								backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50
+								flex items-center h-20
+							`}
+						>
+							{/* Barra lateral */}
+							<div className="w-1 self-stretch bg-gray-200 dark:bg-gray-700 animate-pulse" />
+
+							<div className="flex-1 px-4 flex items-center gap-6">
+								{/* Tag de Tipo */}
+								<div className="flex-shrink-0">
+									<div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+								</div>
+
+								{/* Código */}
+								<div className="flex-shrink-0 w-24">
+									<div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+								</div>
+
+								{/* Nome do Treinamento */}
+								<div className="flex-1 min-w-0">
+									<div className="h-5 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+								</div>
+
+								{/* Informações em linha */}
+								<div className="flex items-center gap-6 flex-shrink-0">
+									{/* Presentes */}
+									<div className="flex items-center gap-2">
+										<div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+										<div className="h-4 w-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+									</div>
+
+									{/* Unidade */}
+									<div className="flex items-center gap-2">
+										<div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+										<div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+									</div>
+
+									{/* Instrutor */}
+									<div className="flex items-center gap-2">
+										<div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+										<div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+									</div>
+
+									{/* Data/Hora */}
+									<div className="flex items-center gap-2">
+										<div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+										<div className="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+									</div>
+								</div>
+
+								{/* Ações */}
+								<div className="flex items-center gap-2 flex-shrink-0 ml-4">
+									<div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+									<div className="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
 								</div>
 							</div>
 						</div>
@@ -177,75 +229,80 @@ export default function Classes() {
 					variants={container}
 					initial="hidden"
 					animate="show"
-					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+					className="grid grid-cols-1 gap-4"
 				>
 					{classes.map((classItem) => (
 						<motion.div
 							key={classItem.id}
 							variants={item}
 							className={`
-								relative overflow-hidden rounded-xl
-								${isDark ? 'bg-gray-800/50' : 'bg-gray-100/50'}
-								backdrop-blur-lg border border-gray-200 dark:border-gray-700
+								relative overflow-hidden rounded-lg
+								${isDark 
+									? 'bg-gray-800/60 hover:bg-gray-800/70' 
+									: 'bg-gray-50/95 hover:bg-gray-50/100'
+								}
+								backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50
 								hover:shadow-lg transition-all duration-300
-								group
+								group flex items-center h-20
 							`}
 						>
 							{/* Barra de Status */}
-							<div className={`
-								absolute top-0 left-0 w-1.5 h-full
-								${getStatusColor(classItem.status)}
-							`} />
+							<div className={`w-1 self-stretch ${getStatusColor(classItem.type)}`} />
 
-							<div className="p-6">
-								{/* Cabeçalho */}
-								<div className="flex justify-between items-start mb-4">
-									<div>
-										<span className={`
-											px-3 py-1 rounded-full text-xs font-medium
-											${getTypeStyle(classItem.type)}
-										`}>
-											{classItem.type}
-										</span>
-										<h3 className="text-lg font-semibold mt-2 text-gray-900 dark:text-white">
-											{classItem.training?.name || 'N/A'}
-										</h3>
-										<p className="text-sm text-gray-500 dark:text-gray-400">
-											Código: {classItem.training?.code || 'N/A'}
-										</p>
-									</div>
+							<div className="flex-1 px-4 flex items-center gap-6">
+								{/* Tag de Tipo */}
+								<div className="flex-shrink-0">
+									<span className={`${getTypeStyle(classItem.type)}`}>
+										{classItem.type}
+									</span>
 								</div>
 
-								{/* Informações */}
-								<div className="space-y-3">
+								{/* Código */}
+								<div className="flex-shrink-0 w-24">
+									<span className="text-sm text-gray-500 dark:text-gray-400">
+										{classItem.training?.code || 'N/A'}
+									</span>
+								</div>
+
+								{/* Nome do Treinamento */}
+								<div className="flex-1 min-w-0">
+									<h3 className="text-base font-medium text-gray-900 dark:text-white truncate">
+										{classItem.training?.name || 'N/A'}
+									</h3>
+								</div>
+
+								{/* Informações em linha */}
+								<div className="flex items-center gap-6 flex-shrink-0">
 									<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-										<FiUsers className="text-indigo-500" />
-										<span className="text-sm">{classItem.presents} presentes</span>
+										<FiUsers className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+										<span className="text-sm">{classItem.presents}</span>
 									</div>
 
 									<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-										<FiClock className="text-indigo-500" />
-										<span className="text-sm">
-											{formatDateTime(classItem.date_start)}
-										</span>
-									</div>
-
-									<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-										<FiMapPin className="text-indigo-500" />
+										<FiMapPin className="h-4 w-4 text-primary-500 dark:text-primary-400" />
 										<span className="text-sm">{classItem.unit}</span>
 									</div>
 
 									<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-										<FiAward className="text-indigo-500" />
-										<span className="text-sm">{classItem.instructor?.name || 'N/A'}</span>
+										<FiAward className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+										<span className="text-sm whitespace-nowrap">
+											{classItem.instructor?.name || 'N/A'}
+										</span>
+									</div>
+
+									<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+										<FiClock className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+										<span className="text-sm whitespace-nowrap">
+											{formatDateTime(classItem.date_start)}
+										</span>
 									</div>
 								</div>
 
 								{/* Ações */}
-								<div className="flex justify-end gap-3 mt-6">
+								<div className="flex items-center gap-2 flex-shrink-0 ml-4">
 									<button
 										onClick={() => handleEnterClass(classItem.id)}
-										className="btn-primary-outline px-4 py-2 flex items-center gap-2"
+										className="btn-primary flex items-center gap-1 px-3 py-1.5 text-sm"
 									>
 										<span>Acessar</span>
 										<FiArrowRight className="h-4 w-4" />
@@ -254,7 +311,8 @@ export default function Classes() {
 									{isAdmin && (
 										<button
 											onClick={() => setDeleteAlert({ isOpen: true, classId: classItem.id })}
-											className="btn-danger-outline px-4 py-2 flex items-center gap-2"
+											className="btn-danger-icon p-1.5 rounded-lg"
+											title="Excluir aula"
 										>
 											<FiTrash2 className="h-4 w-4" />
 										</button>
@@ -293,22 +351,22 @@ export default function Classes() {
 }
 
 // Funções auxiliares para estilização
-const getStatusColor = (status) => {
+const getStatusColor = (type) => {
 	const colors = {
-		active: 'bg-green-500',
-		pending: 'bg-yellow-500',
-		finished: 'bg-blue-500',
-		cancelled: 'bg-red-500'
+		Portfolio: 'bg-purple-500',
+		External: 'bg-blue-500',
+		DDS: 'bg-green-500',
+		Others: 'bg-orange-500'
 	};
-	return colors[status] || 'bg-gray-500';
+	return colors[type] || 'bg-gray-500';
 };
 
 const getTypeStyle = (type) => {
 	const styles = {
-		Portfolio: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-		External: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-		DDS: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-		Others: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+		Portfolio: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-300 dark:border-purple-500/20',
+		External: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/20',
+		DDS: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/20',
+		Others: 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-300 dark:border-orange-500/20'
 	};
-	return styles[type] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+	return `type-badge ${styles[type] || 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-500/10 dark:text-gray-300 dark:border-gray-500/20'}`;
 };
