@@ -31,16 +31,16 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                     className="h-5 w-5"
                 />
                 <div className="ml-3 flex-1">
-                    <h3 className="text-lg font-medium">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                         {classData.training?.name || 'Sem nome'}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                         {classData.training?.code || 'Sem código'}
                     </p>
                 </div>
             </div>
 
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-1 text-gray-700 dark:text-gray-300">
                 <p>Instrutor: {classData.instructor?.name || 'Não definido'}</p>
                 <p>Unidade: {classData.unit || 'Não definida'}</p>
                 <p>Data: {formatDateTimeHourMin(classData.date_start)}</p>
@@ -53,7 +53,7 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                     disabled={isLoading}
                     className="btn-gradient flex-1 flex items-center justify-center gap-2"
                 >
-                    <DocumentChartBarIcon className="h-5 w-5" />
+                    <DocumentChartBarIcon className="h-5 w-5 text-white" />
                     {isLoading ? 'Gerando...' : 'PDF'}
                 </button>
                 <button
@@ -61,7 +61,7 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                     disabled={isLoading}
                     className="btn-gradient-green flex-1 flex items-center justify-center gap-2"
                 >
-                    <TableCellsIcon className="h-5 w-5" />
+                    <TableCellsIcon className="h-5 w-5 text-white" />
                     {isLoading ? 'Gerando...' : 'Excel'}
                 </button>
             </div>
@@ -103,14 +103,14 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
             {reports.length > 0 && (
                 <div className="flex justify-end gap-2">
                     <div className="flex gap-2">
-                        {selectedClasses.length > 0 && (
+                        {selectedClasses.length > 0 ? (
                             <>
                                 <button
                                     onClick={() => handleGenerateSelected('pdf')}
                                     disabled={isLoading}
                                     className="btn-gradient flex items-center gap-2"
                                 >
-                                    <DocumentChartBarIcon className="h-5 w-5" />
+                                    <DocumentChartBarIcon className="h-5 w-5 text-white" />
                                     {isLoading ? 'Gerando...' : `PDF (${selectedClasses.length})`}
                                 </button>
                                 <button
@@ -118,29 +118,30 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                                     disabled={isLoading}
                                     className="btn-gradient-green flex items-center gap-2"
                                 >
-                                    <TableCellsIcon className="h-5 w-5" />
+                                    <TableCellsIcon className="h-5 w-5 text-white" />
                                     {isLoading ? 'Gerando...' : `Excel (${selectedClasses.length})`}
                                 </button>
                             </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => onGenerate({ allClasses: reports, format: 'pdf' })}
+                                    disabled={isLoading}
+                                    className="btn-gradient-secondary flex items-center gap-2"
+                                >
+                                    <DocumentChartBarIcon className="h-5 w-5 text-gray-700 dark:text-gray-200" />
+                                    {isLoading ? 'Gerando...' : `PDF (${reports.length})`}
+                                </button>
+                                <button
+                                    onClick={() => onGenerate({ allClasses: reports, format: 'excel' })}
+                                    disabled={isLoading}
+                                    className="btn-gradient-secondary flex items-center gap-2"
+                                >
+                                    <TableCellsIcon className="h-5 w-5 text-gray-700 dark:text-gray-200" />
+                                    {isLoading ? 'Gerando...' : `Excel (${reports.length})`}
+                                </button>
+                            </>
                         )}
-                    </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => onGenerate({ allClasses: reports, format: 'pdf' })}
-                            disabled={isLoading}
-                            className="btn-gradient-secondary flex items-center gap-2"
-                        >
-                            <DocumentChartBarIcon className="h-5 w-5" />
-                            {isLoading ? 'Gerando...' : `PDF (${reports.length})`}
-                        </button>
-                        <button
-                            onClick={() => onGenerate({ allClasses: reports, format: 'excel' })}
-                            disabled={isLoading}
-                            className="btn-gradient-secondary flex items-center gap-2"
-                        >
-                            <TableCellsIcon className="h-5 w-5" />
-                            {isLoading ? 'Gerando...' : `Excel (${reports.length})`}
-                        </button>
                     </div>
                 </div>
             )}

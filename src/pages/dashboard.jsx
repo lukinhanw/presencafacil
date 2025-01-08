@@ -106,14 +106,14 @@ export default function Dashboard() {
 	const navigate = useNavigate();
 
 	return (
-		<div className="container mx-auto px-4">
+		<div className="container mx-auto px-4 h-full flex flex-col">
 			<motion.div 
-				className="text-center mb-12 mt-5"
+				className="text-center mb-8 mt-10"
 				initial="hidden"
 				animate="visible"
 				variants={titleVariants}
 			>
-				<h1 className="text-5xl font-bold mb-4">
+				<h1 className="text-4xl font-bold mb-3">
 					<span className="gradient-text">Lista de Presença</span>
 					<span className="text-gray-700 dark:text-gray-300"> Digital</span>
 				</h1>
@@ -123,18 +123,18 @@ export default function Dashboard() {
 			</motion.div>
 
 			<motion.div 
-				className="mb-16"
+				className="mb-8"
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ delay: 0.2 }}
 			>
-				<h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6 px-4">
+				<h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 px-4">
 					Visão Geral do Dia
 				</h2>
 				<DashboardStats />
 			</motion.div>
 
-			<div className="relative mb-16">
+			<div className="relative mb-8">
 				<div className="absolute inset-0 flex items-center">
 					<div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
 				</div>
@@ -155,9 +155,9 @@ export default function Dashboard() {
 				</motion.div>
 			</div>
 
-			<div className="mb-8">
+			<div className="flex-1">
 				<motion.h2 
-					className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6 px-4"
+					className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 px-4"
 					initial={{ opacity: 0, x: -20 }}
 					animate={{ opacity: 1, x: 0 }}
 					transition={{ delay: 0.6 }}
@@ -165,7 +165,7 @@ export default function Dashboard() {
 					Menu Principal
 				</motion.h2>
 				<motion.div 
-					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto"
+					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-7xl mx-auto"
 					variants={containerVariants}
 					initial="hidden"
 					animate="visible"

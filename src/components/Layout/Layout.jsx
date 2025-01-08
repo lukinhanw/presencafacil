@@ -9,15 +9,15 @@ export default function Layout() {
 	const isHome = location.pathname === '/';
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-[var(--background-start)] to-[var(--background-end)]">
+		<div className="min-h-screen flex flex-col bg-gradient-to-br from-[var(--background-start)] to-[var(--background-end)]">
 			<MobileSidebar />
 			<Header />
 			{isHome ? (
-				<div className="pt-16 mt-1">
+				<div className="flex-1 pt-16">
 					<Dashboard />
 				</div>
 			) : (
-				<div className="pt-16 mt-1">
+				<div className="flex-1 pt-16 mt-1">
 					<NavigationBar />
 					<main className="container mx-auto px-4 py-6">
 						<div className="glass-card glass-card-dark p-6">

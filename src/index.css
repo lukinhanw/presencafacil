@@ -22,7 +22,11 @@
 	}
 
 	body {
-		@apply min-h-screen bg-gradient-to-br from-[var(--background-start)] to-[var(--background-end)] font-sans;
+		@apply min-h-screen bg-gradient-to-br from-[var(--background-start)] to-[var(--background-end)] font-sans overflow-x-hidden;
+	}
+
+	#root {
+		@apply min-h-screen flex flex-col;
 	}
 
 	::-webkit-scrollbar {
@@ -59,7 +63,9 @@
 
 @layer components {
 	.glass-card {
-		@apply bg-[var(--glass-bg)] border border-[var(--glass-border)] shadow-[var(--glass-shadow)] rounded-lg transition-all duration-300;
+		@apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 
+		shadow-sm hover:shadow-md rounded-lg transition-all duration-300
+		text-gray-900 dark:text-gray-100;
 	}
 
 	.glass-card-alt {
@@ -72,7 +78,11 @@
 	}
 
 	.btn-gradient {
-		@apply px-4 py-2 text-white font-medium bg-gradient-to-r from-primary-600 to-secondary-500 hover:from-primary-700 hover:to-secondary-600 rounded-md transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98];
+		@apply px-4 py-2 text-white font-medium bg-gradient-to-r from-primary-600 to-secondary-500 
+		hover:from-primary-700 hover:to-secondary-600 rounded-md transition-all duration-300 
+		shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed 
+		transform hover:scale-[1.02] active:scale-[0.98]
+		dark:from-primary-500 dark:to-secondary-400 dark:hover:from-primary-600 dark:hover:to-secondary-500;
 	}
 
 	.btn-gradient-outline {
@@ -128,11 +138,43 @@
 	}
 
 	.btn-gradient-green {
-		@apply px-4 py-2 text-white font-medium bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 rounded-md transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98];
+		@apply px-4 py-2 text-white font-medium bg-gradient-to-r from-green-600 to-emerald-500 
+		hover:from-green-700 hover:to-emerald-600 rounded-md transition-all duration-300 
+		shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed 
+		transform hover:scale-[1.02] active:scale-[0.98]
+		dark:from-green-500 dark:to-emerald-400 dark:hover:from-green-600 dark:hover:to-emerald-500;
 	}
 
 	.btn-gradient-secondary {
-		@apply px-4 py-2 text-white font-medium bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-700 hover:to-gray-600 rounded-md transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98];
+		@apply px-4 py-2 font-medium bg-gradient-to-r from-gray-200 to-gray-100 
+		hover:from-gray-300 hover:to-gray-200 rounded-md transition-all duration-300 
+		shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed 
+		transform hover:scale-[1.02] active:scale-[0.98]
+		text-gray-700 hover:text-gray-800
+		dark:from-gray-700 dark:to-gray-600 dark:hover:from-gray-600 dark:hover:to-gray-500
+		dark:text-gray-200 dark:hover:text-white;
+	}
+
+	/* Ajustes para textos dentro dos cards */
+	.glass-card h3 {
+		@apply text-gray-900 dark:text-gray-100;
+	}
+
+	.glass-card p {
+		@apply text-gray-600 dark:text-gray-400;
+	}
+
+	/* Ajustes para os ícones */
+	.glass-card svg {
+		@apply text-gray-100 dark:text-gray-100;
+	}
+
+	/* Ajustes para os inputs */
+	.glass-card input[type="checkbox"] {
+		@apply text-primary-600 dark:text-primary-500 
+		border-gray-300 dark:border-gray-600 
+		bg-white dark:bg-gray-700
+		focus:ring-primary-500 dark:focus:ring-primary-400;
 	}
 }
 
