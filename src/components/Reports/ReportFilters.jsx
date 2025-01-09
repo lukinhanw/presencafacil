@@ -132,6 +132,9 @@ export default function ReportFilters({ type, onFilter, isLoading, classes }) {
                             styles={stylesSelect}
                             placeholder="Selecione o código"
                             isClearable
+                            classNamePrefix="select"
+                            menuPortalTarget={document.body}
+                            menuPosition={'fixed'}
                         />
                     </div>
                     
@@ -146,6 +149,9 @@ export default function ReportFilters({ type, onFilter, isLoading, classes }) {
                             styles={stylesSelect}
                             placeholder="Selecione o treinamento"
                             isClearable
+                            classNamePrefix="select"
+                            menuPortalTarget={document.body}
+                            menuPosition={'fixed'}
                         />
                     </div>
                     
@@ -160,6 +166,9 @@ export default function ReportFilters({ type, onFilter, isLoading, classes }) {
                             styles={stylesSelect}
                             placeholder="Selecione o tipo"
                             isClearable
+                            classNamePrefix="select"
+                            menuPortalTarget={document.body}
+                            menuPosition={'fixed'}
                         />
                     </div>
                     
@@ -174,6 +183,9 @@ export default function ReportFilters({ type, onFilter, isLoading, classes }) {
                             styles={stylesSelect}
                             placeholder="Selecione o fornecedor"
                             isClearable
+                            classNamePrefix="select"
+                            menuPortalTarget={document.body}
+                            menuPosition={'fixed'}
                         />
                     </div>
 
@@ -188,6 +200,9 @@ export default function ReportFilters({ type, onFilter, isLoading, classes }) {
                             styles={stylesSelect}
                             placeholder="Selecione a unidade"
                             isClearable
+                            classNamePrefix="select"
+                            menuPortalTarget={document.body}
+                            menuPosition={'fixed'}
                         />
                     </div>
 
@@ -202,6 +217,9 @@ export default function ReportFilters({ type, onFilter, isLoading, classes }) {
                             styles={stylesSelect}
                             placeholder="Selecione o instrutor"
                             isClearable
+                            classNamePrefix="select"
+                            menuPortalTarget={document.body}
+                            menuPosition={'fixed'}
                         />
                     </div>
                 </div>

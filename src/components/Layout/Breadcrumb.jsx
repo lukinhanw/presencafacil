@@ -32,7 +32,7 @@ export default function Breadcrumb() {
 						<li key={routeTo} className="flex items-center">
 							<ChevronRightIcon className="h-4 w-4 mx-1" />
 							{isLast ? (
-								<span className="text-gray-300 dark:text-white">
+								<span className="text-gray-400 dark:text-gra-100">
 									{routeNames[routeTo] || name}
 								</span>
 							) : (

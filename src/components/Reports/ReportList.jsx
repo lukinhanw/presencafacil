@@ -139,7 +139,7 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                                 <button
                                     onClick={() => onGenerate({ allClasses: reports, format: 'pdf' })}
                                     disabled={isLoading}
-                                    className="btn-gradient-secondary flex items-center gap-2"
+                                    className="btn bg-zinc-50 dark:bg-zinc-600 text-gray-700 dark:text-gray-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-md px-4 py-2 flex items-center gap-2 transition-all duration-200 hover:scale-105"
                                 >
                                     <DocumentChartBarIcon className="h-5 w-5 text-gray-700 dark:text-gray-200" />
                                     {isLoading ? 'Gerando...' : `PDF (${reports.length})`}
@@ -147,7 +147,7 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                                 <button
                                     onClick={() => onGenerate({ allClasses: reports, format: 'excel' })}
                                     disabled={isLoading}
-                                    className="btn-gradient-secondary flex items-center gap-2"
+                                    className="btn bg-zinc-50 dark:bg-zinc-600 text-gray-700 dark:text-gray-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-md px-4 py-2 flex items-center gap-2 transition-all duration-200 hover:scale-105"
                                 >
                                     <TableCellsIcon className="h-5 w-5 text-gray-700 dark:text-gray-200" />
                                     {isLoading ? 'Gerando...' : `Excel (${reports.length})`}

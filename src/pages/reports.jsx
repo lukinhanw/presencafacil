@@ -97,6 +97,9 @@ export default function Reports() {
                             styles={stylesSelect}
                             placeholder="Selecione o tipo"
                             isClearable
+                            classNamePrefix="select"
+                            menuPortalTarget={document.body}
+                            menuPosition={'fixed'}
                         />
                     </div>
                 </div>
