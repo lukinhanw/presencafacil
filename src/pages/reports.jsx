@@ -89,7 +89,7 @@ export default function Reports() {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Tipo de Relatório
                     </label>
-                    <div className="w-full md:w-72">
+                    <div className="w-full md:w-full lg:w-1/2">
                         <Select
                             options={REPORT_TYPES}
                             value={selectedType}

@@ -25,7 +25,7 @@ const MOCK_CLASSES = [
 			{
 				id: 101,
 				name: 'João Silva',
-				registration: 'REG-001',
+				registration: '001',
 				timestamp: '2021-08-02T14:05:00',
 				early_leave: false,
 				position: 'Desenvolvedor'
@@ -33,7 +33,7 @@ const MOCK_CLASSES = [
 			{
 				id: 102,
 				name: 'Maria Santos',
-				registration: 'REG-002',
+				registration: '002',
 				timestamp: '2021-08-02T14:03:00',
 				early_leave: true,
 				early_leave_time: '2021-08-02T17:30:00',
@@ -42,7 +42,7 @@ const MOCK_CLASSES = [
 			{
 				id: 103,
 				name: 'Pedro Oliveira',
-				registration: 'REG-003',
+				registration: '003',
 				timestamp: '2021-08-02T14:10:00',
 				early_leave: false,
 				position: 'Vendedor'
@@ -73,19 +73,19 @@ const MOCK_CLASSES = [
 		attendees: [
 			{
 				id: 201,
-				name: 'Ana Costa',
-				registration: 'REG-004',
+				name: 'Ana Beatriz',
+				registration: '004',
 				timestamp: '2021-09-15T09:02:00',
 				early_leave: false,
 				position: 'Gerente'
 			},
 			{
 				id: 202,
-				name: 'Lucas Ferreira',
-				registration: 'REG-005',
+				name: 'Carlos Eduardo',
+				registration: '005',
 				timestamp: '2021-09-15T09:05:00',
 				early_leave: false,
-				position: 'Vendedor'
+				position: 'Coordenador'
 			}
 		]
 	},
@@ -114,7 +114,7 @@ const MOCK_CLASSES = [
 			{
 				id: 101,
 				name: 'João Silva',
-				registration: 'REG-001',
+				registration: '001',
 				timestamp: '2021-08-02T14:05:00',
 				early_leave: false,
 				position: 'Desenvolvedor'
@@ -122,7 +122,7 @@ const MOCK_CLASSES = [
 			{
 				id: 102,
 				name: 'Maria Santos',
-				registration: 'REG-002',
+				registration: '002',
 				timestamp: '2021-08-02T14:03:00',
 				early_leave: true,
 				early_leave_time: '2021-08-02T17:30:00',
@@ -131,7 +131,7 @@ const MOCK_CLASSES = [
 			{
 				id: 103,
 				name: 'Pedro Oliveira',
-				registration: 'REG-003',
+				registration: '003',
 				timestamp: '2021-08-02T14:10:00',
 				early_leave: false,
 				position: 'Vendedor'

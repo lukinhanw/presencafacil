@@ -5,8 +5,9 @@ import ptBR from 'date-fns/locale/pt-BR';
 import "react-datepicker/dist/react-datepicker.css";
 import { useTheme } from '../../contexts/ThemeContext';
 import { CLASS_TYPES } from '../../services/classService';
-import { selectStyles } from '../../components/Shared/selectStyles';
-import { selectStylesDark } from '../../components/Shared/selectStylesDark';
+import { selectStyles } from '../Shared/selectStyles';
+import { selectStylesDark } from '../Shared/selectStylesDark';
+import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
 // Registrar o locale pt-BR
 registerLocale('pt-BR', ptBR);
@@ -26,6 +27,7 @@ const customDatePickerStyle = `
 
 export default function ReportFilters({ type, onFilter, isLoading, classes }) {
     const { isDark } = useTheme();
+    const [isCollapsed, setIsCollapsed] = useState(true);
     const [filters, setFilters] = useState({
         dateRange: [null, null],
         unit: null,
@@ -33,7 +35,9 @@ export default function ReportFilters({ type, onFilter, isLoading, classes }) {
         classType: null,
         trainingCode: null,
         trainingName: null,
-        provider: null
+        provider: null,
+        employeeName: '',
+        registration: ''
     });
     
     const stylesSelect = isDark ? selectStylesDark : selectStyles;
@@ -76,8 +80,8 @@ export default function ReportFilters({ type, onFilter, isLoading, classes }) {
     }, [classes]);
 
     useEffect(() => {
-        handleFilterChange({ type: 'attendance_list' });
-    }, []);
+        handleFilterChange({ type });
+    }, [type]);
 
     const handleFilterChange = (newValues) => {
         const updatedFilters = {
@@ -86,141 +90,198 @@ export default function ReportFilters({ type, onFilter, isLoading, classes }) {
         };
         setFilters(updatedFilters);
 
-        onFilter({
-            type: 'attendance_list',
-            startDate: updatedFilters.dateRange[0],
-            endDate: updatedFilters.dateRange[1],
-            unit: updatedFilters.unit?.value,
-            instructor: updatedFilters.instructor?.value,
-            classType: updatedFilters.classType?.value,
-            trainingCode: updatedFilters.trainingCode?.value,
-            trainingName: updatedFilters.trainingName?.value,
-            provider: updatedFilters.provider?.value
-        });
+        // Enviar apenas os filtros relevantes para cada tipo de relatório
+        if (type === 'attendance_list') {
+            onFilter({
+                type: 'attendance_list',
+                startDate: updatedFilters.dateRange[0],
+                endDate: updatedFilters.dateRange[1],
+                unit: updatedFilters.unit?.value,
+                instructor: updatedFilters.instructor?.value,
+                classType: updatedFilters.classType?.value,
+                trainingCode: updatedFilters.trainingCode?.value,
+                trainingName: updatedFilters.trainingName?.value,
+                provider: updatedFilters.provider?.value
+            });
+        } else if (type === 'employee_training') {
+            onFilter({
+                type: 'employee_training',
+                employeeName: updatedFilters.employeeName,
+                registration: updatedFilters.registration
+            });
+        }
     };
     
     return (
         <>
             <style>{customDatePickerStyle}</style>
-            <div className="glass-card p-4 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Período
-                        </label>
-                        <DatePicker
-                            selectsRange={true}
-                            startDate={filters.dateRange[0]}
-                            endDate={filters.dateRange[1]}
-                            onChange={(update) => handleFilterChange({ dateRange: update })}
-                            className="input-field w-full"
-                            placeholderText="Selecione o período"
-                            dateFormat="dd/MM/yyyy"
-                            locale="pt-BR"
-                            monthsShown={2}
-                        />
-                    </div>
+            <div className="glass-card">
+                <button 
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="w-full p-4 flex justify-between items-center text-gray-900 dark:text-white"
+                >
+                    <span className="font-medium">Filtros</span>
+                    {isCollapsed ? (
+                        <ChevronDownIcon className="h-5 w-5" />
+                    ) : (
+                        <ChevronUpIcon className="h-5 w-5" />
+                    )}
+                </button>
+                
+                <div className={`p-4 pt-0 space-y-4 transition-all duration-300 ${isCollapsed ? 'hidden' : 'block'}`}>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {type === 'attendance_list' ? (
+                            // Filtros para lista de presença
+                            <>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        Período
+                                    </label>
+                                    <DatePicker
+                                        selectsRange
+                                        startDate={filters.dateRange[0]}
+                                        endDate={filters.dateRange[1]}
+                                        onChange={(update) => handleFilterChange({ dateRange: update })}
+                                        isClearable
+                                        locale="pt-BR"
+                                        dateFormat="dd/MM/yyyy"
+                                        placeholderText="Selecione o período"
+                                        className="input-field"
+                                    />
+                                </div>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Código do Treinamento
-                        </label>
-                        <Select
-                            value={filters.trainingCode}
-                            onChange={(option) => handleFilterChange({ trainingCode: option })}
-                            options={options.trainingCodes}
-                            styles={stylesSelect}
-                            placeholder="Selecione o código"
-                            isClearable
-                            classNamePrefix="select"
-                            menuPortalTarget={document.body}
-                            menuPosition={'fixed'}
-                        />
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Nome do Treinamento
-                        </label>
-                        <Select
-                            value={filters.trainingName}
-                            onChange={(option) => handleFilterChange({ trainingName: option })}
-                            options={options.trainingNames}
-                            styles={stylesSelect}
-                            placeholder="Selecione o treinamento"
-                            isClearable
-                            classNamePrefix="select"
-                            menuPortalTarget={document.body}
-                            menuPosition={'fixed'}
-                        />
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Tipo do Treinamento
-                        </label>
-                        <Select
-                            value={filters.classType}
-                            onChange={(option) => handleFilterChange({ classType: option })}
-                            options={CLASS_TYPES}
-                            styles={stylesSelect}
-                            placeholder="Selecione o tipo"
-                            isClearable
-                            classNamePrefix="select"
-                            menuPortalTarget={document.body}
-                            menuPosition={'fixed'}
-                        />
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Fornecedor
-                        </label>
-                        <Select
-                            value={filters.provider}
-                            onChange={(option) => handleFilterChange({ provider: option })}
-                            options={options.providers}
-                            styles={stylesSelect}
-                            placeholder="Selecione o fornecedor"
-                            isClearable
-                            classNamePrefix="select"
-                            menuPortalTarget={document.body}
-                            menuPosition={'fixed'}
-                        />
-                    </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        Código do Treinamento
+                                    </label>
+                                    <Select
+                                        value={filters.trainingCode}
+                                        onChange={(option) => handleFilterChange({ trainingCode: option })}
+                                        options={options.trainingCodes}
+                                        styles={stylesSelect}
+                                        placeholder="Selecione o código"
+                                        isClearable
+                                        classNamePrefix="select"
+                                        menuPortalTarget={document.body}
+                                        menuPosition={'fixed'}
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        Nome do Treinamento
+                                    </label>
+                                    <Select
+                                        value={filters.trainingName}
+                                        onChange={(option) => handleFilterChange({ trainingName: option })}
+                                        options={options.trainingNames}
+                                        styles={stylesSelect}
+                                        placeholder="Selecione o treinamento"
+                                        isClearable
+                                        classNamePrefix="select"
+                                        menuPortalTarget={document.body}
+                                        menuPosition={'fixed'}
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        Tipo do Treinamento
+                                    </label>
+                                    <Select
+                                        value={filters.classType}
+                                        onChange={(option) => handleFilterChange({ classType: option })}
+                                        options={CLASS_TYPES}
+                                        styles={stylesSelect}
+                                        placeholder="Selecione o tipo"
+                                        isClearable
+                                        classNamePrefix="select"
+                                        menuPortalTarget={document.body}
+                                        menuPosition={'fixed'}
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        Fornecedor
+                                    </label>
+                                    <Select
+                                        value={filters.provider}
+                                        onChange={(option) => handleFilterChange({ provider: option })}
+                                        options={options.providers}
+                                        styles={stylesSelect}
+                                        placeholder="Selecione o fornecedor"
+                                        isClearable
+                                        classNamePrefix="select"
+                                        menuPortalTarget={document.body}
+                                        menuPosition={'fixed'}
+                                    />
+                                </div>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Unidade
-                        </label>
-                        <Select
-                            value={filters.unit}
-                            onChange={(option) => handleFilterChange({ unit: option })}
-                            options={options.units}
-                            styles={stylesSelect}
-                            placeholder="Selecione a unidade"
-                            isClearable
-                            classNamePrefix="select"
-                            menuPortalTarget={document.body}
-                            menuPosition={'fixed'}
-                        />
-                    </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        Unidade
+                                    </label>
+                                    <Select
+                                        value={filters.unit}
+                                        onChange={(option) => handleFilterChange({ unit: option })}
+                                        options={options.units}
+                                        styles={stylesSelect}
+                                        placeholder="Selecione a unidade"
+                                        isClearable
+                                        classNamePrefix="select"
+                                        menuPortalTarget={document.body}
+                                        menuPosition={'fixed'}
+                                    />
+                                </div>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Instrutor
-                        </label>
-                        <Select
-                            value={filters.instructor}
-                            onChange={(option) => handleFilterChange({ instructor: option })}
-                            options={options.instructors}
-                            styles={stylesSelect}
-                            placeholder="Selecione o instrutor"
-                            isClearable
-                            classNamePrefix="select"
-                            menuPortalTarget={document.body}
-                            menuPosition={'fixed'}
-                        />
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        Instrutor
+                                    </label>
+                                    <Select
+                                        value={filters.instructor}
+                                        onChange={(option) => handleFilterChange({ instructor: option })}
+                                        options={options.instructors}
+                                        styles={stylesSelect}
+                                        placeholder="Selecione o instrutor"
+                                        isClearable
+                                        classNamePrefix="select"
+                                        menuPortalTarget={document.body}
+                                        menuPosition={'fixed'}
+                                    />
+                                </div>
+                            </>
+                        ) : type === 'employee_training' ? (
+                            // Filtros para relatório de colaboradores
+                            <>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        Nome do Colaborador
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        placeholder="Digite o nome"
+                                        value={filters.employeeName}
+                                        onChange={(e) => handleFilterChange({ employeeName: e.target.value })}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        Matrícula
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        placeholder="Digite a matrícula"
+                                        value={filters.registration}
+                                        onChange={(e) => handleFilterChange({ registration: e.target.value })}
+                                    />
+                                </div>
+                            </>
+                        ) : null}
                     </div>
                 </div>
             </div>

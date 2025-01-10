@@ -2,10 +2,12 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx-js-style';
 import { getClasses } from './classService';
+import { getEmployees } from './employeeService';
 import viteLogo from '/vite.svg';
 
 export const REPORT_TYPES = [
-    { value: 'attendance_list', label: 'Lista de Presença Digital' }
+    { value: 'attendance_list', label: 'Lista de Presença Digital' },
+    { value: 'employee_training', label: 'Relatório de Treinamentos por Colaborador' }
 ];
 
 // Função auxiliar para formatar data
@@ -19,35 +21,78 @@ const formatDate = (date) => {
     });
 };
 
+// Nova função para buscar dados do relatório de colaboradores
+const getEmployeeTrainingReport = async (filters = {}) => {
+    try {
+        const employees = await getEmployees({
+            search: filters.employeeName || filters.registration
+        });
+
+        const allClasses = await getClasses({});
+        
+        const reports = employees.map(employee => {
+            const trainings = allClasses.filter(classData => 
+                classData.attendees.some(attendee => 
+                    attendee.registration === employee.registration
+                )
+            ).map(classData => {
+                const attendeeData = classData.attendees.find(
+                    attendee => attendee.registration === employee.registration
+                );
+
+                return {
+                    trainingName: classData.training.name,
+                    trainingCode: classData.training.code,
+                    instructor: classData.instructor.name,
+                    unit: classData.unit,
+                    date: classData.date_start,
+                    duration: classData.training.duration,
+                    status: classData.status,
+                    attendanceTime: attendeeData.timestamp,
+                    earlyLeave: attendeeData.early_leave,
+                    earlyLeaveTime: attendeeData.early_leave_time
+                };
+            });
+
+            return {
+                employee: {
+                    id: employee.id,
+                    name: employee.name,
+                    registration: employee.registration,
+                    unit: employee.unit,
+                    position: employee.position
+                },
+                trainings
+            };
+        });
+
+        return reports.filter(report => report.trainings.length > 0);
+    } catch (error) {
+        console.error('Erro ao buscar relatório de funcionários:', error);
+        return [];
+    }
+};
+
 export const getReports = async (filters = {}) => {
     await new Promise(resolve => setTimeout(resolve, 500));
     
     try {
+        if (filters.type === 'employee_training') {
+            return await getEmployeeTrainingReport(filters);
+        }
         
-        // Mapear os filtros para o formato esperado pelo getClasses
+        // Código existente para lista de presença...
         const classFilters = {
-            // Busca combinada de nome ou código do treinamento
             search: filters.trainingName || filters.trainingCode,
-            
-            // Filtro de tipos de treinamento
             types: filters.classType ? [{ value: filters.classType }] : [],
-            
-            // Filtro de unidade
             units: filters.unit ? [{ value: filters.unit }] : [],
-            
-            // Filtros de data
             startDate: filters.startDate,
             endDate: filters.endDate,
-            
-            // Filtro de instrutor
             instructor: filters.instructor,
-            
-            // Filtro de fornecedor
             provider: filters.provider
         };
         
         const classes = await getClasses(classFilters);
-        
         return Array.isArray(classes) ? classes : [];
     } catch (error) {
         console.error('Erro ao buscar relatórios:', error);
@@ -207,18 +252,6 @@ const generateAttendanceListContent = (doc, classData) => {
             { align: 'center' }
         );
     }
-};
-
-// Manter a função original para compatibilidade, mas simplificada
-const generateAttendanceListPDF = (classData) => {
-    const doc = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
-    });
-    
-    generateAttendanceListContent(doc, classData);
-    return doc;
 };
 
 const generateAttendanceListExcel = (classes) => {
@@ -400,8 +433,104 @@ const generateAttendanceListExcel = (classes) => {
     XLSX.writeFile(wb, fileName);
 };
 
+// Função para gerar o Excel do relatório de colaboradores
+const generateEmployeeTrainingExcel = (reports) => {
+    const wb = XLSX.utils.book_new();
+    let allData = [];
+
+    // Título
+    allData.push([{
+        v: 'RELATÓRIO DE TREINAMENTOS POR COLABORADOR',
+        s: {
+            font: { bold: true, sz: 16, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: '4F81BD' } },
+            alignment: { horizontal: 'center', vertical: 'center' }
+        }
+    }]);
+    allData.push([]);
+
+    reports.forEach((report) => {
+        // Cabeçalho do Colaborador
+        allData.push([{
+            v: `Colaborador: ${report.employee.name} (${report.employee.registration})`,
+            s: {
+                font: { bold: true, sz: 12, color: { rgb: 'FFFFFF' } },
+                fill: { fgColor: { rgb: '1F4E79' } },
+                alignment: { horizontal: 'left' }
+            }
+        }]);
+
+        // Informações do Colaborador
+        allData.push([
+            { v: 'Cargo:', s: { font: { bold: true } } },
+            { v: report.employee.position },
+            { v: 'Unidade:', s: { font: { bold: true } } },
+            { v: report.employee.unit }
+        ]);
+
+        // Cabeçalho da tabela de treinamentos
+        allData.push([
+            { v: 'Código', s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } } } },
+            { v: 'Treinamento', s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } } } },
+            { v: 'Data', s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } } } },
+            { v: 'Instrutor', s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } } } },
+            { v: 'Unidade', s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } } } },
+            { v: 'Status', s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } } } }
+        ]);
+
+        // Dados dos treinamentos
+        report.trainings.forEach((training) => {
+            allData.push([
+                { v: training.trainingCode },
+                { v: training.trainingName },
+                { v: formatDate(training.date) },
+                { v: training.instructor },
+                { v: training.unit },
+                { v: training.status }
+            ]);
+        });
+
+        // Espaço entre colaboradores
+        allData.push([]);
+        allData.push([]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(allData);
+
+    // Configurar larguras das colunas
+    ws['!cols'] = [
+        { wch: 15 },  // Código
+        { wch: 40 },  // Treinamento
+        { wch: 20 },  // Data
+        { wch: 25 },  // Instrutor
+        { wch: 20 },  // Unidade
+        { wch: 15 }   // Status
+    ];
+
+    // Adicionar a worksheet ao workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Relatório de Treinamentos');
+
+    // Gerar arquivo
+    XLSX.writeFile(wb, `relatorio_treinamentos_${new Date().getTime()}.xlsx`);
+};
+
 export const downloadReport = async (reportData) => {
     try {
+        // Verificar se é um relatório de funcionário ou múltiplos funcionários
+        if (reportData.employeeReport) {
+            generateEmployeeTrainingExcel([reportData.employeeReport]);
+            return {
+                success: true,
+                message: 'Relatório gerado com sucesso!'
+            };
+        } else if (reportData.selectedEmployees) {
+            generateEmployeeTrainingExcel(reportData.selectedEmployees);
+            return {
+                success: true,
+                message: 'Relatórios gerados com sucesso!'
+            };
+        }
+
         let classesToProcess = [];
         
         if (reportData.selectedClasses?.length > 0) {
