@@ -155,7 +155,7 @@ export default function Dashboard() {
 				</motion.div>
 			</div>
 
-			<div className="flex-1">
+			<div className="flex-1 bg-white dark:bg-gray-900 rounded-lg p-4 shadow-lg px-6 py-10">
 				<motion.h2 
 					className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 px-4"
 					initial={{ opacity: 0, x: -20 }}

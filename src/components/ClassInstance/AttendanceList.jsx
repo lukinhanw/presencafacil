@@ -39,41 +39,41 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 			</div>
 
 			<div className="overflow-x-auto">
-				<table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+				<table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
 					<thead>
-						<tr className="bg-gray-50/80 dark:bg-gray-800/80">
-							<th className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/6">
+						<tr className="bg-gray-100 dark:bg-gray-700">
+							<th className="px-6 py-4 text-center text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/6">
 								Matrícula
 							</th>
-							<th className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/3">
+							<th className="px-6 py-4 text-center text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/3">
 								Colaborador
 							</th>
-							<th className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/6">
+							<th className="px-6 py-4 text-center text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/6">
 								Horário
 							</th>
-							<th className="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/6">
+							<th className="px-6 py-4 text-center text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/6">
 								Cargo
 							</th>
 							{!isFinished && (
-								<th className="px-6 py-4 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-1/6">
+								<th className="px-6 py-4 text-end text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/6">
 									Ações
 								</th>
 							)}
 						</tr>
 					</thead>
-					<tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+					<tbody className="divide-y divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800">
 						{attendees.map((attendee) => (
-							<tr key={attendee.id} className="hover:bg-gray-50/80 dark:hover:bg-gray-800/80 transition-colors duration-150">
-								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
+							<tr key={attendee.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-800 dark:text-gray-100">
 									{attendee.registration}
 								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
+								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-800 dark:text-gray-100">
 									{attendee.name}
 								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
+								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-800 dark:text-gray-100">
 									{new Date(attendee.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
 								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
+								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-800 dark:text-gray-100">
 									{attendee.position}
 								</td>
 								{!isFinished && (
@@ -82,7 +82,7 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 											{!attendee.early_leave && (
 												<button
 													onClick={() => setEarlyLeaveAlert({ isOpen: true, attendeeId: attendee.id })}
-													className="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300"
+													className="text-yellow-500 hover:text-yellow-700 dark:text-yellow-300 dark:hover:text-yellow-200"
 													title="Registrar saída antecipada"
 												>
 													<ClockIcon className="h-5 w-5" />
@@ -90,7 +90,7 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 											)}
 											<button
 												onClick={() => setDeleteAlert({ isOpen: true, attendeeId: attendee.id })}
-												className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+												className="text-red-500 hover:text-red-700 dark:text-red-300 dark:hover:text-red-200"
 												title="Remover presença"
 											>
 												<TrashIcon className="h-5 w-5" />
