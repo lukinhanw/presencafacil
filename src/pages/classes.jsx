@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { FiUsers, FiClock, FiMapPin, FiAward, FiPlus, FiTrash2, FiArrowRight } from 'react-icons/fi';
+import { FiUsers, FiClock, FiMapPin, FiAward, FiPlus, FiTrash2, FiArrowRight, FiGrid, FiList } from 'react-icons/fi';
 import Modal from '../components/General/modal';
 import Alert from '../components/General/alert';
 import ClassForm from '../components/Class/classForm';
@@ -30,6 +30,7 @@ export default function Classes() {
 	const navigate = useNavigate();
 	const isAdmin = hasRole('ADMIN_ROLE');
 	const { isDark } = useTheme();
+	const [viewMode, setViewMode] = useState('list');
 
 	const fetchClasses = useCallback(async () => {
 		try {
@@ -129,9 +130,35 @@ export default function Classes() {
 	return (
 		<div className="space-y-6 p-6">
 			<div className="flex flex-col md:flex-row justify-between items-center gap-4">
-				<h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-					Aulas
-				</h1>
+				<div className="flex items-center gap-4">
+					<h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+						Aulas
+					</h1>
+					<div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+						<button
+							onClick={() => setViewMode('list')}
+							className={`p-1.5 rounded-md transition-colors ${
+								viewMode === 'list'
+									? 'bg-white dark:bg-gray-700 text-primary-500 shadow-sm'
+									: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+							}`}
+							title="Visualização em lista"
+						>
+							<FiList className="h-5 w-5" />
+						</button>
+						<button
+							onClick={() => setViewMode('grid')}
+							className={`p-1.5 rounded-md transition-colors ${
+								viewMode === 'grid'
+									? 'bg-white dark:bg-gray-700 text-primary-500 shadow-sm'
+									: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+							}`}
+							title="Visualização em grid"
+						>
+							<FiGrid className="h-5 w-5" />
+						</button>
+					</div>
+				</div>
 				{isAdmin && (
 					<button
 						onClick={handleOpenModal}
@@ -149,7 +176,7 @@ export default function Classes() {
 			/>
 
 			{isLoading ? (
-				<div className="grid grid-cols-1 gap-4">
+				<div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-4`}>
 					{[1, 2, 3, 4].map((i) => (
 						<div 
 							key={i} 
@@ -160,7 +187,7 @@ export default function Classes() {
 									: 'bg-gray-50/95'
 								}
 								backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50
-								flex items-center h-20
+								${viewMode === 'grid' ? 'flex flex-col p-4 h-auto' : 'flex items-center h-20'}
 							`}
 						>
 							{/* Barra lateral */}
@@ -229,7 +256,7 @@ export default function Classes() {
 					variants={container}
 					initial="hidden"
 					animate="show"
-					className="grid grid-cols-1 gap-4"
+					className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-4`}
 				>
 					{classes.map((classItem) => (
 						<motion.div
@@ -243,82 +270,149 @@ export default function Classes() {
 								}
 								backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50
 								hover:shadow-lg transition-all duration-300
-								group flex items-center h-20
+								group
+								${viewMode === 'grid' ? 'flex flex-col p-4' : 'flex items-center h-20'}
 							`}
 						>
-							{/* Barra de Status */}
-							<div className={`w-1 self-stretch ${getStatusColor(classItem.type)}`} />
+							{viewMode === 'grid' ? (
+								<>
+									{/* Visualização em Grid */}
+									<div className="flex items-center gap-2 mb-3">
+										<span className={`${getTypeStyle(classItem.type)}`}>
+											{classItem.type}
+										</span>
+										<span className="text-sm text-gray-500 dark:text-gray-400">
+											{classItem.training?.code || 'N/A'}
+										</span>
+									</div>
 
-							<div className="flex-1 px-4 flex items-center gap-6">
-								{/* Tag de Tipo */}
-								<div className="flex-shrink-0">
-									<span className={`${getTypeStyle(classItem.type)}`}>
-										{classItem.type}
-									</span>
-								</div>
-
-								{/* Código */}
-								<div className="flex-shrink-0 w-24">
-									<span className="text-sm text-gray-500 dark:text-gray-400">
-										{classItem.training?.code || 'N/A'}
-									</span>
-								</div>
-
-								{/* Nome do Treinamento */}
-								<div className="flex-1 min-w-0">
-									<h3 className="text-base font-medium text-gray-900 dark:text-white truncate">
+									<h3 className="text-base font-medium text-gray-900 dark:text-white mb-3 line-clamp-2">
 										{classItem.training?.name || 'N/A'}
 									</h3>
-								</div>
 
-								{/* Informações em linha */}
-								<div className="flex items-center gap-6 flex-shrink-0">
-									<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-										<FiUsers className="h-4 w-4 text-primary-500 dark:text-primary-400" />
-										<span className="text-sm">{classItem.presents}</span>
+									<div className="space-y-2 flex-1">
+										<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+											<FiUsers className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+											<span className="text-sm">{classItem.presents} presentes</span>
+										</div>
+
+										<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+											<FiMapPin className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+											<span className="text-sm">{classItem.unit}</span>
+										</div>
+
+										<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+											<FiAward className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+											<span className="text-sm truncate">
+												{classItem.instructor?.name || 'N/A'}
+											</span>
+										</div>
+
+										<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+											<FiClock className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+											<span className="text-sm">
+												{formatDateTime(classItem.date_start)}
+											</span>
+										</div>
 									</div>
 
-									<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-										<FiMapPin className="h-4 w-4 text-primary-500 dark:text-primary-400" />
-										<span className="text-sm">{classItem.unit}</span>
-									</div>
-
-									<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-										<FiAward className="h-4 w-4 text-primary-500 dark:text-primary-400" />
-										<span className="text-sm whitespace-nowrap">
-											{classItem.instructor?.name || 'N/A'}
-										</span>
-									</div>
-
-									<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-										<FiClock className="h-4 w-4 text-primary-500 dark:text-primary-400" />
-										<span className="text-sm whitespace-nowrap">
-											{formatDateTime(classItem.date_start)}
-										</span>
-									</div>
-								</div>
-
-								{/* Ações */}
-								<div className="flex items-center gap-2 flex-shrink-0 ml-4">
-									<button
-										onClick={() => handleEnterClass(classItem.id)}
-										className="btn-primary flex items-center gap-1 px-3 py-1.5 text-sm"
-									>
-										<span>Acessar</span>
-										<FiArrowRight className="h-4 w-4" />
-									</button>
-
-									{isAdmin && (
+									<div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
 										<button
-											onClick={() => setDeleteAlert({ isOpen: true, classId: classItem.id })}
-											className="btn-danger-icon p-1.5 rounded-lg"
-											title="Excluir aula"
+											onClick={() => handleEnterClass(classItem.id)}
+											className="btn-primary flex items-center gap-1 px-3 py-1.5 text-sm"
 										>
-											<FiTrash2 className="h-4 w-4" />
+											<span>Acessar</span>
+											<FiArrowRight className="h-4 w-4" />
 										</button>
-									)}
-								</div>
-							</div>
+
+										{isAdmin && (
+											<button
+												onClick={() => setDeleteAlert({ isOpen: true, classId: classItem.id })}
+												className="btn-danger-icon p-1.5 rounded-lg"
+												title="Excluir aula"
+											>
+												<FiTrash2 className="h-4 w-4" />
+											</button>
+										)}
+									</div>
+								</>
+							) : (
+								<>
+									{/* Visualização em Lista (código existente) */}
+									<div className={`w-1 self-stretch ${getStatusColor(classItem.type)}`} />
+
+									<div className="flex-1 px-4 flex items-center gap-6">
+										{/* Tag de Tipo */}
+										<div className="flex-shrink-0">
+											<span className={`${getTypeStyle(classItem.type)}`}>
+												{classItem.type}
+											</span>
+										</div>
+
+										{/* Código */}
+										<div className="flex-shrink-0 w-24">
+											<span className="text-sm text-gray-500 dark:text-gray-400">
+												{classItem.training?.code || 'N/A'}
+											</span>
+										</div>
+
+										{/* Nome do Treinamento */}
+										<div className="flex-1 min-w-0">
+											<h3 className="text-base font-medium text-gray-900 dark:text-white truncate">
+												{classItem.training?.name || 'N/A'}
+											</h3>
+										</div>
+
+										{/* Informações em linha */}
+										<div className="flex items-center gap-6 flex-shrink-0">
+											<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+												<FiUsers className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+												<span className="text-sm">{classItem.presents}</span>
+											</div>
+
+											<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+												<FiMapPin className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+												<span className="text-sm">{classItem.unit}</span>
+											</div>
+
+											<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+												<FiAward className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+												<span className="text-sm whitespace-nowrap">
+													{classItem.instructor?.name || 'N/A'}
+												</span>
+											</div>
+
+											<div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+												<FiClock className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+												<span className="text-sm whitespace-nowrap">
+													{formatDateTime(classItem.date_start)}
+												</span>
+											</div>
+										</div>
+
+										{/* Ações */}
+										<div className="flex items-center gap-2 flex-shrink-0 ml-4">
+											<button
+												onClick={() => handleEnterClass(classItem.id)}
+												className="btn-primary flex items-center gap-1 px-3 py-1.5 text-sm"
+											>
+												<span>Acessar</span>
+												<FiArrowRight className="h-4 w-4" />
+											</button>
+
+											{isAdmin && (
+												<button
+													onClick={() => setDeleteAlert({ isOpen: true, classId: classItem.id })}
+													className="btn-danger-icon p-1.5 rounded-lg"
+													title="Excluir aula"
+												>
+													<FiTrash2 className="h-4 w-4" />
+												</button>
+											)}
+										</div>
+									</div>
+								</>
+							)}
 						</motion.div>
 					))}
 				</motion.div>
