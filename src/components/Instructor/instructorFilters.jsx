@@ -1,7 +1,6 @@
 import Select from 'react-select';
 import { useTheme } from '../../contexts/ThemeContext';
-import { UNITS } from '../../services/employeeService';
-import { INSTRUCTOR_POSITIONS } from '../../services/instructorService';
+import { UNITS, POSITIONS } from '../../services/instructorService';
 import { selectStyles } from '../Shared/selectStyles';
 import { selectStylesDark } from '../Shared/selectStylesDark';
 
@@ -10,7 +9,7 @@ const unitOptions = UNITS.map(unit => ({
   label: unit
 }));
 
-const positionOptions = INSTRUCTOR_POSITIONS.map(position => ({
+const positionOptions = POSITIONS.map(position => ({
   value: position,
   label: position
 }));

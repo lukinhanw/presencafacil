@@ -1,91 +1,147 @@
-// Mock data for instructors
-const MOCK_INSTRUCTORS = [
-	{
-		id: 1,
-		registration: '54321',
-		name: 'Carlos Oliveira',
-		unit: 'Matriz',
-		position: 'Instrutor Senior'
-	},
-	{
-		id: 2,
-		registration: '98765',
-		name: 'Ana Beatriz',
-		unit: 'Filial SP',
-		position: 'Instrutor Pleno'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const TOKEN_KEY = 'token';
+
+const getAuthHeader = () => {
+	const token = localStorage.getItem(TOKEN_KEY);
+	if (!token) {
+		throw new Error('Usuário não autenticado');
 	}
+	return {
+		'Authorization': `Bearer ${token}`,
+		'Content-Type': 'application/json'
+	};
+};
+
+const handleErrorResponse = async (response) => {
+	const data = await response.json();
+	
+	// Caso 1: Erros de validação do express-validator
+	if (data.errors && Array.isArray(data.errors)) {
+		throw new Error(data.errors.map(err => err.msg).join(', '));
+	}
+	
+	// Caso 2: Erro específico com mensagem e error
+	if (data.error) {
+		throw new Error(data.error);
+	}
+	
+	// Caso 3: Apenas mensagem de erro
+	if (data.message) {
+		throw new Error(data.message);
+	}
+	
+	// Caso padrão
+	throw new Error('Erro na operação');
+};
+
+export const UNITS = [
+	'Matriz',
+	'Filial SP',
+	'Filial RJ',
+	'Filial MG',
+	'Filial RS'
 ];
 
-export const INSTRUCTOR_POSITIONS = [
+export const POSITIONS = [
 	'Instrutor Junior',
 	'Instrutor Pleno',
 	'Instrutor Senior',
-	'Coordenador de Treinamentos'
+	'Coordenador de Treinamento',
+	'Especialista em Treinamento'
 ];
 
 export const getInstructors = async (filters = {}) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-
-	let filteredInstructors = [...MOCK_INSTRUCTORS];
-
+	const params = new URLSearchParams();
+	
 	if (filters.search) {
-		const searchLower = filters.search.toLowerCase();
-		filteredInstructors = filteredInstructors.filter(instructor =>
-			instructor.name.toLowerCase().includes(searchLower) ||
-			instructor.registration.includes(filters.search)
-		);
+		params.append('search', filters.search);
 	}
-
+	
 	if (filters.units?.length > 0) {
-		filteredInstructors = filteredInstructors.filter(instructor =>
-			filters.units.includes(instructor.unit)
-		);
+		params.append('units', filters.units.join(','));
 	}
-
+	
 	if (filters.positions?.length > 0) {
-		filteredInstructors = filteredInstructors.filter(instructor =>
-			filters.positions.includes(instructor.position)
-		);
+		params.append('positions', filters.positions.join(','));
 	}
 
-	return filteredInstructors;
+	if (filters.isActive !== undefined) {
+		params.append('isActive', filters.isActive);
+	}
+
+	const response = await fetch(`${API_URL}/instructors?${params}`, {
+		headers: getAuthHeader()
+	});
+
+	if (!response.ok) {
+		await handleErrorResponse(response);
+	}
+
+	return await response.json();
 };
 
-export const createInstructor = async (instructorData) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
+export const createInstructor = async (data) => {
+	const response = await fetch(`${API_URL}/instructors`, {
+		method: 'POST',
+		headers: getAuthHeader(),
+		body: JSON.stringify(data)
+	});
 
-	if (MOCK_INSTRUCTORS.some(inst => inst.registration === instructorData.registration)) {
-		throw new Error('Matrícula já cadastrada');
+	if (!response.ok) {
+		await handleErrorResponse(response);
 	}
 
-	const newInstructor = {
-		id: MOCK_INSTRUCTORS.length + 1,
-		...instructorData
-	};
-	MOCK_INSTRUCTORS.push(newInstructor);
-	return newInstructor;
+	return await response.json();
 };
 
-export const updateInstructor = async (id, instructorData) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
+export const updateInstructor = async (id, data) => {
+	const response = await fetch(`${API_URL}/instructors/${id}`, {
+		method: 'PUT',
+		headers: getAuthHeader(),
+		body: JSON.stringify(data)
+	});
 
-	const index = MOCK_INSTRUCTORS.findIndex(i => i.id === id);
-	if (index === -1) throw new Error('Instrutor não encontrado');
-
-	if (MOCK_INSTRUCTORS.some(inst =>
-		inst.registration === instructorData.registration && inst.id !== id
-	)) {
-		throw new Error('Matrícula já cadastrada');
+	if (!response.ok) {
+		await handleErrorResponse(response);
 	}
 
-	MOCK_INSTRUCTORS[index] = { ...MOCK_INSTRUCTORS[index], ...instructorData };
-	return MOCK_INSTRUCTORS[index];
+	return await response.json();
 };
 
 export const deleteInstructor = async (id) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-	const index = MOCK_INSTRUCTORS.findIndex(i => i.id === id);
-	if (index === -1) throw new Error('Instrutor não encontrado');
+	const response = await fetch(`${API_URL}/instructors/${id}`, {
+		method: 'DELETE',
+		headers: getAuthHeader()
+	});
 
-	MOCK_INSTRUCTORS.splice(index, 1);
+	if (!response.ok) {
+		await handleErrorResponse(response);
+	}
+};
+
+export const searchInstructors = async (query) => {
+	if (!query || query.length < 2) return [];
+
+	const response = await fetch(`${API_URL}/instructors/search?q=${encodeURIComponent(query)}`, {
+		headers: getAuthHeader()
+	});
+
+	if (!response.ok) {
+		await handleErrorResponse(response);
+	}
+
+	return await response.json();
+};
+
+export const toggleInstructorStatus = async (id) => {
+	const response = await fetch(`${API_URL}/instructors/${id}/toggle-status`, {
+		method: 'PATCH',
+		headers: getAuthHeader()
+	});
+
+	if (!response.ok) {
+		await handleErrorResponse(response);
+	}
+
+	return await response.json();
 };
