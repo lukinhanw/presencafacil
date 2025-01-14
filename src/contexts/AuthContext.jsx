@@ -13,21 +13,24 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
 	const [user, setUser] = useState(null);
+	const [token, setToken] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		const storedUser = getStoredAuth();
-		if (storedUser) {
-			setUser(storedUser);
+		const storedAuth = getStoredAuth();
+		if (storedAuth) {
+			setUser(storedAuth.user);
+			setToken(storedAuth.token);
 		}
 		setLoading(false);
 	}, []);
 
 	const login = async (credentials) => {
 		try {
-			const userData = await loginService(credentials);
-			setUser(userData);
+			const result = await loginService(credentials);
+			setUser(result);
+			setToken(result.token);
 			navigate('/');
 			return true;
 		} catch (error) {
@@ -37,6 +40,7 @@ export const AuthProvider = ({ children }) => {
 
 	const logout = () => {
 		setUser(null);
+		setToken(null);
 		removeStoredAuth();
 		navigate('/login');
 	};
@@ -49,7 +53,7 @@ export const AuthProvider = ({ children }) => {
 		try {
 			const updatedUser = { ...user, ...newData };
 			setUser(updatedUser);
-			setStoredAuth(updatedUser);
+			setStoredAuth({ user: updatedUser, token });
 		} catch (error) {
 			console.error('Erro ao atualizar dados do usuário:', error);
 		}
@@ -62,6 +66,7 @@ export const AuthProvider = ({ children }) => {
 	return (
 		<AuthContext.Provider value={{
 			user,
+			token,
 			login,
 			logout,
 			hasRole,
