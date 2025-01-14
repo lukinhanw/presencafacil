@@ -107,7 +107,7 @@ export default function Dashboard() {
 
 	return (
 		<div className="container mx-auto px-4 h-full flex flex-col">
-			<motion.div 
+			<motion.div
 				className="text-center mb-8 mt-10"
 				initial="hidden"
 				animate="visible"
@@ -122,7 +122,7 @@ export default function Dashboard() {
 				</p>
 			</motion.div>
 
-			<motion.div 
+			<motion.div
 				className="mb-8"
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
@@ -138,15 +138,15 @@ export default function Dashboard() {
 				<div className="absolute inset-0 flex items-center">
 					<div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
 				</div>
-				<motion.div 
+				<motion.div
 					className="relative flex justify-center"
 					initial={{ scale: 0 }}
 					animate={{ scale: 1 }}
-					transition={{ 
+					transition={{
 						type: "spring",
 						stiffness: 260,
 						damping: 20,
-						delay: 0.5 
+						delay: 0.5
 					}}
 				>
 					<div className="bg-[var(--background-start)] px-4">
@@ -155,8 +155,13 @@ export default function Dashboard() {
 				</motion.div>
 			</div>
 
-			<div className="flex-1 bg-white dark:bg-gray-900 rounded-lg p-4 shadow-lg px-6 py-10">
-				<motion.h2 
+			<motion.div
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.6 }}
+				className="flex-1 bg-white dark:bg-gray-900 rounded-lg p-4 shadow-lg px-6 py-10"
+			>
+				<motion.h2
 					className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 px-4"
 					initial={{ opacity: 0, x: -20 }}
 					animate={{ opacity: 1, x: 0 }}
@@ -164,7 +169,7 @@ export default function Dashboard() {
 				>
 					Menu Principal
 				</motion.h2>
-				<motion.div 
+				<motion.div
 					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-7xl mx-auto"
 					variants={containerVariants}
 					initial="hidden"
@@ -174,7 +179,7 @@ export default function Dashboard() {
 						<motion.button
 							key={item.path}
 							variants={itemVariants}
-							whileHover={{ 
+							whileHover={{
 								scale: 1.02,
 								transition: { type: "spring", stiffness: 400, damping: 10 }
 							}}
@@ -184,7 +189,7 @@ export default function Dashboard() {
 						>
 							{/* Gradient Background com animação */}
 							<div className={`absolute inset-0 opacity-30 bg-gradient-to-br ${item.bgColor} group-hover:opacity-40 transition-opacity duration-300`} />
-							
+
 							{/* Content */}
 							<div className="relative z-10 p-6">
 								<div className="flex items-start space-x-4">
@@ -200,7 +205,7 @@ export default function Dashboard() {
 										</p>
 									</div>
 								</div>
-								
+
 								{/* Hover Effect Line com gradiente animado */}
 								<div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
 							</div>
@@ -216,7 +221,7 @@ export default function Dashboard() {
 						</motion.button>
 					))}
 				</motion.div>
-			</div>
+			</motion.div>
 		</div>
 	);
 }

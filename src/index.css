@@ -4,8 +4,8 @@
 
 @layer base {
 	:root {
-		--background-start: #e0e0e0;
-		--background-end: #e0e0e0;
+		--background-start: #eeeeee;
+		--background-end: #eeeeee ;
 		--glass-bg: rgba(255, 255, 255, 1);
 		--glass-bg-alt: rgba(255, 255, 255, 1);
 		--glass-border: rgba(148, 163, 184, 0.5);

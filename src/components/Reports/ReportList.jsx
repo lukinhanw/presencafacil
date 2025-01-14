@@ -291,7 +291,7 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-600 dark:text-gray-400">
-                            Ver em:
+                            Visualização:
                         </span>
                         <button
                             onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
