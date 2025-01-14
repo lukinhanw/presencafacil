@@ -5,7 +5,7 @@ import Modal from '../components/General/modal';
 import Alert from '../components/General/alert';
 import ClassForm from '../components/Class/classForm';
 import ClassFilters from '../components/Class/classFilters';
-import { getClasses, createClass, deleteClass, CLASS_TYPES } from '../services/classService';
+import { getClasses, createClass, deleteClass } from '../services/classService';
 import { getTrainings } from '../services/trainingService';
 import { getInstructors } from '../services/instructorService';
 import { useAuth } from '../contexts/AuthContext';
@@ -447,20 +447,20 @@ export default function Classes() {
 // Funções auxiliares para estilização
 const getStatusColor = (type) => {
 	const colors = {
-		Portfolio: 'bg-purple-500',
-		External: 'bg-blue-500',
+		Portfólio: 'bg-purple-500',
+		Externo: 'bg-blue-500',
 		DDS: 'bg-green-500',
-		Others: 'bg-orange-500'
+		Outros: 'bg-orange-500'
 	};
 	return colors[type] || 'bg-gray-500';
 };
 
 const getTypeStyle = (type) => {
 	const styles = {
-		Portfolio: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-300 dark:border-purple-500/20',
-		External: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/20',
+		Portfólio: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-300 dark:border-purple-500/20',
+		Externo: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/20',
 		DDS: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-300 dark:border-green-500/20',
-		Others: 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-300 dark:border-orange-500/20'
+		Outros: 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-300 dark:border-orange-500/20'
 	};
 	return `type-badge ${styles[type] || 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-500/10 dark:text-gray-300 dark:border-gray-500/20'}`;
 };

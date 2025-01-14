@@ -6,6 +6,8 @@ const authRoutes = require('./routes/auth.routes');
 const trainingRoutes = require('./routes/training.routes');
 const employeeRoutes = require('./routes/employee.routes');
 const instructorRoutes = require('./routes/instructor.routes');
+const classRoutes = require('./routes/class.routes');
+
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -24,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/trainings', trainingRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/instructors', instructorRoutes);
+app.use('/api/classes', classRoutes);
 
 // Middleware de tratamento de erros
 app.use(errorHandler);

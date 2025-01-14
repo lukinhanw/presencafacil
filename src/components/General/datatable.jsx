@@ -32,7 +32,7 @@ export default function DataTable({
 			<div className="overflow-x-auto">
 				<table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
 					<thead>
-						<tr className="bg-gray-50/50 dark:bg-gray-800/50">
+						<tr className="bg-gray-200 dark:bg-gray-700">
 							{columns.map((column) => (
 								<th
 									key={column.accessorKey}

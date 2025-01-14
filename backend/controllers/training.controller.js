@@ -24,10 +24,7 @@ class TrainingController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors: errors.array() });
             }
-
-            console.log('Dados recebidos:', req.body);
             const training = await trainingService.createTraining(req.body);
-            console.log('Treinamento criado:', training);
             res.status(201).json(training);
         } catch (error) {
             console.error('Erro ao criar treinamento:', error);
@@ -41,10 +38,7 @@ class TrainingController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors: errors.array() });
             }
-
-            console.log('Dados de atualização:', req.body);
             const training = await trainingService.updateTraining(req.params.id, req.body);
-            console.log('Treinamento atualizado:', training);
             res.json(training);
         } catch (error) {
             console.error('Erro ao atualizar treinamento:', error);
@@ -54,9 +48,7 @@ class TrainingController {
 
     async deleteTraining(req, res, next) {
         try {
-            console.log('Deletando treinamento:', req.params.id);
             await trainingService.deleteTraining(req.params.id);
-            console.log('Treinamento deletado com sucesso');
             res.status(204).send();
         } catch (error) {
             console.error('Erro ao deletar treinamento:', error);
