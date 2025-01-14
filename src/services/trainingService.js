@@ -1,26 +1,4 @@
-// Mock data for trainings
-const MOCK_TRAININGS = [
-	{
-		id: 1,
-		name: 'Desenvolvimento React',
-		code: 'TR-001',
-		duration: '40:00',
-		provider: 'Udemy',
-		content: 'Fundamentos do React, Hooks, Context API, Redux',
-		classification: 'Tecnologia',
-		objective: 'Capacitar desenvolvedores em React.js'
-	},
-	{
-		id: 2,
-		name: 'Gestão Ágil',
-		code: 'TR-002',
-		duration: '20:00',
-		provider: 'Alura',
-		content: 'Scrum, Kanban, Lean',
-		classification: 'Metodologia',
-		objective: 'Implementar metodologias ágeis'
-	}
-];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const PROVIDERS = [
 	'Udemy',
@@ -38,57 +16,109 @@ export const CLASSIFICATIONS = [
 	'Compliance'
 ];
 
+const getAuthHeader = () => {
+	const auth = JSON.parse(localStorage.getItem('@presenca:auth'));
+	return {
+		'Authorization': `Bearer ${auth.token}`,
+		'Content-Type': 'application/json'
+	};
+};
+
+const handleResponse = async (response) => {
+	const data = await response.json();
+	
+	if (!response.ok) {
+		// Se houver erros de validação
+		if (data.errors && Array.isArray(data.errors)) {
+			throw new Error(data.errors.map(err => err.message || err).join(', '));
+		}
+		
+		// Se houver uma mensagem de erro específica
+		if (data.message) {
+			throw new Error(data.message);
+		}
+		
+		// Se houver um erro específico
+		if (data.error) {
+			throw new Error(data.error);
+		}
+		
+		throw new Error('Ocorreu um erro na operação');
+	}
+	
+	return data;
+};
+
 export const getTrainings = async (filters = {}) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
+	try {
+		const params = new URLSearchParams();
 
-	let filteredTrainings = [...MOCK_TRAININGS];
+		if (filters.search) {
+			params.append('search', filters.search);
+		}
 
-	if (filters.search) {
-		const searchLower = filters.search.toLowerCase();
-		filteredTrainings = filteredTrainings.filter(training =>
-			training.name.toLowerCase().includes(searchLower) ||
-			training.code.toLowerCase().includes(searchLower)
-		);
+		if (filters.providers?.length > 0) {
+			params.append('providers', JSON.stringify(filters.providers));
+		}
+
+		if (filters.classifications?.length > 0) {
+			params.append('classifications', JSON.stringify(filters.classifications));
+		}
+
+		const response = await fetch(`${API_URL}/trainings?${params}`, {
+			headers: getAuthHeader()
+		});
+
+		return await handleResponse(response);
+	} catch (error) {
+		console.error('Erro ao buscar treinamentos:', error);
+		throw error;
 	}
-
-	if (filters.providers?.length > 0) {
-		filteredTrainings = filteredTrainings.filter(training =>
-			filters.providers.includes(training.provider)
-		);
-	}
-
-	if (filters.classifications?.length > 0) {
-		filteredTrainings = filteredTrainings.filter(training =>
-			filters.classifications.includes(training.classification)
-		);
-	}
-
-	return filteredTrainings;
 };
 
 export const createTraining = async (trainingData) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-	const newTraining = {
-		id: MOCK_TRAININGS.length + 1,
-		...trainingData
-	};
-	MOCK_TRAININGS.push(newTraining);
-	return newTraining;
+	try {
+		const response = await fetch(`${API_URL}/trainings`, {
+			method: 'POST',
+			headers: getAuthHeader(),
+			body: JSON.stringify(trainingData)
+		});
+
+		return await handleResponse(response);
+	} catch (error) {
+		console.error('Erro ao criar treinamento:', error);
+		throw error;
+	}
 };
 
 export const updateTraining = async (id, trainingData) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-	const index = MOCK_TRAININGS.findIndex(t => t.id === id);
-	if (index === -1) throw new Error('Treinamento não encontrado');
+	try {
+		const response = await fetch(`${API_URL}/trainings/${id}`, {
+			method: 'PUT',
+			headers: getAuthHeader(),
+			body: JSON.stringify(trainingData)
+		});
 
-	MOCK_TRAININGS[index] = { ...MOCK_TRAININGS[index], ...trainingData };
-	return MOCK_TRAININGS[index];
+		return await handleResponse(response);
+	} catch (error) {
+		console.error('Erro ao atualizar treinamento:', error);
+		throw error;
+	}
 };
 
 export const deleteTraining = async (id) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-	const index = MOCK_TRAININGS.findIndex(t => t.id === id);
-	if (index === -1) throw new Error('Treinamento não encontrado');
+	try {
+		const response = await fetch(`${API_URL}/trainings/${id}`, {
+			method: 'DELETE',
+			headers: getAuthHeader()
+		});
 
-	MOCK_TRAININGS.splice(index, 1);
+		if (!response.ok) {
+			const data = await response.json();
+			throw new Error(data.message || data.error || 'Erro ao excluir treinamento');
+		}
+	} catch (error) {
+		console.error('Erro ao excluir treinamento:', error);
+		throw error;
+	}
 };

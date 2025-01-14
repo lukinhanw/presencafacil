@@ -33,7 +33,7 @@ export default function Employees() {
 			});
 			setEmployees(data);
 		} catch (error) {
-			showToast.error('Erro', 'Não foi possível carregar os colaboradores');
+			showToast.error('Erro', error.message || 'Não foi possível carregar os colaboradores');
 		} finally {
 			setIsLoading(false);
 		}

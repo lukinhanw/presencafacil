@@ -1,51 +1,38 @@
-// Mock data for employees
-const MOCK_EMPLOYEES = [
-	{
-		id: 1,
-		name: 'João Silva',
-		registration: '001',
-		unit: 'Matriz',
-		position: 'Desenvolvedor',
-		cardNumber: '81722cf9182738',
-		lastCardRead: null
-	},
-	{
-		id: 2,
-		name: 'Maria Santos',
-		registration: '002',
-		unit: 'Filial SP',
-		position: 'Analista',
-		cardNumber: '92831ab7463829',
-		lastCardRead: null
-	},
-	{
-		id: 3,
-		name: 'Pedro Oliveira',
-		registration: '003',
-		unit: 'Filial RJ',
-		position: 'Vendedor',
-		cardNumber: '37281ef9182734',
-		lastCardRead: null
-	},
-	{
-		id: 4,
-		name: 'Ana Beatriz',
-		registration: '004',
-		unit: 'Matriz',
-		position: 'Gerente',
-		cardNumber: '12345cd8901234',
-		lastCardRead: null
-	},
-	{
-		id: 5,
-		name: 'Carlos Eduardo',
-		registration: '005',
-		unit: 'Filial SP',
-		position: 'Coordenador',
-		cardNumber: '56789ef0123456',
-		lastCardRead: null
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const TOKEN_KEY = 'token';
+
+const getAuthHeader = () => {
+	const token = localStorage.getItem(TOKEN_KEY);
+	if (!token) {
+		throw new Error('Usuário não autenticado');
 	}
-];
+	return {
+		'Authorization': `Bearer ${token}`,
+		'Content-Type': 'application/json'
+	};
+};
+
+const handleErrorResponse = async (response) => {
+	const data = await response.json();
+	
+	// Caso 1: Erros de validação do express-validator
+	if (data.errors && Array.isArray(data.errors)) {
+		throw new Error(data.errors.map(err => err.msg).join(', '));
+	}
+	
+	// Caso 2: Erro específico com mensagem e error
+	if (data.error) {
+		throw new Error(data.error);
+	}
+	
+	// Caso 3: Apenas mensagem de erro
+	if (data.message) {
+		throw new Error(data.message);
+	}
+	
+	// Caso padrão
+	throw new Error('Erro na operação');
+};
 
 export const UNITS = [
 	'Matriz',
@@ -67,116 +54,104 @@ export const POSITIONS = [
 ];
 
 export const getEmployees = async (filters = {}) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-
-	let filteredEmployees = [...MOCK_EMPLOYEES];
-
+	const params = new URLSearchParams();
+	
 	if (filters.search) {
-		const searchLower = filters.search.toLowerCase();
-		filteredEmployees = filteredEmployees.filter(employee =>
-			employee.name.toLowerCase().includes(searchLower) ||
-			employee.registration.includes(filters.search)
-		);
+		params.append('search', filters.search);
 	}
-
+	
 	if (filters.units?.length > 0) {
-		filteredEmployees = filteredEmployees.filter(employee =>
-			filters.units.includes(employee.unit)
-		);
+		params.append('units', filters.units.join(','));
 	}
-
+	
 	if (filters.positions?.length > 0) {
-		filteredEmployees = filteredEmployees.filter(employee =>
-			filters.positions.includes(employee.position)
-		);
+		params.append('positions', filters.positions.join(','));
 	}
 
-	return filteredEmployees;
+	const response = await fetch(`${API_URL}/employees?${params}`, {
+		headers: getAuthHeader()
+	});
+
+	if (!response.ok) {
+		await handleErrorResponse(response);
+	}
+
+	return await response.json();
 };
 
-export const createEmployee = async (employeeData) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
+export const createEmployee = async (data) => {
+	const response = await fetch(`${API_URL}/employees`, {
+		method: 'POST',
+		headers: getAuthHeader(),
+		body: JSON.stringify(data)
+	});
 
-	if (MOCK_EMPLOYEES.some(emp => emp.registration === employeeData.registration)) {
-		throw new Error('Matrícula já cadastrada');
+	if (!response.ok) {
+		await handleErrorResponse(response);
 	}
 
-	if (employeeData.cardNumber && MOCK_EMPLOYEES.some(emp => emp.cardNumber === employeeData.cardNumber)) {
-		throw new Error('Número do cartão já cadastrado');
-	}
-
-	const newEmployee = {
-		id: MOCK_EMPLOYEES.length + 1,
-		...employeeData,
-		lastCardRead: null
-	};
-	MOCK_EMPLOYEES.push(newEmployee);
-	return newEmployee;
+	return await response.json();
 };
 
-export const updateEmployee = async (id, employeeData) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
+export const updateEmployee = async (id, data) => {
+	const response = await fetch(`${API_URL}/employees/${id}`, {
+		method: 'PUT',
+		headers: getAuthHeader(),
+		body: JSON.stringify(data)
+	});
 
-	const index = MOCK_EMPLOYEES.findIndex(e => e.id === id);
-	if (index === -1) throw new Error('Colaborador não encontrado');
-
-	if (MOCK_EMPLOYEES.some(emp =>
-		emp.registration === employeeData.registration && emp.id !== id
-	)) {
-		throw new Error('Matrícula já cadastrada');
+	if (!response.ok) {
+		await handleErrorResponse(response);
 	}
 
-	if (employeeData.cardNumber && MOCK_EMPLOYEES.some(emp =>
-		emp.cardNumber === employeeData.cardNumber && emp.id !== id
-	)) {
-		throw new Error('Número do cartão já cadastrado');
-	}
-
-	MOCK_EMPLOYEES[index] = { ...MOCK_EMPLOYEES[index], ...employeeData };
-	return MOCK_EMPLOYEES[index];
+	return await response.json();
 };
 
 export const deleteEmployee = async (id) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-	const index = MOCK_EMPLOYEES.findIndex(e => e.id === id);
-	if (index === -1) throw new Error('Colaborador não encontrado');
+	const response = await fetch(`${API_URL}/employees/${id}`, {
+		method: 'DELETE',
+		headers: getAuthHeader()
+	});
 
-	MOCK_EMPLOYEES.splice(index, 1);
+	if (!response.ok) {
+		await handleErrorResponse(response);
+	}
 };
 
 export const searchEmployees = async (query) => {
-	await new Promise(resolve => setTimeout(resolve, 300));
-
 	if (!query || query.length < 2) return [];
 
-	const searchLower = query.toLowerCase();
-	return MOCK_EMPLOYEES.filter(emp =>
-		emp.name.toLowerCase().includes(searchLower) ||
-		emp.registration.toLowerCase().includes(searchLower)
-	).slice(0, 10);
-};
+	const response = await fetch(`${API_URL}/employees/search?q=${encodeURIComponent(query)}`, {
+		headers: getAuthHeader()
+	});
 
-export const getEmployeeById = async (id) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-	const employee = MOCK_EMPLOYEES.find(emp => emp.id === parseInt(id));
-	if (!employee) throw new Error('Funcionário não encontrado');
-	return employee;
+	if (!response.ok) {
+		await handleErrorResponse(response);
+	}
+
+	return await response.json();
 };
 
 export const getEmployeeByRegistration = async (registration) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-	const employee = MOCK_EMPLOYEES.find(emp => emp.registration === registration);
-	if (!employee) throw new Error('Funcionário não encontrado');
-	return employee;
+	const response = await fetch(`${API_URL}/employees/registration/${registration}`, {
+		headers: getAuthHeader()
+	});
+
+	if (!response.ok) {
+		await handleErrorResponse(response);
+	}
+
+	return await response.json();
 };
 
 export const getEmployeeByCardNumber = async (cardNumber) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-	const employee = MOCK_EMPLOYEES.find(emp => emp.cardNumber === cardNumber);
-	if (!employee) throw new Error('Cartão não cadastrado');
+	const response = await fetch(`${API_URL}/employees/card/${encodeURIComponent(cardNumber)}`, {
+		headers: getAuthHeader()
+	});
 
-	// Update last card read timestamp
-	employee.lastCardRead = new Date().toISOString();
+	if (!response.ok) {
+		await handleErrorResponse(response);
+	}
 
-	return employee;
+	return await response.json();
 };

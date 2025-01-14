@@ -28,9 +28,10 @@ export const AuthProvider = ({ children }) => {
 
 	const login = async (credentials) => {
 		try {
-			const result = await loginService(credentials);
-			setUser(result);
-			setToken(result.token);
+			const userData = await loginService(credentials);
+			const storedAuth = getStoredAuth();
+			setUser(storedAuth.user);
+			setToken(storedAuth.token);
 			navigate('/');
 			return true;
 		} catch (error) {
@@ -70,7 +71,8 @@ export const AuthProvider = ({ children }) => {
 			login,
 			logout,
 			hasRole,
-			updateUserData
+			updateUserData,
+			isAuthenticated: !!token
 		}}>
 			{children}
 		</AuthContext.Provider>

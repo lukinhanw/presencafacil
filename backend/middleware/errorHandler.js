@@ -1,13 +1,21 @@
-const { ValidationError, UniqueConstraintError } = require('sequelize');
+const { ValidationError, UniqueConstraintError, DatabaseError } = require('sequelize');
 
 const errorHandler = (err, req, res, next) => {
-    console.error(err.stack);
+    console.error('Erro detalhado:', {
+        message: err.message,
+        stack: err.stack,
+        name: err.name,
+        code: err.code
+    });
 
     // Erros de validação do Sequelize
     if (err instanceof ValidationError) {
         return res.status(400).json({
             message: 'Erro de validação',
-            errors: err.errors.map(error => error.message)
+            errors: err.errors.map(error => ({
+                field: error.path,
+                message: error.message
+            }))
         });
     }
 
@@ -19,6 +27,14 @@ const errorHandler = (err, req, res, next) => {
         });
     }
 
+    // Erros de banco de dados
+    if (err instanceof DatabaseError) {
+        return res.status(500).json({
+            message: 'Erro no banco de dados',
+            error: err.message
+        });
+    }
+
     // Erros de autenticação
     if (err.message === 'Credenciais inválidas') {
         return res.status(401).json({
@@ -26,9 +42,17 @@ const errorHandler = (err, req, res, next) => {
         });
     }
 
+    // Erros personalizados
+    if (err.statusCode) {
+        return res.status(err.statusCode).json({
+            message: err.message
+        });
+    }
+
     // Erro padrão
     res.status(500).json({
-        message: 'Erro interno do servidor'
+        message: 'Erro interno do servidor',
+        error: err.message
     });
 };
 

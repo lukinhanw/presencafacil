@@ -36,13 +36,28 @@ const User = sequelize.define('User', {
         type: DataTypes.JSON,
         allowNull: false,
         defaultValue: ['INSTRUCTOR_ROLE'],
+        get() {
+            const value = this.getDataValue('roles');
+            if (!value) return ['INSTRUCTOR_ROLE'];
+            return Array.isArray(value) ? value : 
+                   (typeof value === 'string' ? JSON.parse(value) : [value]).filter(Boolean);
+        },
+        set(value) {
+            const roles = Array.isArray(value) ? value : 
+                         (typeof value === 'string' ? JSON.parse(value) : [value]).filter(Boolean);
+            this.setDataValue('roles', roles);
+        },
         validate: {
             isValidRole(value) {
-                if (!Array.isArray(value)) {
+                const roles = Array.isArray(value) ? value : 
+                            (typeof value === 'string' ? JSON.parse(value) : [value]).filter(Boolean);
+                
+                if (!Array.isArray(roles)) {
                     throw new Error('Roles deve ser um array');
                 }
+                
                 const validRoles = ['ADMIN_ROLE', 'INSTRUCTOR_ROLE'];
-                if (!value.every(role => validRoles.includes(role))) {
+                if (!roles.every(role => validRoles.includes(role))) {
                     throw new Error('Role inválida');
                 }
             }
@@ -88,7 +103,7 @@ const User = sequelize.define('User', {
 });
 
 // Método para comparar senhas
-User.prototype.comparePassword = async function (candidatePassword) {
+User.prototype.comparePassword = async function(candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };
 
