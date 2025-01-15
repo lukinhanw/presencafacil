@@ -30,6 +30,8 @@ const getAuthHeader = () => {
 };
 
 export const getEmployees = async (filters = {}) => {
+	await new Promise(resolve => setTimeout(resolve, 500)); // Delay artificial
+	
 	const queryParams = new URLSearchParams();
 	
 	if (filters.search) queryParams.append('search', filters.search);
@@ -100,6 +102,19 @@ export const getUnits = async () => {
 	if (!response.ok) {
 		const error = await response.json();
 		throw new Error(error.error || 'Erro ao buscar unidades');
+	}
+
+	return response.json();
+};
+
+export const getPositions = async () => {
+	const response = await fetch(`${API_URL}/employees/positions`, {
+		headers: getAuthHeader()
+	});
+
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || 'Erro ao buscar cargos');
 	}
 
 	return response.json();

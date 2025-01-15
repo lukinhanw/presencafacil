@@ -1,38 +1,44 @@
 import { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { useTheme } from '../../contexts/ThemeContext';
-import { POSITIONS, getUnits } from '../../services/employeeService';
+import { getUnits, getPositions } from '../../services/employeeService';
 import { selectStyles } from '../Shared/selectStyles';
 import { selectStylesDark } from '../Shared/selectStylesDark';
 import { showToast } from '../General/toast';
-
-const positionOptions = POSITIONS.map(position => ({
-    value: position,
-    label: position
-}));
 
 export default function EmployeeFilters({ filters, onFilterChange }) {
     const { isDark } = useTheme();
     const stylesSelect = isDark ? selectStylesDark : selectStyles;
     const [unitOptions, setUnitOptions] = useState([]);
+    const [positionOptions, setPositionOptions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchUnits = async () => {
+        const fetchData = async () => {
             try {
-                const units = await getUnits();
+                setIsLoading(true);
+                const [units, positions] = await Promise.all([
+                    getUnits(),
+                    getPositions()
+                ]);
+
                 setUnitOptions(units.map(unit => ({
                     value: unit,
                     label: unit
                 })));
+
+                setPositionOptions(positions.map(position => ({
+                    value: position,
+                    label: position
+                })));
             } catch (error) {
-                showToast.error('Erro', 'Não foi possível carregar as unidades');
+                showToast.error('Erro', 'Não foi possível carregar os dados dos filtros');
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchUnits();
+        fetchData();
     }, []);
 
     const handleFilterChange = (field, value) => {
@@ -69,6 +75,7 @@ export default function EmployeeFilters({ filters, onFilterChange }) {
                         placeholder="Selecione a unidade"
                         classNamePrefix="select"
                         isClearable
+                        isLoading={isLoading}
                     />
                 </div>
 
@@ -86,6 +93,7 @@ export default function EmployeeFilters({ filters, onFilterChange }) {
                         placeholder="Selecione o cargo"
                         classNamePrefix="select"
                         isClearable
+                        isLoading={isLoading}
                     />
                 </div>
             </div>

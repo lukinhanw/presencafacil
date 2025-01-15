@@ -17,6 +17,7 @@ $app->post('/api/login', [AuthController::class, 'login']);
 $app->group('/api/employees', function ($app) {
     $app->get('', [EmployeeController::class, 'getAll']);
     $app->get('/units', [EmployeeController::class, 'getUnits']);
+    $app->get('/positions', [EmployeeController::class, 'getPositions']);
     $app->get('/{id}', [EmployeeController::class, 'getOne']);
     $app->post('', [EmployeeController::class, 'create']);
     $app->put('/{id}', [EmployeeController::class, 'update']);

@@ -59,6 +59,7 @@ export default function Employees() {
 	useEffect(() => {
 		if (!employees.length) return;
 
+		setIsLoading(true);
 		let filtered = [...employees];
 
 		// Aplica filtro de busca
@@ -77,6 +78,7 @@ export default function Employees() {
 			pages: Math.ceil(filtered.length / prev.limit),
 			page: 1
 		}));
+		setIsLoading(false);
 	}, [filters.search, employees]);
 
 	// Função para pegar os itens da página atual

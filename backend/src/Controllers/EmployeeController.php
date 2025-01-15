@@ -5,6 +5,7 @@ namespace App\Controllers;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Models\Employee;
+use Exception;
 
 class EmployeeController {
     private Employee $employeeModel;
@@ -161,5 +162,18 @@ class EmployeeController {
         
         $response->getBody()->write(json_encode($units));
         return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    public function getPositions(Request $request, Response $response): Response {
+        try {
+            $positions = $this->employeeModel->getPositions();
+            $response->getBody()->write(json_encode($positions));
+            return $response->withHeader('Content-Type', 'application/json');
+        } catch (Exception $e) {
+            $response->getBody()->write(json_encode([
+                'error' => 'Erro ao buscar cargos'
+            ]));
+            return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
+        }
     }
 } 

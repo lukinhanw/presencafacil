@@ -166,4 +166,10 @@ class Employee {
         $stmt->execute(['role' => '%"EMPLOYEE_ROLE"%']);
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
+
+    public function getPositions(): array {
+        $stmt = $this->db->prepare('SELECT DISTINCT position FROM users WHERE roles LIKE :role ORDER BY position');
+        $stmt->execute(['role' => '%"EMPLOYEE_ROLE"%']);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
 } 
