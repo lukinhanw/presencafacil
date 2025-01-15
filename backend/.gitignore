@@ -1,0 +1,44 @@
+# Arquivos e diretórios específicos do PHP
+/vendor/
+composer.phar
+composer.lock
+.env
+.env.backup
+.phpunit.result.cache
+
+# Arquivos de cache e logs
+/storage/*.key
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+.php_cs.cache
+
+# Arquivos de IDE e editores
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+.DS_Store
+
+# Arquivos de dependências e build
+/node_modules/
+/public/hot
+/public/storage
+/public/build
+/public/css
+/public/js
+
+# Arquivos de teste e cobertura
+/coverage/
+.phpunit.cache
+.phpunit.xml
+phpunit.xml
+
+# Outros arquivos do sistema
+Thumbs.db
+*.log
+*.sql
+*.sqlite
