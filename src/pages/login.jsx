@@ -19,7 +19,7 @@ export default function Login() {
 			const destination = location.state?.from?.pathname || '/';
 			navigate(destination);
 		} catch (error) {
-			showToast.error('Erro', error.message);
+			showToast.error('Erro', error.message || 'Ocorreu um erro ao fazer login. Tente novamente.');
 		} finally {
 			setLoading(false);
 		}
@@ -46,6 +46,7 @@ export default function Login() {
 							<input
 								id="email"
 								type="email"
+								required
 								value={credentials.email}
 								onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
 								className="input-field"
@@ -60,6 +61,7 @@ export default function Login() {
 							<input
 								id="password"
 								type="password"
+								required
 								value={credentials.password}
 								onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
 								className="input-field"
@@ -72,7 +74,7 @@ export default function Login() {
 						type="submit"
 						disabled={loading}
 						className="btn-gradient w-full flex justify-center"
-						>
+					>
 						{loading ? 'Carregando...' : 'Entrar'}
 					</button>
 				</form>
