@@ -2,6 +2,7 @@
 
 use App\Controllers\AuthController;
 use App\Controllers\EmployeeController;
+use App\Controllers\InstructorController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -22,4 +23,15 @@ $app->group('/api/employees', function ($app) {
     $app->post('', [EmployeeController::class, 'create']);
     $app->put('/{id}', [EmployeeController::class, 'update']);
     $app->delete('/{id}', [EmployeeController::class, 'delete']);
+});
+
+// Rotas de instrutores
+$app->group('/api/instructors', function ($app) {
+    $app->get('', [InstructorController::class, 'getAll']);
+    $app->get('/units', [InstructorController::class, 'getUnits']);
+    $app->get('/positions', [InstructorController::class, 'getPositions']);
+    $app->get('/{id}', [InstructorController::class, 'getOne']);
+    $app->post('', [InstructorController::class, 'create']);
+    $app->put('/{id}', [InstructorController::class, 'update']);
+    $app->delete('/{id}', [InstructorController::class, 'delete']);
 });
