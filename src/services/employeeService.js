@@ -1,52 +1,6 @@
-// Mock data for employees
-const MOCK_EMPLOYEES = [
-	{
-		id: 1,
-		name: 'João Silva',
-		registration: '001',
-		unit: 'Matriz',
-		position: 'Desenvolvedor',
-		cardNumber: '81722cf9182738',
-		lastCardRead: null
-	},
-	{
-		id: 2,
-		name: 'Maria Santos',
-		registration: '002',
-		unit: 'Filial SP',
-		position: 'Analista',
-		cardNumber: '92831ab7463829',
-		lastCardRead: null
-	},
-	{
-		id: 3,
-		name: 'Pedro Oliveira',
-		registration: '003',
-		unit: 'Filial RJ',
-		position: 'Vendedor',
-		cardNumber: '37281ef9182734',
-		lastCardRead: null
-	},
-	{
-		id: 4,
-		name: 'Ana Beatriz',
-		registration: '004',
-		unit: 'Matriz',
-		position: 'Gerente',
-		cardNumber: '12345cd8901234',
-		lastCardRead: null
-	},
-	{
-		id: 5,
-		name: 'Carlos Eduardo',
-		registration: '005',
-		unit: 'Filial SP',
-		position: 'Coordenador',
-		cardNumber: '56789ef0123456',
-		lastCardRead: null
-	}
-];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
+// Constantes mantidas para os selects do formulário
 export const UNITS = [
 	'Matriz',
 	'Filial SP',
@@ -66,117 +20,147 @@ export const POSITIONS = [
 	'Diretor'
 ];
 
+// Função auxiliar para obter o token
+const getAuthHeader = () => {
+	const auth = JSON.parse(localStorage.getItem('@presenca:auth'));
+	return {
+		'Authorization': `Bearer ${auth?.token}`,
+		'Content-Type': 'application/json'
+	};
+};
+
 export const getEmployees = async (filters = {}) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
+	const queryParams = new URLSearchParams();
+	
+	if (filters.search) queryParams.append('search', filters.search);
+	if (filters.unit) queryParams.append('unit', filters.unit);
+	if (filters.position) queryParams.append('position', filters.position);
+	if (filters.page) queryParams.append('page', filters.page);
+	if (filters.limit) queryParams.append('limit', filters.limit);
 
-	let filteredEmployees = [...MOCK_EMPLOYEES];
+	const response = await fetch(`${API_URL}/employees?${queryParams}`, {
+		headers: getAuthHeader()
+	});
 
-	if (filters.search) {
-		const searchLower = filters.search.toLowerCase();
-		filteredEmployees = filteredEmployees.filter(employee =>
-			employee.name.toLowerCase().includes(searchLower) ||
-			employee.registration.includes(filters.search)
-		);
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || 'Erro ao buscar colaboradores');
 	}
 
-	if (filters.units?.length > 0) {
-		filteredEmployees = filteredEmployees.filter(employee =>
-			filters.units.includes(employee.unit)
-		);
-	}
-
-	if (filters.positions?.length > 0) {
-		filteredEmployees = filteredEmployees.filter(employee =>
-			filters.positions.includes(employee.position)
-		);
-	}
-
-	return filteredEmployees;
+	return response.json();
 };
 
 export const createEmployee = async (employeeData) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
+	const response = await fetch(`${API_URL}/employees`, {
+		method: 'POST',
+		headers: getAuthHeader(),
+		body: JSON.stringify(employeeData)
+	});
 
-	if (MOCK_EMPLOYEES.some(emp => emp.registration === employeeData.registration)) {
-		throw new Error('Matrícula já cadastrada');
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || 'Erro ao criar colaborador');
 	}
 
-	if (employeeData.cardNumber && MOCK_EMPLOYEES.some(emp => emp.cardNumber === employeeData.cardNumber)) {
-		throw new Error('Número do cartão já cadastrado');
-	}
-
-	const newEmployee = {
-		id: MOCK_EMPLOYEES.length + 1,
-		...employeeData,
-		lastCardRead: null
-	};
-	MOCK_EMPLOYEES.push(newEmployee);
-	return newEmployee;
+	return response.json();
 };
 
 export const updateEmployee = async (id, employeeData) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
+	const response = await fetch(`${API_URL}/employees/${id}`, {
+		method: 'PUT',
+		headers: getAuthHeader(),
+		body: JSON.stringify(employeeData)
+	});
 
-	const index = MOCK_EMPLOYEES.findIndex(e => e.id === id);
-	if (index === -1) throw new Error('Colaborador não encontrado');
-
-	if (MOCK_EMPLOYEES.some(emp =>
-		emp.registration === employeeData.registration && emp.id !== id
-	)) {
-		throw new Error('Matrícula já cadastrada');
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || 'Erro ao atualizar colaborador');
 	}
 
-	if (employeeData.cardNumber && MOCK_EMPLOYEES.some(emp =>
-		emp.cardNumber === employeeData.cardNumber && emp.id !== id
-	)) {
-		throw new Error('Número do cartão já cadastrado');
-	}
-
-	MOCK_EMPLOYEES[index] = { ...MOCK_EMPLOYEES[index], ...employeeData };
-	return MOCK_EMPLOYEES[index];
+	return response.json();
 };
 
 export const deleteEmployee = async (id) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-	const index = MOCK_EMPLOYEES.findIndex(e => e.id === id);
-	if (index === -1) throw new Error('Colaborador não encontrado');
+	const response = await fetch(`${API_URL}/employees/${id}`, {
+		method: 'DELETE',
+		headers: getAuthHeader()
+	});
 
-	MOCK_EMPLOYEES.splice(index, 1);
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || 'Erro ao excluir colaborador');
+	}
+};
+
+export const getUnits = async () => {
+	const response = await fetch(`${API_URL}/employees/units`, {
+		headers: getAuthHeader()
+	});
+
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || 'Erro ao buscar unidades');
+	}
+
+	return response.json();
 };
 
 export const searchEmployees = async (query) => {
-	await new Promise(resolve => setTimeout(resolve, 300));
-
 	if (!query || query.length < 2) return [];
 
-	const searchLower = query.toLowerCase();
-	return MOCK_EMPLOYEES.filter(emp =>
-		emp.name.toLowerCase().includes(searchLower) ||
-		emp.registration.toLowerCase().includes(searchLower)
-	).slice(0, 10);
+	const response = await fetch(`${API_URL}/employees?search=${query}&limit=10`, {
+		headers: getAuthHeader()
+	});
+
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || 'Erro ao buscar colaboradores');
+	}
+
+	const { data } = await response.json();
+	return data.map(emp => ({
+		value: emp.id,
+		label: `${emp.name} (${emp.registration})`,
+		employee: emp
+	}));
 };
 
-export const getEmployeeById = async (id) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-	const employee = MOCK_EMPLOYEES.find(emp => emp.id === parseInt(id));
-	if (!employee) throw new Error('Funcionário não encontrado');
+export const getEmployeeByCardNumber = async (cardNumber) => {
+	const response = await fetch(`${API_URL}/employees?search=${cardNumber}`, {
+		headers: getAuthHeader()
+	});
+
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || 'Cartão não cadastrado');
+	}
+
+	const { data } = await response.json();
+	const employee = data.find(emp => emp.cardNumber === cardNumber);
+	
+	if (!employee) {
+		throw new Error('Cartão não cadastrado');
+	}
+
 	return employee;
 };
 
 export const getEmployeeByRegistration = async (registration) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-	const employee = MOCK_EMPLOYEES.find(emp => emp.registration === registration);
-	if (!employee) throw new Error('Funcionário não encontrado');
-	return employee;
-};
+	const response = await fetch(`${API_URL}/employees?search=${registration}`, {
+		headers: getAuthHeader()
+	});
 
-export const getEmployeeByCardNumber = async (cardNumber) => {
-	await new Promise(resolve => setTimeout(resolve, 500));
-	const employee = MOCK_EMPLOYEES.find(emp => emp.cardNumber === cardNumber);
-	if (!employee) throw new Error('Cartão não cadastrado');
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || 'Funcionário não encontrado');
+	}
 
-	// Update last card read timestamp
-	employee.lastCardRead = new Date().toISOString();
+	const { data } = await response.json();
+	const employee = data.find(emp => emp.registration === registration);
+	
+	if (!employee) {
+		throw new Error('Funcionário não encontrado');
+	}
 
 	return employee;
 };

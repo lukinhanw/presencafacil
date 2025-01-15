@@ -15,16 +15,27 @@ class Employee {
     public function findAll(array $filters = []): array {
         $sql = 'SELECT * FROM users WHERE roles LIKE :role';
         $params = ['role' => '%"EMPLOYEE_ROLE"%'];
+        $conditions = [];
 
         // Adiciona filtros se existirem
         if (!empty($filters['search'])) {
-            $sql .= ' AND (name LIKE :search OR email LIKE :search OR registration LIKE :search)';
+            $conditions[] = '(name LIKE :search OR email LIKE :search OR registration LIKE :search)';
             $params['search'] = '%' . $filters['search'] . '%';
         }
 
         if (!empty($filters['unit'])) {
-            $sql .= ' AND unit = :unit';
+            $conditions[] = 'unit = :unit';
             $params['unit'] = $filters['unit'];
+        }
+
+        if (!empty($filters['position'])) {
+            $conditions[] = 'position = :position';
+            $params['position'] = $filters['position'];
+        }
+
+        // Adiciona as condições à query
+        if (!empty($conditions)) {
+            $sql .= ' AND ' . implode(' AND ', $conditions);
         }
 
         // Ordenação
@@ -32,17 +43,16 @@ class Employee {
 
         // Paginação
         if (isset($filters['page']) && isset($filters['limit'])) {
-            $offset = ($filters['page'] - 1) * $filters['limit'];
             $sql .= ' LIMIT :limit OFFSET :offset';
-            $params['limit'] = $filters['limit'];
-            $params['offset'] = $offset;
+            $params['limit'] = (int)$filters['limit'];
+            $params['offset'] = (int)(($filters['page'] - 1) * $filters['limit']);
         }
 
         $stmt = $this->db->prepare($sql);
 
         // Bind dos parâmetros
         foreach ($params as $key => $value) {
-            if ($key === 'limit' || $key === 'offset') {
+            if (in_array($key, ['limit', 'offset'])) {
                 $stmt->bindValue(':' . $key, $value, PDO::PARAM_INT);
             } else {
                 $stmt->bindValue(':' . $key, $value);
@@ -56,15 +66,25 @@ class Employee {
     public function count(array $filters = []): int {
         $sql = 'SELECT COUNT(*) FROM users WHERE roles LIKE :role';
         $params = ['role' => '%"EMPLOYEE_ROLE"%'];
+        $conditions = [];
 
         if (!empty($filters['search'])) {
-            $sql .= ' AND (name LIKE :search OR email LIKE :search OR registration LIKE :search)';
+            $conditions[] = '(name LIKE :search OR email LIKE :search OR registration LIKE :search)';
             $params['search'] = '%' . $filters['search'] . '%';
         }
 
         if (!empty($filters['unit'])) {
-            $sql .= ' AND unit = :unit';
+            $conditions[] = 'unit = :unit';
             $params['unit'] = $filters['unit'];
+        }
+
+        if (!empty($filters['position'])) {
+            $conditions[] = 'position = :position';
+            $params['position'] = $filters['position'];
+        }
+
+        if (!empty($conditions)) {
+            $sql .= ' AND ' . implode(' AND ', $conditions);
         }
 
         $stmt = $this->db->prepare($sql);
@@ -86,8 +106,8 @@ class Employee {
 
     public function create(array $data): int {
         $stmt = $this->db->prepare('
-            INSERT INTO users (name, email, password, roles, position, unit, registration)
-            VALUES (:name, :email, :password, :roles, :position, :unit, :registration)
+            INSERT INTO users (name, email, roles, position, unit, registration)
+            VALUES (:name, :email, :roles, :position, :unit, :registration)
         ');
 
         // Garante que o role de colaborador está presente
@@ -98,8 +118,7 @@ class Employee {
 
         $stmt->execute([
             'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => password_hash($data['password'], PASSWORD_DEFAULT),
+            'email' => $data['email'] ?? null,
             'roles' => json_encode($roles),
             'position' => $data['position'],
             'unit' => $data['unit'],
@@ -121,12 +140,6 @@ class Employee {
                 $fields[] = "$key = :$key";
                 $params[$key] = $value;
             }
-        }
-
-        // Se houver uma nova senha, inclui no update
-        if (!empty($data['password'])) {
-            $fields[] = "password = :password";
-            $params['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
 
         if (empty($fields)) {

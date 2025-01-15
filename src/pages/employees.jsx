@@ -11,11 +11,18 @@ import { showToast } from '../components/General/toast';
 
 export default function Employees() {
 	const [employees, setEmployees] = useState([]);
+	const [filteredEmployees, setFilteredEmployees] = useState([]);
+	const [pagination, setPagination] = useState({
+		total: 0,
+		page: 1,
+		limit: 10,
+		pages: 1
+	});
 	const [isLoading, setIsLoading] = useState(false);
 	const [filters, setFilters] = useState({
 		search: '',
-		units: [],
-		positions: []
+		unit: null,
+		position: null
 	});
 	const [selectedEmployee, setSelectedEmployee] = useState(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,22 +33,58 @@ export default function Employees() {
 	const fetchEmployees = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			const data = await getEmployees({
-				search: filters.search,
-				units: filters.units?.map(u => u.value) || [],
-				positions: filters.positions?.map(p => p.value) || []
+			const response = await getEmployees({
+				unit: filters.unit?.value,
+				position: filters.position?.value
 			});
-			setEmployees(data);
+			setEmployees(response.data);
+			setFilteredEmployees(response.data);
+			setPagination(prev => ({
+				...prev,
+				total: response.data.length,
+				pages: Math.ceil(response.data.length / prev.limit)
+			}));
 		} catch (error) {
 			showToast.error('Erro', 'Não foi possível carregar os colaboradores');
 		} finally {
 			setIsLoading(false);
 		}
-	}, [filters]);
+	}, [filters.unit, filters.position]);
 
 	useEffect(() => {
 		fetchEmployees();
 	}, [fetchEmployees]);
+
+	// Efeito para filtrar localmente os colaboradores
+	useEffect(() => {
+		if (!employees.length) return;
+
+		let filtered = [...employees];
+
+		// Aplica filtro de busca
+		if (filters.search) {
+			const searchTerm = filters.search.toLowerCase();
+			filtered = filtered.filter(employee => 
+				employee.name.toLowerCase().includes(searchTerm) ||
+				employee.registration.toLowerCase().includes(searchTerm)
+			);
+		}
+
+		setFilteredEmployees(filtered);
+		setPagination(prev => ({
+			...prev,
+			total: filtered.length,
+			pages: Math.ceil(filtered.length / prev.limit),
+			page: 1
+		}));
+	}, [filters.search, employees]);
+
+	// Função para pegar os itens da página atual
+	const getCurrentPageItems = useCallback(() => {
+		const start = (pagination.page - 1) * pagination.limit;
+		const end = start + pagination.limit;
+		return filteredEmployees.slice(start, end);
+	}, [filteredEmployees, pagination.page, pagination.limit]);
 
 	const handleOpenModal = (employee = null) => {
 		setSelectedEmployee(employee);
@@ -84,6 +127,10 @@ export default function Employees() {
 		} finally {
 			setIsLoading(false);
 		}
+	};
+
+	const handlePageChange = (newPage) => {
+		setPagination(prev => ({ ...prev, page: newPage }));
 	};
 
 	const columns = [
@@ -145,14 +192,19 @@ export default function Employees() {
 
 			<EmployeeFilters
 				filters={filters}
-				onFilterChange={setFilters}
+				onFilterChange={(newFilters) => {
+					setFilters(newFilters);
+					setPagination(prev => ({ ...prev, page: 1 }));
+				}}
 			/>
 
 			<DataTable
 				columns={columns}
-				data={employees}
+				data={getCurrentPageItems()}
 				actions={actions}
 				isLoading={isLoading}
+				pagination={pagination}
+				onPageChange={handlePageChange}
 			/>
 
 			<Modal

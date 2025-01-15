@@ -21,6 +21,7 @@ class EmployeeController {
         $filters = [
             'search' => $params['search'] ?? '',
             'unit' => $params['unit'] ?? '',
+            'position' => $params['position'] ?? '',
             'page' => isset($params['page']) ? (int)$params['page'] : 1,
             'limit' => isset($params['limit']) ? (int)$params['limit'] : 10
         ];
@@ -72,7 +73,7 @@ class EmployeeController {
         $data = $request->getParsedBody();
 
         // Validação básica
-        $requiredFields = ['name', 'email', 'password', 'position', 'unit', 'registration'];
+        $requiredFields = ['name', 'position', 'unit', 'registration'];
         foreach ($requiredFields as $field) {
             if (empty($data[$field])) {
                 $response->getBody()->write(json_encode([

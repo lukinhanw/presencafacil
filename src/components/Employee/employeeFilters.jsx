@@ -1,13 +1,10 @@
+import { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { useTheme } from '../../contexts/ThemeContext';
-import { UNITS, POSITIONS } from '../../services/employeeService';
+import { POSITIONS, getUnits } from '../../services/employeeService';
 import { selectStyles } from '../Shared/selectStyles';
 import { selectStylesDark } from '../Shared/selectStylesDark';
-
-const unitOptions = UNITS.map(unit => ({
-    value: unit,
-    label: unit
-}));
+import { showToast } from '../General/toast';
 
 const positionOptions = POSITIONS.map(position => ({
     value: position,
@@ -17,6 +14,30 @@ const positionOptions = POSITIONS.map(position => ({
 export default function EmployeeFilters({ filters, onFilterChange }) {
     const { isDark } = useTheme();
     const stylesSelect = isDark ? selectStylesDark : selectStyles;
+    const [unitOptions, setUnitOptions] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchUnits = async () => {
+            try {
+                const units = await getUnits();
+                setUnitOptions(units.map(unit => ({
+                    value: unit,
+                    label: unit
+                })));
+            } catch (error) {
+                showToast.error('Erro', 'Não foi possível carregar as unidades');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUnits();
+    }, []);
+
+    const handleFilterChange = (field, value) => {
+        onFilterChange({ ...filters, [field]: value });
+    };
 
     return (
         <div className="glass-card p-4 space-y-4">
@@ -28,7 +49,7 @@ export default function EmployeeFilters({ filters, onFilterChange }) {
                     <input
                         type="text"
                         value={filters.search}
-                        onChange={(e) => onFilterChange({ ...filters, search: e.target.value })}
+                        onChange={(e) => handleFilterChange('search', e.target.value)}
                         placeholder="Buscar por nome ou matrícula..."
                         className="input-field"
                     />
@@ -36,35 +57,35 @@ export default function EmployeeFilters({ filters, onFilterChange }) {
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Unidades
+                        Unidade
                     </label>
                     <Select
-                        isMulti
+                        value={filters.unit}
+                        onChange={(selected) => handleFilterChange('unit', selected)}
                         options={unitOptions}
-                        value={filters.units}
-                        onChange={(selected) => onFilterChange({ ...filters, units: selected })}
                         styles={stylesSelect}
                         menuPortalTarget={document.body}
                         menuPosition={'fixed'}
-                        placeholder="Selecione as unidades"
+                        placeholder="Selecione a unidade"
                         classNamePrefix="select"
+                        isClearable
                     />
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Cargos
+                        Cargo
                     </label>
                     <Select
-                        isMulti
+                        value={filters.position}
+                        onChange={(selected) => handleFilterChange('position', selected)}
                         options={positionOptions}
-                        value={filters.positions}
-                        onChange={(selected) => onFilterChange({ ...filters, positions: selected })}
                         styles={stylesSelect}
                         menuPortalTarget={document.body}
                         menuPosition={'fixed'}
-                        placeholder="Selecione os cargos"
+                        placeholder="Selecione o cargo"
                         classNamePrefix="select"
+                        isClearable
                     />
                 </div>
             </div>
