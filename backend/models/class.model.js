@@ -2,29 +2,22 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const Instructor = require('./instructor.model');
 
-const Class = sequelize.define('Class', {
+const Class = sequelize.define('class', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
     type: {
-        type: DataTypes.ENUM('Portfolio', 'External', 'DDS', 'Others'),
+        type: DataTypes.STRING,
         allowNull: false,
         validate: {
-            notNull: { msg: 'Tipo é obrigatório' },
-            isIn: {
-                args: [['Portfolio', 'External', 'DDS', 'Others']],
-                msg: 'Tipo inválido'
-            }
+            isIn: [['Portfolio', 'External', 'DDS', 'Others']]
         }
     },
     date_start: {
         type: DataTypes.DATE,
-        allowNull: false,
-        validate: {
-            notNull: { msg: 'Data de início é obrigatória' }
-        }
+        allowNull: false
     },
     date_end: {
         type: DataTypes.DATE,
@@ -32,63 +25,72 @@ const Class = sequelize.define('Class', {
     },
     presents: {
         type: DataTypes.INTEGER,
+        allowNull: false,
         defaultValue: 0
     },
     status: {
-        type: DataTypes.ENUM('scheduled', 'completed', 'cancelled'),
-        defaultValue: 'scheduled'
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'scheduled',
+        validate: {
+            isIn: [['scheduled', 'completed', 'cancelled']]
+        }
+    },
+    unit: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
     name: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notNull: { msg: 'Nome é obrigatório' },
-            notEmpty: { msg: 'Nome é obrigatório' }
-        }
+        allowNull: false
     },
     code: {
         type: DataTypes.STRING(20),
-        allowNull: false
+        allowNull: true
     },
     duration: {
-        type: DataTypes.STRING(10)
+        type: DataTypes.STRING,
+        allowNull: true
     },
     provider: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        allowNull: true
     },
     content: {
-        type: DataTypes.TEXT
+        type: DataTypes.TEXT,
+        allowNull: true
     },
     classification: {
-        type: DataTypes.STRING(100)
+        type: DataTypes.STRING,
+        allowNull: true
     },
     objective: {
-        type: DataTypes.TEXT
-    },
-    unit: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-        validate: {
-            notNull: { msg: 'Unidade é obrigatória' },
-            notEmpty: { msg: 'Unidade é obrigatória' }
-        }
+        type: DataTypes.TEXT,
+        allowNull: true
     },
     instructor_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        validate: {
-            notNull: { msg: 'Instrutor é obrigatório' }
+        references: {
+            model: 'instructors',
+            key: 'id'
         }
+    },
+    invite_token: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    invite_expires_at: {
+        type: DataTypes.DATE,
+        allowNull: true
     }
 }, {
     tableName: 'classes',
+    timestamps: true,
     underscored: true
 });
 
-// Relacionamento com Instrutor
-Class.belongsTo(Instructor, {
-    foreignKey: 'instructor_id',
-    as: 'instructor'
-});
+// Relacionamento com a tabela de instrutores
+Class.belongsTo(Instructor, { foreignKey: 'instructor_id', as: 'instructor' });
 
 module.exports = Class; 

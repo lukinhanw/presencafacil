@@ -149,12 +149,14 @@ export const getClassById = async (id) => {
 };
 
 // Funções temporárias para participantes (serão substituídas posteriormente por endpoints próprios)
-export const removeAttendee = async (classId, attendeeId) => {
+export const removeAttendee = async (classId, registration) => {
 	try {
-		const classData = await getClassById(classId);
-		classData.attendees = classData.attendees.filter(a => a.id !== attendeeId);
-		classData.presents = classData.attendees.length;
-		return await updateClass(classId, classData);
+		const response = await fetch(`${API_URL}/classes/${classId}/attendees/${registration}`, {
+			method: 'DELETE',
+			headers: getAuthHeader()
+		});
+
+		return await handleResponse(response);
 	} catch (error) {
 		console.error('Erro ao remover participante:', error);
 		throw error;
@@ -179,49 +181,73 @@ export const updateEarlyLeave = async (classId, attendeeId) => {
 
 export const registerAttendance = async (classId, attendeeData) => {
 	try {
-		const classData = await getClassById(classId);
-		
-		const existingAttendee = classData.attendees.find(a => a.id === attendeeData.id);
-		if (existingAttendee) {
-			throw new Error('Participante já registrado nesta aula');
-		}
+		const response = await fetch(`${API_URL}/classes/${classId}/attendees`, {
+			method: 'POST',
+			headers: getAuthHeader(),
+			body: JSON.stringify(attendeeData)
+		});
 
-		const newAttendee = {
-			...attendeeData,
-			timestamp: new Date().toISOString(),
-			early_leave: false
-		};
-
-		classData.attendees = [...(classData.attendees || []), newAttendee];
-		classData.presents = classData.attendees.length;
-
-		return await updateClass(classId, classData);
+		return await handleResponse(response);
 	} catch (error) {
 		console.error('Erro ao registrar presença:', error);
 		throw error;
 	}
 };
 
-export const finishClass = async (id) => {
+export const registerEarlyLeave = async (classId, registration) => {
 	try {
-		const classData = await getClassById(id);
-		classData.date_end = new Date().toISOString();
-		classData.status = 'completed';
-		return await updateClass(id, classData);
+		const response = await fetch(`${API_URL}/classes/${classId}/attendees/${registration}/early-leave`, {
+			method: 'POST',
+			headers: getAuthHeader()
+		});
+
+		return await handleResponse(response);
+	} catch (error) {
+		console.error('Erro ao registrar saída antecipada:', error);
+		throw error;
+	}
+};
+
+export const finishClass = async (classId) => {
+	try {
+		const response = await fetch(`${API_URL}/classes/${classId}/finish`, {
+			method: 'POST',
+			headers: getAuthHeader()
+		});
+
+		return await handleResponse(response);
 	} catch (error) {
 		console.error('Erro ao finalizar aula:', error);
 		throw error;
 	}
 };
 
-export const generateInviteLink = async (classId) => {
-	// Implementação temporária
-	return `${window.location.origin}/aulas/${classId}/join/${Math.random().toString(36).substring(2, 15)}`;
+export const generateInviteLink = async (classId, expiresInMinutes = 60) => {
+	try {
+		const response = await fetch(`${API_URL}/classes/${classId}/invite`, {
+			method: 'POST',
+			headers: getAuthHeader(),
+			body: JSON.stringify({ expiresInMinutes })
+		});
+
+		return await handleResponse(response);
+	} catch (error) {
+		console.error('Erro ao gerar link de convite:', error);
+		throw error;
+	}
 };
 
 export const validateInviteToken = async (classId, token) => {
-	// Implementação temporária
-	return true;
+	try {
+		const response = await fetch(`${API_URL}/classes/${classId}/invite/${token}/validate`, {
+			headers: getAuthHeader()
+		});
+
+		return await handleResponse(response);
+	} catch (error) {
+		console.error('Erro ao validar token:', error);
+		throw error;
+	}
 };
 
 export const registerAttendanceByCard = async (classId, cardId) => {

@@ -56,7 +56,7 @@ export default function ClassInstance() {
 		setFinishAlert(false);
 	};
 
-	if (isLoading) {
+	if (isLoading || !classData) {
 		return (
 			<div className="flex items-center justify-center min-h-[400px]">
 				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
@@ -102,7 +102,7 @@ export default function ClassInstance() {
 				<ClassHeader
 					classData={classData}
 					onOpenDetails={() => setIsDetailsModalOpen(true)}
-					onFinishclassName={() => setFinishAlert(true)}
+					onFinishClass={() => setFinishAlert(true)}
 					isFinished={finished}
 				/>
 			</motion.div>
@@ -114,7 +114,7 @@ export default function ClassInstance() {
 				>
 					<AttendanceList
 						classId={id}
-						attendees={classData.attendees}
+						attendees={classData.attendees || []}
 						onUpdate={fetchClassData}
 						isFinished={finished}
 					/>
@@ -124,7 +124,7 @@ export default function ClassInstance() {
 					className="w-full md:w-1/4 space-y-4"
 					variants={itemVariants}
 				>
-					<AttendanceStats attendees={classData.attendees} />
+					<AttendanceStats attendees={classData.attendees || []} />
 
 					{!finished && (
 						<motion.div 

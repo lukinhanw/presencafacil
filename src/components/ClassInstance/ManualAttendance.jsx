@@ -46,6 +46,8 @@ export default function ManualAttendance({ classId, onSuccess }) {
 				id: selectedEmployee.employee.id,
 				name: selectedEmployee.employee.name,
 				registration: selectedEmployee.employee.registration,
+				unit: selectedEmployee.employee.unit,
+				position: selectedEmployee.employee.position,
 				photo: photoData,
 				type: 'Manual'
 			});
@@ -55,6 +57,7 @@ export default function ManualAttendance({ classId, onSuccess }) {
 			showToast.error('Erro', error.message || 'Não foi possível registrar a presença');
 		} finally {
 			setIsLoading(false);
+			setShowCamera(false);
 		}
 	};
 

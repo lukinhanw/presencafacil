@@ -4,6 +4,8 @@ import { removeAttendee, updateEarlyLeave } from '../../services/classService';
 import Alert from '../General/alert';
 import { showToast } from '../General/toast';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function AttendanceList({ classId, attendees, onUpdate, isFinished }) {
 	const [deleteAlert, setDeleteAlert] = useState({ isOpen: false, attendeeId: null });
 	const [earlyLeaveAlert, setEarlyLeaveAlert] = useState({ isOpen: false, attendeeId: null });
@@ -43,6 +45,9 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 					<thead>
 						<tr className="bg-gray-100 dark:bg-gray-700">
 							<th className="px-6 py-4 text-center text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/6">
+								Foto
+							</th>
+							<th className="px-6 py-4 text-center text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/6">
 								Matrícula
 							</th>
 							<th className="px-6 py-4 text-center text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/3">
@@ -64,6 +69,21 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 					<tbody className="divide-y divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800">
 						{attendees.map((attendee) => (
 							<tr key={attendee.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+								<td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+									{attendee.photo ? (
+										<img
+											src={`${API_URL}/uploads/${attendee.photo}`}
+											alt={`Foto de ${attendee.name}`}
+											className="w-12 h-12 rounded-full object-cover mx-auto"
+										/>
+									) : (
+										<div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 mx-auto flex items-center justify-center">
+											<span className="text-gray-500 dark:text-gray-400 text-xl">
+												{attendee.name.charAt(0)}
+											</span>
+										</div>
+									)}
+								</td>
 								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-800 dark:text-gray-100">
 									{attendee.registration}
 								</td>

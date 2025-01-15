@@ -1,6 +1,12 @@
 const { Op } = require('sequelize');
+const crypto = require('crypto');
 const Class = require('../models/class.model');
 const Instructor = require('../models/instructor.model');
+const ClassParticipant = require('../models/classParticipant.model');
+const uploadService = require('./upload.service');
+
+// URL base para os arquivos estáticos
+const API_URL = process.env.API_URL || 'http://localhost:5000';
 
 class ClassService {
     // Método auxiliar para formatar o tipo
@@ -71,11 +77,18 @@ class ClassService {
         try {
             const classes = await Class.findAll({
                 where,
-                include: [{
-                    model: Instructor,
-                    as: 'instructor',
-                    attributes: ['id', 'name', 'registration', 'unit', 'position']
-                }],
+                include: [
+                    {
+                        model: Instructor,
+                        as: 'instructor',
+                        attributes: ['id', 'name', 'registration', 'unit', 'position']
+                    },
+                    {
+                        model: ClassParticipant,
+                        as: 'participants',
+                        attributes: ['id', 'name', 'registration', 'unit', 'position', 'photo', 'type', 'timestamp', 'early_leave', 'early_leave_time']
+                    }
+                ],
                 order: [['date_start', 'DESC']]
             });
 
@@ -83,10 +96,10 @@ class ClassService {
             return classes.map(classItem => ({
                 id: classItem.id,
                 type: this.formatType(classItem.type),
-                originalType: classItem.type, // Mantemos o tipo original para edição
+                originalType: classItem.type,
                 date_start: classItem.date_start,
                 date_end: classItem.date_end,
-                presents: classItem.presents,
+                presents: classItem.participants?.length || 0,
                 status: classItem.status,
                 unit: classItem.unit,
                 training: {
@@ -104,22 +117,41 @@ class ClassService {
                     registration: classItem.instructor.registration,
                     unit: classItem.instructor.unit,
                     position: classItem.instructor.position
-                } : null
+                } : null,
+                attendees: classItem.participants?.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    registration: p.registration,
+                    unit: p.unit,
+                    position: p.position,
+                    photo: p.photo ? `${API_URL}/uploads/${p.photo}` : null,
+                    type: p.type,
+                    timestamp: p.timestamp,
+                    early_leave: p.early_leave,
+                    early_leave_time: p.early_leave_time
+                })) || []
             }));
         } catch (error) {
             console.error('Erro ao buscar aulas:', error);
-            throw new Error('Erro ao buscar aulas');
+            throw error;
         }
     }
 
     async getClassById(id) {
         try {
             const classData = await Class.findByPk(id, {
-                include: [{
-                    model: Instructor,
-                    as: 'instructor',
-                    attributes: ['id', 'name', 'registration', 'unit', 'position']
-                }]
+                include: [
+                    {
+                        model: Instructor,
+                        as: 'instructor',
+                        attributes: ['id', 'name', 'registration', 'unit', 'position']
+                    },
+                    {
+                        model: ClassParticipant,
+                        as: 'participants',
+                        attributes: ['id', 'name', 'registration', 'unit', 'position', 'photo', 'type', 'timestamp', 'early_leave', 'early_leave_time']
+                    }
+                ]
             });
             
             if (!classData) {
@@ -130,10 +162,10 @@ class ClassService {
             return {
                 id: classData.id,
                 type: this.formatType(classData.type),
-                originalType: classData.type, // Mantemos o tipo original para edição
+                originalType: classData.type,
                 date_start: classData.date_start,
                 date_end: classData.date_end,
-                presents: classData.presents,
+                presents: classData.participants?.length || 0,
                 status: classData.status,
                 unit: classData.unit,
                 training: {
@@ -151,11 +183,23 @@ class ClassService {
                     registration: classData.instructor.registration,
                     unit: classData.instructor.unit,
                     position: classData.instructor.position
-                } : null
+                } : null,
+                attendees: classData.participants?.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    registration: p.registration,
+                    unit: p.unit,
+                    position: p.position,
+                    photo: p.photo ? `${API_URL}/uploads/${p.photo}` : null,
+                    type: p.type,
+                    timestamp: p.timestamp,
+                    early_leave: p.early_leave,
+                    early_leave_time: p.early_leave_time
+                })) || []
             };
         } catch (error) {
             console.error('Erro ao buscar aula:', error);
-            throw new Error('Erro ao buscar aula');
+            throw error;
         }
     }
 
@@ -265,6 +309,232 @@ class ClassService {
             case 'DDS': return 'DDS';
             case 'Others': return 'OUTROS';
             default: return '';
+        }
+    }
+
+    async registerAttendance(classId, attendeeData) {
+        try {
+            const classInstance = await Class.findByPk(classId);
+            if (!classInstance) {
+                throw new Error('Aula não encontrada');
+            }
+
+            if (classInstance.status !== 'scheduled') {
+                throw new Error('Não é possível registrar presença em uma aula finalizada');
+            }
+
+            // Verifica se o participante já está registrado
+            const existingAttendee = await ClassParticipant.findOne({
+                where: {
+                    class_id: classId,
+                    registration: attendeeData.registration
+                }
+            });
+
+            if (existingAttendee) {
+                throw new Error('Participante já registrado nesta aula');
+            }
+
+            // Se houver foto, salva usando o serviço de upload
+            let photoFileName = null;
+            if (attendeeData.photo) {
+                photoFileName = await uploadService.saveBase64Image(
+                    attendeeData.photo,
+                    `class_${classId}_${attendeeData.registration}`
+                );
+            }
+
+            // Cria o novo participante
+            const newParticipant = await ClassParticipant.create({
+                class_id: classId,
+                name: attendeeData.name,
+                registration: attendeeData.registration,
+                unit: attendeeData.unit,
+                position: attendeeData.position,
+                photo: photoFileName,
+                type: attendeeData.type || 'Manual'
+            });
+
+            // Atualiza o contador de presentes na aula
+            const participantsCount = await ClassParticipant.count({
+                where: { class_id: classId }
+            });
+            await classInstance.update({ presents: participantsCount });
+
+            return newParticipant;
+        } catch (error) {
+            // Se houver erro e a foto foi salva, remove o arquivo
+            if (error.photoFileName) {
+                try {
+                    await uploadService.deleteFile(error.photoFileName);
+                } catch (deleteError) {
+                    console.error('Erro ao deletar arquivo após falha:', deleteError);
+                }
+            }
+            throw error;
+        }
+    }
+
+    async registerEarlyLeave(classId, registration) {
+        try {
+            const participant = await ClassParticipant.findOne({
+                where: {
+                    class_id: classId,
+                    registration: registration
+                }
+            });
+
+            if (!participant) {
+                throw new Error('Participante não encontrado nesta aula');
+            }
+
+            if (participant.early_leave) {
+                throw new Error('Saída antecipada já registrada para este participante');
+            }
+
+            // Registra a saída antecipada
+            await participant.update({
+                early_leave: true,
+                early_leave_time: new Date()
+            });
+
+            return this.getClassById(classId);
+        } catch (error) {
+            console.error('Erro ao registrar saída antecipada:', error);
+            throw error;
+        }
+    }
+
+    async removeAttendee(classId, registration) {
+        try {
+            const classInstance = await Class.findByPk(classId);
+            if (!classInstance) {
+                throw new Error('Aula não encontrada');
+            }
+
+            if (classInstance.status === 'completed') {
+                throw new Error('Não é possível remover participantes de uma aula finalizada');
+            }
+
+            const participant = await ClassParticipant.findOne({
+                where: {
+                    class_id: classId,
+                    registration: registration
+                }
+            });
+
+            if (!participant) {
+                throw new Error('Participante não encontrado nesta aula');
+            }
+
+            // Se o participante tinha foto, remove o arquivo
+            if (participant.photo) {
+                try {
+                    await uploadService.deleteFile(participant.photo);
+                } catch (deleteError) {
+                    console.error('Erro ao deletar foto do participante:', deleteError);
+                }
+            }
+
+            // Remove o participante
+            await participant.destroy();
+
+            // Atualiza o contador de presentes na aula
+            const participantsCount = await ClassParticipant.count({
+                where: { class_id: classId }
+            });
+            await classInstance.update({ presents: participantsCount });
+
+            return this.getClassById(classId);
+        } catch (error) {
+            console.error('Erro ao remover participante:', error);
+            throw error;
+        }
+    }
+
+    async finishClass(classId) {
+        try {
+            const classData = await Class.findByPk(classId);
+            if (!classData) {
+                throw new Error('Aula não encontrada');
+            }
+
+            if (classData.status === 'completed') {
+                throw new Error('Aula já finalizada');
+            }
+
+            if (classData.status === 'cancelled') {
+                throw new Error('Não é possível finalizar uma aula cancelada');
+            }
+
+            // Finaliza a aula
+            await classData.update({
+                status: 'completed',
+                date_end: new Date()
+            });
+
+            return this.getClassById(classId);
+        } catch (error) {
+            console.error('Erro ao finalizar aula:', error);
+            throw error;
+        }
+    }
+
+    async generateInviteLink(classId, expiresInMinutes = 60) {
+        try {
+            const classData = await Class.findByPk(classId);
+            if (!classData) {
+                throw new Error('Aula não encontrada');
+            }
+
+            if (classData.status !== 'scheduled') {
+                throw new Error('Não é possível gerar link para uma aula não agendada');
+            }
+
+            // Gera um token único
+            const token = crypto.randomBytes(32).toString('hex');
+            const expiresAt = new Date(Date.now() + expiresInMinutes * 60000);
+
+            // Atualiza a aula com o novo token
+            await classData.update({
+                invite_token: token,
+                invite_expires_at: expiresAt
+            });
+
+            return {
+                token,
+                expiresAt,
+                url: `/aulas/${classId}/join/${token}`
+            };
+        } catch (error) {
+            console.error('Erro ao gerar link de convite:', error);
+            throw error;
+        }
+    }
+
+    async validateInviteToken(classId, token) {
+        try {
+            const classData = await Class.findByPk(classId);
+            if (!classData) {
+                throw new Error('Aula não encontrada');
+            }
+
+            if (classData.status !== 'scheduled') {
+                throw new Error('Aula não está mais disponível');
+            }
+
+            if (!classData.invite_token || classData.invite_token !== token) {
+                throw new Error('Token inválido');
+            }
+
+            if (new Date() > new Date(classData.invite_expires_at)) {
+                throw new Error('Token expirado');
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Erro ao validar token:', error);
+            throw error;
         }
     }
 }
