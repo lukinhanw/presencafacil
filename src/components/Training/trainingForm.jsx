@@ -1,25 +1,44 @@
 import { useForm, Controller } from 'react-hook-form';
+import { useState } from 'react';
 import { IMaskInput } from 'react-imask';
 import Select from 'react-select';
-import { PROVIDERS, CLASSIFICATIONS } from '../../services/trainingService';
 import { selectStyles } from '../Shared/selectStyles';
 import { selectStylesDark } from '../Shared/selectStylesDark';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const providerOptions = PROVIDERS.map(provider => ({
-	value: provider,
-	label: provider
-}));
+const PROVIDERS = [
+	'SENAI',
+	'SENAC',
+	'SEBRAE',
+	'SESI',
+	'Outros'
+];
 
-const classificationOptions = CLASSIFICATIONS.map(classification => ({
-	value: classification,
-	label: classification
-}));
+const CLASSIFICATIONS = [
+	'NR-10',
+	'NR-12',
+	'NR-33',
+	'NR-35',
+	'Segurança do Trabalho',
+	'Qualidade',
+	'Técnico',
+	'Comportamental'
+];
 
-export default function TrainingForm({ onSubmit, initialData, isLoading }) {
-
+export default function TrainingForm({ onSubmit, initialData, isLoading: isSubmitting }) {
 	const { isDark } = useTheme();
 	const stylesSelect = isDark ? selectStylesDark : selectStyles;
+	const [isLoading, setIsLoading] = useState(false);
+
+	const providerOptions = PROVIDERS.map(provider => ({
+		value: provider,
+		label: provider
+	}));
+
+	const classificationOptions = CLASSIFICATIONS.map(classification => ({
+		value: classification,
+		label: classification
+	}));
 
 	const { register, handleSubmit, control, formState: { errors } } = useForm({
 		defaultValues: initialData ? {
@@ -113,11 +132,14 @@ export default function TrainingForm({ onSubmit, initialData, isLoading }) {
 						render={({ field }) => (
 							<Select
 								{...field}
+								isLoading={isLoading}
 								options={providerOptions}
 								styles={stylesSelect}
 								placeholder="Selecione um fornecedor"
 								className="mt-1"
 								classNamePrefix="select"
+								menuPortalTarget={document.body}
+								menuPosition={'fixed'}
 							/>
 						)}
 					/>
@@ -137,11 +159,14 @@ export default function TrainingForm({ onSubmit, initialData, isLoading }) {
 						render={({ field }) => (
 							<Select
 								{...field}
+								isLoading={isLoading}
 								options={classificationOptions}
 								styles={stylesSelect}
 								placeholder="Selecione uma classificação"
 								className="mt-1"
 								classNamePrefix="select"
+								menuPortalTarget={document.body}
+								menuPosition={'fixed'}
 							/>
 						)}
 					/>
@@ -184,10 +209,10 @@ export default function TrainingForm({ onSubmit, initialData, isLoading }) {
 			<div className="flex justify-end space-x-4">
 				<button
 					type="submit"
-					disabled={isLoading}
+					disabled={isSubmitting || isLoading}
 					className="btn-gradient"
 				>
-					{isLoading ? 'Salvando...' : 'Salvar'}
+					{isSubmitting ? 'Salvando...' : 'Salvar'}
 				</button>
 			</div>
 		</form>

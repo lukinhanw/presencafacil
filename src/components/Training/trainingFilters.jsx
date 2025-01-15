@@ -1,22 +1,44 @@
+import { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { useTheme } from '../../contexts/ThemeContext';
-import { PROVIDERS, CLASSIFICATIONS } from '../../services/trainingService';
+import { getTrainingProviders, getTrainingClassifications } from '../../services/trainingService';
 import { selectStyles } from '../Shared/selectStyles';
 import { selectStylesDark } from '../Shared/selectStylesDark';
+import { showToast } from '../General/toast';
 
-const providerOptions = PROVIDERS.map(provider => ({
-	value: provider,
-	label: provider
-}));
-
-const classificationOptions = CLASSIFICATIONS.map(classification => ({
-	value: classification,
-	label: classification
-}));
-
-export default function TrainingFilters({ filters, onFilterChange }) {
+export default function TrainingFilters({ filters, onFilterChange, reloadKey = 0 }) {
 	const { isDark } = useTheme();
 	const stylesSelect = isDark ? selectStylesDark : selectStyles;
+	const [isLoading, setIsLoading] = useState(true);
+	const [providerOptions, setProviderOptions] = useState([]);
+	const [classificationOptions, setClassificationOptions] = useState([]);
+
+	useEffect(() => {
+		const fetchOptions = async () => {
+			try {
+				setIsLoading(true);
+				const [providers, classifications] = await Promise.all([
+					getTrainingProviders(),
+					getTrainingClassifications()
+				]);
+
+				setProviderOptions(providers.map(provider => ({
+					value: provider,
+					label: provider
+				})));
+				setClassificationOptions(classifications.map(classification => ({
+					value: classification,
+					label: classification
+				})));
+			} catch (error) {
+				showToast.error('Erro', 'Erro ao carregar opções de filtro');
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchOptions();
+	}, [reloadKey]);
 
 	return (
 		<div className="glass-card p-4 space-y-4">
@@ -40,6 +62,7 @@ export default function TrainingFilters({ filters, onFilterChange }) {
 					</label>
 					<Select
 						isMulti
+						isLoading={isLoading}
 						options={providerOptions}
 						value={filters.providers}
 						onChange={(selected) => onFilterChange({ ...filters, providers: selected })}
@@ -57,6 +80,7 @@ export default function TrainingFilters({ filters, onFilterChange }) {
 					</label>
 					<Select
 						isMulti
+						isLoading={isLoading}
 						options={classificationOptions}
 						value={filters.classifications}
 						onChange={(selected) => onFilterChange({ ...filters, classifications: selected })}

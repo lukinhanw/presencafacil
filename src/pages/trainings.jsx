@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import DataTable from '../components/General/datatable';
 import Modal from '../components/General/modal';
@@ -22,12 +22,12 @@ export default function Trainings() {
 	const [deleteAlert, setDeleteAlert] = useState({ isOpen: false, trainingId: null });
 	const { hasRole } = useAuth();
 	const isAdmin = hasRole('ADMIN_ROLE');
+	const [reloadKey, setReloadKey] = useState(0);
 
 	const fetchTrainings = useCallback(async () => {
 		try {
 			setIsLoading(true);
 			const data = await getTrainings({
-				search: filters.search,
 				providers: filters.providers?.map(p => p.value) || [],
 				classifications: filters.classifications?.map(c => c.value) || []
 			});
@@ -37,7 +37,19 @@ export default function Trainings() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [filters]);
+	}, [filters.providers, filters.classifications]);
+
+	const filteredTrainings = useMemo(() => {
+		if (!filters.search) return trainings;
+
+		const searchTerm = filters.search.toLowerCase();
+		return trainings.filter(training => 
+			training.name.toLowerCase().includes(searchTerm) ||
+			training.code.toLowerCase().includes(searchTerm) ||
+			training.provider.toLowerCase().includes(searchTerm) ||
+			training.classification.toLowerCase().includes(searchTerm)
+		);
+	}, [trainings, filters.search]);
 
 	useEffect(() => {
 		fetchTrainings();
@@ -64,6 +76,7 @@ export default function Trainings() {
 				showToast.success('Sucesso', 'Treinamento criado com sucesso!');
 			}
 			handleCloseModal();
+			setReloadKey(prev => prev + 1);
 			fetchTrainings();
 		} catch (error) {
 			showToast.error('Erro', error.message || 'Erro ao salvar treinamento');
@@ -151,11 +164,12 @@ export default function Trainings() {
 			<TrainingFilters
 				filters={filters}
 				onFilterChange={setFilters}
+				reloadKey={reloadKey}
 			/>
 
 			<DataTable
 				columns={columns}
-				data={trainings}
+				data={filteredTrainings}
 				actions={actions}
 				isLoading={isLoading}
 			/>
