@@ -30,6 +30,7 @@ class AuthController {
 
         // Verifica se o usuário existe e a senha está correta
         if (!$user || !password_verify($data['password'], $user['password'])) {
+            error_log('Tentativa de login falhou para o email: ' . $data['email']);
             $response->getBody()->write(json_encode([
                 'error' => 'Credenciais inválidas'
             ]));

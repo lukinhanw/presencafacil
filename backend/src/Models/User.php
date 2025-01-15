@@ -14,10 +14,14 @@ class User {
 
     // Busca um usuário pelo email
     public function findByEmail(string $email): ?array {
+        error_log('Buscando usuário com email: ' . $email);
+        
         $stmt = $this->db->prepare('SELECT * FROM users WHERE email = :email');
         $stmt->execute(['email' => $email]);
-
+        
         $user = $stmt->fetch();
+        error_log('Resultado da busca: ' . ($user ? json_encode($user) : 'null'));
+        
         return $user ?: null;
     }
 
