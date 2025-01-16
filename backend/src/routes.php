@@ -66,4 +66,5 @@ $app->group('/api/lessons', function ($app) {
     // Rotas para gerenciar status
     $app->post('/{id}/finish', [LessonController::class, 'finishLesson']);
     $app->post('/{id}/cancel', [LessonController::class, 'cancelLesson']);
+    $app->post('/{id}/validate-token', [LessonController::class, 'validateToken']);
 });

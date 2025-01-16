@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Config\Database;
 use PDO;
+use PDOException;
 
 class Lesson {
     private PDO $db;
@@ -150,26 +151,79 @@ class Lesson {
     }
 
     public function findById(int $id): ?array {
-        $sql = 'SELECT l.*, 
-                COUNT(la.id) as presents,
-                u.name as instructor_name
+        try {
+            // Busca a aula
+            $stmt = $this->db->prepare('
+                SELECT l.*, 
+                       i.name as instructor_name,
+                       i.email as instructor_email,
+                       i.position as instructor_position,
+                       i.unit as instructor_unit
                 FROM lessons l
-                LEFT JOIN lesson_attendees la ON l.id = la.lesson_id
-                LEFT JOIN users u ON l.instructor_id = u.id
+                LEFT JOIN users i ON l.instructor_id = i.id
                 WHERE l.id = :id
-                GROUP BY l.id';
+            ');
+            
+            $stmt->execute(['id' => $id]);
+            $lesson = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$lesson) {
+                return null;
+            }
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['id' => $id]);
-        
-        $lesson = $stmt->fetch();
-        if ($lesson) {
-            // Busca os participantes
-            $attendees = $this->getAttendees($id);
-            $lesson['attendees'] = $attendees;
+            // Formata os dados do instrutor
+            $lesson['instructor'] = [
+                'id' => $lesson['instructor_id'],
+                'name' => $lesson['instructor_name'] ?? 'Instrutor não encontrado',
+                'email' => $lesson['instructor_email'] ?? '',
+                'position' => $lesson['instructor_position'] ?? '',
+                'unit' => $lesson['instructor_unit'] ?? ''
+            ];
+
+            // Remove as colunas individuais do instrutor
+            unset(
+                $lesson['instructor_name'],
+                $lesson['instructor_email'],
+                $lesson['instructor_position'],
+                $lesson['instructor_unit']
+            );
+
+            // Decodifica e formata os dados do treinamento
+            if (!empty($lesson['training_data'])) {
+                $trainingData = json_decode($lesson['training_data'], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $lesson['training'] = $trainingData;
+                } else {
+                    error_log('Erro ao decodificar training_data: ' . json_last_error_msg());
+                    $lesson['training'] = [
+                        'name' => $this->getDefaultTrainingName($lesson['type'])
+                    ];
+                }
+            } else {
+                $lesson['training'] = [
+                    'name' => $this->getDefaultTrainingName($lesson['type'])
+                ];
+            }
+            unset($lesson['training_data']);
+
+            return $lesson;
+        } catch (PDOException $e) {
+            error_log('Erro ao buscar aula: ' . $e->getMessage());
+            throw $e;
         }
-        
-        return $lesson ?: null;
+    }
+
+    private function getDefaultTrainingName(string $type): string {
+        switch ($type) {
+            case 'DDS':
+                return 'Diálogo Diário de Segurança';
+            case 'External':
+                return 'Treinamento Externo';
+            case 'Others':
+                return 'Outro Treinamento';
+            default:
+                return 'Treinamento';
+        }
     }
 
     public function create(array $data): int {
@@ -223,15 +277,25 @@ class Lesson {
     }
 
     public function getAttendees(int $lessonId): array {
-        $sql = 'SELECT la.*, u.name, u.registration, u.position
+        try {
+            $stmt = $this->db->prepare('
+                SELECT la.*,
+                       u.name,
+                       u.registration,
+                       u.position,
+                       u.unit
                 FROM lesson_attendees la
                 JOIN users u ON la.employee_id = u.id
                 WHERE la.lesson_id = :lesson_id
-                ORDER BY la.timestamp ASC';
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['lesson_id' => $lessonId]);
-        return $stmt->fetchAll();
+                ORDER BY la.timestamp ASC
+            ');
+            
+            $stmt->execute(['lesson_id' => $lessonId]);
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log('Erro ao buscar participantes: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     public function registerAttendance(int $lessonId, int $employeeId): bool {
@@ -303,5 +367,26 @@ class Lesson {
         $stmt = $this->db->prepare('SELECT DISTINCT unit FROM lessons ORDER BY unit');
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function validateInviteToken(int $lessonId, string $token): bool {
+        try {
+            $stmt = $this->db->prepare('
+                SELECT COUNT(*) FROM lesson_invites 
+                WHERE lesson_id = :lesson_id 
+                AND token = :token 
+                AND expires_at > NOW()
+            ');
+            
+            $stmt->execute([
+                'lesson_id' => $lessonId,
+                'token' => $token
+            ]);
+            
+            return (bool)$stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log('Erro ao validar token de convite: ' . $e->getMessage());
+            throw $e;
+        }
     }
 } 

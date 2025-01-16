@@ -74,14 +74,13 @@ class LessonController {
                 return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
             }
 
-            // Decodifica os dados do treinamento
-            if ($lesson['training_data']) {
-                $lesson['training_data'] = json_decode($lesson['training_data'], true);
-            }
+            // Busca os participantes da aula
+            $lesson['attendees'] = $this->lessonModel->getAttendees($id);
 
             $response->getBody()->write(json_encode($lesson));
             return $response->withHeader('Content-Type', 'application/json');
         } catch (Exception $e) {
+            error_log('Erro ao buscar aula: ' . $e->getMessage());
             $response->getBody()->write(json_encode([
                 'error' => 'Erro ao buscar aula'
             ]));
@@ -350,6 +349,36 @@ class LessonController {
         } catch (Exception $e) {
             $response->getBody()->write(json_encode([
                 'error' => 'Erro ao cancelar aula'
+            ]));
+            return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
+        }
+    }
+
+    public function validateToken(Request $request, Response $response, array $args): Response {
+        try {
+            $id = (int)$args['id'];
+            $data = $request->getParsedBody();
+
+            if (empty($data['token'])) {
+                $response->getBody()->write(json_encode([
+                    'error' => 'Token é obrigatório'
+                ]));
+                return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+            }
+
+            $isValid = $this->lessonModel->validateInviteToken($id, $data['token']);
+            if (!$isValid) {
+                $response->getBody()->write(json_encode([
+                    'error' => 'Token inválido'
+                ]));
+                return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+            }
+
+            $response->getBody()->write(json_encode(['valid' => true]));
+            return $response->withHeader('Content-Type', 'application/json');
+        } catch (Exception $e) {
+            $response->getBody()->write(json_encode([
+                'error' => 'Erro ao validar token'
             ]));
             return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
         }

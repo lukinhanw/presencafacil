@@ -29,21 +29,27 @@ export default function ClassInstance() {
 	const [isNFCModalOpen, setIsNFCModalOpen] = useState(false);
 	const [finishAlert, setFinishAlert] = useState(false);
 
-	useEffect(() => {
-		fetchClassData();
-	}, [id]);
-
 	const fetchClassData = async () => {
 		try {
+			console.log('Iniciando fetchClassData com id:', id);
 			setIsLoading(true);
 			const data = await getClassById(id);
+			console.log('Dados recebidos:', data);
 			setClassData(data);
 		} catch (error) {
+			console.error('Erro ao carregar dados:', error);
 			showToast.error('Erro', 'Não foi possível carregar os dados da aula');
 		} finally {
 			setIsLoading(false);
 		}
 	};
+
+	useEffect(() => {
+		console.log('useEffect executado com id:', id);
+		if (id) {
+			fetchClassData();
+		}
+	}, [id]);
 
 	const handleFinishClass = async () => {
 		try {
@@ -60,6 +66,16 @@ export default function ClassInstance() {
 		return (
 			<div className="flex items-center justify-center min-h-[400px]">
 				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+			</div>
+		);
+	}
+
+	if (!classData) {
+		return (
+			<div className="flex items-center justify-center min-h-[400px]">
+				<p className="text-gray-600 dark:text-gray-400">
+					Não foi possível carregar os dados da aula.
+				</p>
 			</div>
 		);
 	}
@@ -102,7 +118,7 @@ export default function ClassInstance() {
 				<ClassHeader
 					classData={classData}
 					onOpenDetails={() => setIsDetailsModalOpen(true)}
-					onFinishclassName={() => setFinishAlert(true)}
+					onFinishClass={() => setFinishAlert(true)}
 					isFinished={finished}
 				/>
 			</motion.div>
@@ -114,7 +130,7 @@ export default function ClassInstance() {
 				>
 					<AttendanceList
 						classId={id}
-						attendees={classData.attendees}
+						attendees={classData.attendees || []}
 						onUpdate={fetchClassData}
 						isFinished={finished}
 					/>
@@ -124,7 +140,7 @@ export default function ClassInstance() {
 					className="w-full md:w-1/4 space-y-4"
 					variants={itemVariants}
 				>
-					<AttendanceStats attendees={classData.attendees} />
+					<AttendanceStats attendees={classData.attendees || []} />
 
 					{!finished && (
 						<motion.div 
