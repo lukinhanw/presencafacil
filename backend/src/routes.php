@@ -4,6 +4,7 @@ use App\Controllers\AuthController;
 use App\Controllers\EmployeeController;
 use App\Controllers\InstructorController;
 use App\Controllers\TrainingController;
+use App\Controllers\LessonController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -46,4 +47,23 @@ $app->group('/api/trainings', function ($app) {
     $app->post('', [TrainingController::class, 'create']);
     $app->put('/{id}', [TrainingController::class, 'update']);
     $app->delete('/{id}', [TrainingController::class, 'delete']);
+});
+
+// Rotas de aulas
+$app->group('/api/lessons', function ($app) {
+    $app->get('', [LessonController::class, 'getAll']);
+    $app->get('/units', [LessonController::class, 'getUnits']);
+    $app->get('/{id}', [LessonController::class, 'getOne']);
+    $app->post('', [LessonController::class, 'create']);
+    $app->put('/{id}', [LessonController::class, 'update']);
+    $app->delete('/{id}', [LessonController::class, 'delete']);
+    
+    // Rotas para gerenciar presença
+    $app->post('/{id}/attendance', [LessonController::class, 'registerAttendance']);
+    $app->post('/{id}/early-leave', [LessonController::class, 'registerEarlyLeave']);
+    $app->delete('/{id}/attendees/{employee_id}', [LessonController::class, 'removeAttendee']);
+    
+    // Rotas para gerenciar status
+    $app->post('/{id}/finish', [LessonController::class, 'finishLesson']);
+    $app->post('/{id}/cancel', [LessonController::class, 'cancelLesson']);
 });

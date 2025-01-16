@@ -1,68 +1,87 @@
+import { useEffect, useState } from 'react';
+import { FiSearch } from 'react-icons/fi';
 import Select from 'react-select';
 import { useTheme } from '../../contexts/ThemeContext';
-import { UNITS } from '../../services/employeeService';
-import { CLASS_TYPES } from '../../services/classService';
 import { selectStyles } from '../Shared/selectStyles';
 import { selectStylesDark } from '../Shared/selectStylesDark';
-
-const unitOptions = UNITS.map(unit => ({
-	value: unit,
-	label: unit
-}));
+import { CLASS_TYPES, getUnits } from '../../services/lessonService';
 
 export default function ClassFilters({ filters, onFilterChange }) {
 	const { isDark } = useTheme();
+	const [unitOptions, setUnitOptions] = useState([]);
 	const stylesSelect = isDark ? selectStylesDark : selectStyles;
 
+	useEffect(() => {
+		const fetchUnits = async () => {
+			try {
+				const units = await getUnits();
+				setUnitOptions(units);
+			} catch (error) {
+				console.error('Erro ao buscar unidades:', error);
+			}
+		};
+
+		fetchUnits();
+	}, []);
+
+	const handleSearchChange = (e) => {
+		onFilterChange({
+			...filters,
+			search: e.target.value
+		});
+	};
+
+	const handleTypesChange = (selectedOptions) => {
+		onFilterChange({
+			...filters,
+			types: selectedOptions || []
+		});
+	};
+
+	const handleUnitsChange = (selectedOptions) => {
+		onFilterChange({
+			...filters,
+			units: selectedOptions || []
+		});
+	};
+
 	return (
-		<div className="glass-card p-4 space-y-4">
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-				<div>
-					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-						Buscar
-					</label>
+		<div className="flex flex-col md:flex-row gap-4">
+			<div className="flex-1">
+				<div className="relative">
 					<input
 						type="text"
+						placeholder="Buscar aulas..."
 						value={filters.search}
-						onChange={(e) => onFilterChange({ ...filters, search: e.target.value })}
-						placeholder="Buscar por nome, código ou instrutor..."
-						className="input-field"
+						onChange={handleSearchChange}
+						className="input-field pl-10 w-full"
 					/>
+					<FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 				</div>
-
-				<div>
-					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-						Tipos
-					</label>
-					<Select
-						isMulti
-						options={CLASS_TYPES}
-						value={filters.types}
-						onChange={(selected) => onFilterChange({ ...filters, types: selected })}
-						styles={stylesSelect}
-						menuPortalTarget={document.body}
-						menuPosition={'fixed'}
-						placeholder="Selecione os tipos"
-						classNamePrefix="select"
-					/>
-				</div>
-
-				<div>
-					<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-						Unidades
-					</label>
-					<Select
-						isMulti
-						options={unitOptions}
-						value={filters.units}
-						onChange={(selected) => onFilterChange({ ...filters, units: selected })}
-						styles={stylesSelect}
-						menuPortalTarget={document.body}
-						menuPosition={'fixed'}
-						placeholder="Selecione as unidades"
-						classNamePrefix="select"
-					/>
-				</div>
+			</div>
+			<div className="w-full md:w-64">
+				<Select
+					value={filters.types}
+					onChange={handleTypesChange}
+					options={CLASS_TYPES}
+					placeholder="Tipos"
+					isMulti
+					styles={stylesSelect}
+					className="react-select-container"
+					classNamePrefix="react-select"
+				/>
+			</div>
+			<div className="w-full md:w-64">
+				<Select
+					value={filters.units}
+					onChange={handleUnitsChange}
+					options={unitOptions}
+					placeholder="Unidades"
+					isMulti
+					styles={stylesSelect}
+					className="react-select-container"
+					classNamePrefix="react-select"
+				/>
 			</div>
 		</div>
 	);

@@ -4,23 +4,24 @@ import { IMaskInput } from 'react-imask';
 import Select from 'react-select';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { UNITS } from '../../services/employeeService';
-import { CLASS_TYPES } from '../../services/classService';
+import { CLASS_TYPES } from '../../services/lessonService';
 import { selectStyles } from '../Shared/selectStyles';
 import { selectStylesDark } from '../Shared/selectStylesDark';
+import { UNITS } from '../../services/employeeService';
 
 const unitOptions = UNITS.map(unit => ({
 	value: unit,
 	label: unit
 }));
 
-export default function ClassForm({
+
+const ClassForm = ({
 	onSubmit,
 	initialData,
 	isLoading,
 	trainings,
 	instructors
-}) {
+}) => {
 	const { isDark } = useTheme();
 	const { user, hasRole } = useAuth();
 	const stylesSelect = isDark ? selectStylesDark : selectStyles;
@@ -35,7 +36,6 @@ export default function ClassForm({
 
 	const selectedType = watch('type');
 
-	// If user is an instructor, set the instructor field automatically
 	useEffect(() => {
 		if (!hasRole('ADMIN_ROLE') && user) {
 			setValue('instructor', {
@@ -46,29 +46,29 @@ export default function ClassForm({
 	}, [hasRole, user, setValue]);
 
 	const handleFormSubmit = (data) => {
+		const { presents, ...cleanData } = data;
+
 		const formattedData = {
-			...data,
 			type: data.type.value,
 			unit: data.unit.value,
-			instructor: {
-				id: data.instructor.value,
-				name: data.instructor.label
-			},
-			date_start: new Date().toISOString(),
-			presents: 0
+			instructor_id: data.instructor.value,
+			date_start: new Date().toISOString().slice(0, 19).replace('T', ' ')
 		};
 
 		if (data.type.value === 'Portfolio') {
 			const selectedTraining = trainings.find(t => t.id === data.training.value);
-			formattedData.training = selectedTraining;
+			if (selectedTraining) {
+				const { id, created_at, updated_at, ...trainingData } = selectedTraining;
+				formattedData.training_data = trainingData;
+			}
 		} else {
-			formattedData.training = {
+			formattedData.training_data = {
 				name: data.name,
 				code: getCodeByType(data.type.value),
 				duration: data.type.value === 'DDS' ? '00:40' : data.duration,
-				provider: data.provider.value,
+				provider: data.provider,
 				content: data.content,
-				classification: data.classification.value,
+				classification: data.classification,
 				objective: data.objective
 			};
 		}
@@ -127,7 +127,7 @@ export default function ClassForm({
 							type="text"
 							value={trainings.find(t => t.id === watch('training')?.value)?.name || ''}
 							readOnly
-							className="input-field mt-1 w-full"
+							className="input-field mt-1 w-full read-only"
 						/>
 					</div>
 
@@ -139,7 +139,7 @@ export default function ClassForm({
 							type="text"
 							value={trainings.find(t => t.id === watch('training')?.value)?.code || ''}
 							readOnly
-							className="input-field mt-1 w-full"
+							className="input-field mt-1 w-full read-only"
 						/>
 					</div>
 
@@ -151,7 +151,7 @@ export default function ClassForm({
 							type="text"
 							value={trainings.find(t => t.id === watch('training')?.value)?.duration || ''}
 							readOnly
-							className="input-field mt-1 w-full"
+							className="input-field mt-1 w-full read-only"
 						/>
 					</div>
 
@@ -163,7 +163,7 @@ export default function ClassForm({
 							type="text"
 							value={trainings.find(t => t.id === watch('training')?.value)?.provider || ''}
 							readOnly
-							className="input-field mt-1 w-full"
+							className="input-field mt-1 w-full read-only"
 						/>
 					</div>
 
@@ -174,7 +174,7 @@ export default function ClassForm({
 						<textarea
 							value={trainings.find(t => t.id === watch('training')?.value)?.content || ''}
 							readOnly
-							className="input-field mt-1 w-full"
+							className="input-field mt-1 w-full read-only"
 							rows={4}
 						/>
 					</div>
@@ -187,7 +187,7 @@ export default function ClassForm({
 							type="text"
 							value={trainings.find(t => t.id === watch('training')?.value)?.classification || ''}
 							readOnly
-							className="input-field mt-1 w-full"
+							className="input-field mt-1 w-full read-only"
 						/>
 					</div>
 
@@ -198,7 +198,7 @@ export default function ClassForm({
 						<textarea
 							value={trainings.find(t => t.id === watch('training')?.value)?.objective || ''}
 							readOnly
-							className="input-field mt-1 w-full"
+							className="input-field mt-1 w-full read-only"
 							rows={4}
 						/>
 					</div>
@@ -292,7 +292,7 @@ export default function ClassForm({
 							type="text"
 							value="EXT"
 							readOnly
-							className="input-field mt-1"
+							className="input-field mt-1 read-only"
 						/>
 					</div>
 					<div>
@@ -340,19 +340,45 @@ export default function ClassForm({
 							type="text"
 							value={type === 'DDS' ? 'DDS' : 'OUTROS'}
 							readOnly
-							className="input-field mt-1"
+							className="input-field mt-1 read-only"
 						/>
 					</div>
 					<div>
 						<label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 							Duração
 						</label>
-						<input
-							type="text"
-							value="00:40"
-							readOnly
-							className="input-field mt-1"
-						/>
+						{type === 'DDS' ? (
+							<input
+								type="text"
+								value="00:40"
+								readOnly
+								className="input-field mt-1 read-only"
+							/>
+						) : (
+							<Controller
+								name="duration"
+								control={control}
+								rules={{
+									required: 'Duração é obrigatória',
+									pattern: {
+										value: /^([0-9]{2}):([0-9]{2})$/,
+										message: 'Formato inválido. Use HH:mm'
+									}
+								}}
+								render={({ field }) => (
+									<IMaskInput
+										mask="00:00"
+										{...field}
+										unmask={false}
+										className="input-field mt-1"
+										placeholder="00:00"
+									/>
+								)}
+							/>
+						)}
+						{errors.duration && (
+							<p className="mt-1 text-sm text-red-500">{errors.duration.message}</p>
+						)}
 					</div>
 				</div>
 			);
@@ -457,4 +483,6 @@ export default function ClassForm({
 			</div>
 		</form>
 	);
-}
+};
+
+export default ClassForm;

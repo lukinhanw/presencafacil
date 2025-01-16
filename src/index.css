@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.read-only {
+    cursor: not-allowed;
+}
+
 @layer base {
 	:root {
 		--background-start: #eeeeee;

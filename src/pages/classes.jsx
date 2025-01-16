@@ -5,7 +5,7 @@ import Modal from '../components/General/modal';
 import Alert from '../components/General/alert';
 import ClassForm from '../components/Class/classForm';
 import ClassFilters from '../components/Class/classFilters';
-import { getClasses, createClass, deleteClass, CLASS_TYPES } from '../services/classService';
+import { getClasses, createClass, deleteClass, CLASS_TYPES } from '../services/lessonService';
 import { getTrainings } from '../services/trainingService';
 import { getInstructors } from '../services/instructorService';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,6 +16,7 @@ import { formatDateTime } from '../utils/dateUtils';
 
 export default function Classes() {
 	const [classes, setClasses] = useState([]);
+	const [filteredClasses, setFilteredClasses] = useState([]);
 	const [trainings, setTrainings] = useState([]);
 	const [instructors, setInstructors] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
@@ -35,18 +36,20 @@ export default function Classes() {
 	const fetchClasses = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			const data = await getClasses({
-				search: filters.search,
-				types: filters.types?.map(t => t.value) || [],
-				units: filters.units?.map(u => u.value) || []
+			const { data } = await getClasses({
+				types: filters.types?.length > 0 ? filters.types.map(t => t.value) : undefined,
+				units: filters.units?.length > 0 ? filters.units.map(u => u.value) : undefined,
+				page: 1,
+				limit: 10
 			});
 			setClasses(data);
+			setFilteredClasses(data);
 		} catch (error) {
 			showToast.error('Erro', 'Não foi possível carregar as aulas');
 		} finally {
 			setIsLoading(false);
 		}
-	}, [filters]);
+	}, [filters.types, filters.units]);
 
 	const fetchTrainings = async () => {
 		try {
@@ -126,6 +129,27 @@ export default function Classes() {
 		hidden: { opacity: 0, y: 20 },
 		show: { opacity: 1, y: 0 }
 	};
+
+	// Função para filtrar localmente
+	useEffect(() => {
+		if (!filters.search) {
+			setFilteredClasses(classes);
+			return;
+		}
+
+		const searchTerm = filters.search.toLowerCase();
+		const filtered = classes.filter(classItem => {
+			return (
+				classItem.training_data?.name?.toLowerCase().includes(searchTerm) ||
+				classItem.training_data?.code?.toLowerCase().includes(searchTerm) ||
+				classItem.instructor_name?.toLowerCase().includes(searchTerm) ||
+				classItem.unit?.toLowerCase().includes(searchTerm) ||
+				classItem.type?.toLowerCase().includes(searchTerm)
+			);
+		});
+
+		setFilteredClasses(filtered);
+	}, [filters.search, classes]);
 
 	return (
 		<div className="space-y-6 p-6">
@@ -245,7 +269,7 @@ export default function Classes() {
 						</div>
 					))}
 				</div>
-			) : classes.length === 0 ? (
+			) : filteredClasses.length === 0 ? (
 				<div className="flex flex-col items-center justify-center py-12 glass-card">
 					<p className="text-gray-500 dark:text-gray-400 text-lg">
 						Nenhuma aula encontrada
@@ -258,7 +282,7 @@ export default function Classes() {
 					animate="show"
 					className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-4`}
 				>
-					{classes.map((classItem) => (
+					{filteredClasses.map((classItem) => (
 						<motion.div
 							key={classItem.id}
 							variants={item}
@@ -282,12 +306,12 @@ export default function Classes() {
 											{classItem.type}
 										</span>
 										<span className="text-sm text-gray-500 dark:text-gray-400">
-											{classItem.training?.code || 'N/A'}
+											{classItem.training_data?.code || 'N/A'}
 										</span>
 									</div>
 
 									<h3 className="text-base font-medium text-gray-900 dark:text-white mb-3 line-clamp-2">
-										{classItem.training?.name || 'N/A'}
+										{classItem.training_data?.name || 'N/A'}
 									</h3>
 
 									<div className="space-y-2 flex-1">
@@ -352,14 +376,14 @@ export default function Classes() {
 										{/* Código */}
 										<div className="flex-shrink-0 w-24">
 											<span className="text-sm text-gray-500 dark:text-gray-400">
-												{classItem.training?.code || 'N/A'}
+												{classItem.training_data?.code || 'N/A'}
 											</span>
 										</div>
 
 										{/* Nome do Treinamento */}
 										<div className="flex-1 min-w-0">
 											<h3 className="text-base font-medium text-gray-900 dark:text-white truncate">
-												{classItem.training?.name || 'N/A'}
+												{classItem.training_data?.name || 'N/A'}
 											</h3>
 										</div>
 
