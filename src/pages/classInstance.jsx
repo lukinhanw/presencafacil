@@ -18,9 +18,11 @@ import AttendanceStats from '../components/ClassInstance/AttendanceStats';
 import { showToast } from '../components/General/toast';
 import { isClassFinished } from '../utils/dateUtils';
 import { motion } from 'framer-motion';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ClassInstance() {
 	const { id } = useParams();
+	const { hasRole } = useAuth();
 	const [classData, setClassData] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -142,15 +144,17 @@ export default function ClassInstance() {
 								<span>Registrar Presença</span>
 							</motion.button>
 
-							<motion.button
-								onClick={() => setIsInviteModalOpen(true)}
-								className="w-full btn-gradient py-2 flex items-center justify-center gap-2 text-sm"
-								whileHover={{ scale: 1.05 }}
-								whileTap={{ scale: 0.95 }}
-							>
-								<QrCodeIcon className="h-4 w-4" />
-								<span>Gerar Link</span>
-							</motion.button>
+							{hasRole('ADMIN_ROLE') && (
+								<motion.button
+									onClick={() => setIsInviteModalOpen(true)}
+									className="w-full btn-gradient py-2 flex items-center justify-center gap-2 text-sm"
+									whileHover={{ scale: 1.05 }}
+									whileTap={{ scale: 0.95 }}
+								>
+									<QrCodeIcon className="h-4 w-4" />
+									<span>Gerar Link</span>
+								</motion.button>
+							)}
 
 							<motion.button
 								onClick={() => setIsNFCModalOpen(true)}

@@ -1,13 +1,8 @@
 const AUTH_KEY = '@presenca:auth';
-const TOKEN_KEY = 'token';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const setStoredAuth = (userData) => {
 	localStorage.setItem(AUTH_KEY, JSON.stringify(userData));
-	// Armazena o token separadamente para fácil acesso
-	if (userData.token) {
-		localStorage.setItem(TOKEN_KEY, userData.token);
-	}
 };
 
 export const getStoredAuth = () => {
@@ -17,7 +12,6 @@ export const getStoredAuth = () => {
 
 export const removeStoredAuth = () => {
 	localStorage.removeItem(AUTH_KEY);
-	localStorage.removeItem(TOKEN_KEY);
 };
 
 export const login = async (credentials) => {

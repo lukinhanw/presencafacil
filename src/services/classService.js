@@ -9,6 +9,9 @@ export const CLASS_TYPES = [
 
 const getAuthHeader = () => {
 	const auth = JSON.parse(localStorage.getItem('@presenca:auth'));
+	if (!auth || !auth.token) {
+		throw new Error('Usuário não autenticado');
+	}
 	return {
 		'Authorization': `Bearer ${auth.token}`,
 		'Content-Type': 'application/json'

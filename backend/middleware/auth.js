@@ -3,21 +3,26 @@ const jwt = require('jsonwebtoken');
 const verifyToken = (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
+        console.log('Auth Header:', authHeader);
         if (!authHeader) {
             return res.status(401).json({ message: 'Token não fornecido' });
         }
 
         const parts = authHeader.split(' ');
+        console.log('Parts:', parts);
         if (parts.length !== 2) {
             return res.status(401).json({ message: 'Token mal formatado' });
         }
 
         const [scheme, token] = parts;
+        console.log('Scheme:', scheme);
+        console.log('Token:', token);
         if (!/^Bearer$/i.test(scheme)) {
             return res.status(401).json({ message: 'Token mal formatado' });
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+        console.log('Decoded:', decoded);
         
         // Garante que roles seja um array
         decoded.roles = Array.isArray(decoded.roles) ? decoded.roles : 

@@ -7,6 +7,7 @@ const trainingRoutes = require('./routes/training.routes');
 const employeeRoutes = require('./routes/employee.routes');
 const instructorRoutes = require('./routes/instructor.routes');
 const classRoutes = require('./routes/class.routes');
+const testRoutes = require('./routes/test.routes');
 
 const errorHandler = require('./middleware/errorHandler');
 
@@ -27,6 +28,9 @@ app.use('/api/trainings', trainingRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/instructors', instructorRoutes);
 app.use('/api/classes', classRoutes);
+
+// Rota para ler um arquivo de imagem na pasta uploads
+app.use('/api/uploads', express.static('uploads'));
 
 // Middleware de tratamento de erros
 app.use(errorHandler);

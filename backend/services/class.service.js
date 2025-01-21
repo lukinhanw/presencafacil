@@ -190,7 +190,7 @@ class ClassService {
                     registration: p.registration,
                     unit: p.unit,
                     position: p.position,
-                    photo: p.photo ? `${API_URL}/uploads/${p.photo}` : null,
+                    photo: p.photo ? `${p.photo}` : null,
                     type: p.type,
                     timestamp: p.timestamp,
                     early_leave: p.early_leave,

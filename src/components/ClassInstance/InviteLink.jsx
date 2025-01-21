@@ -2,10 +2,22 @@ import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { generateInviteLink } from '../../services/classService';
 import { showToast } from '../General/toast';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function InviteLink({ classId }) {
+	const { hasRole } = useAuth();
 	const [inviteLink, setInviteLink] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
+
+	if (!hasRole('ADMIN_ROLE')) {
+		return (
+			<div className="text-center">
+				<p className="text-gray-600 dark:text-gray-400">
+					Você não tem permissão para gerar links de convite.
+				</p>
+			</div>
+		);
+	}
 
 	const handleGenerateLink = async () => {
 		try {

@@ -2,12 +2,12 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const TOKEN_KEY = 'token';
 
 const getAuthHeader = () => {
-	const token = localStorage.getItem(TOKEN_KEY);
-	if (!token) {
+	const auth = JSON.parse(localStorage.getItem('@presenca:auth'));
+	if (!auth || !auth.token) {
 		throw new Error('Usuário não autenticado');
 	}
 	return {
-		'Authorization': `Bearer ${token}`,
+		'Authorization': `Bearer ${auth.token}`,
 		'Content-Type': 'application/json'
 	};
 };

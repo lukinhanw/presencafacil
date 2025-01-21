@@ -40,7 +40,13 @@ class AuthService {
                      (typeof userData.roles === 'string' ? JSON.parse(userData.roles) : 
                      [userData.roles]).filter(Boolean);
 
-        return jwt.sign(
+        console.log('Generating token for user:', {
+            id: userData.id,
+            email: userData.email,
+            roles: roles
+        });
+
+        const token = jwt.sign(
             {
                 id: userData.id,
                 email: userData.email,
@@ -49,6 +55,10 @@ class AuthService {
             secret,
             { expiresIn: '24h' }
         );
+
+        console.log('Generated token:', token);
+
+        return token;
     }
 }
 

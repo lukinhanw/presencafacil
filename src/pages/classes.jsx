@@ -422,7 +422,7 @@ export default function Classes() {
 				isOpen={isModalOpen}
 				onClose={handleCloseModal}
 				title="Nova Aula"
-				size="xl"
+				size="xxxl"
 			>
 				<ClassForm
 					onSubmit={handleSubmit}
