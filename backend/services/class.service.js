@@ -487,25 +487,19 @@ class ClassService {
                 throw new Error('Aula não encontrada');
             }
 
-            if (classData.status !== 'scheduled') {
-                throw new Error('Não é possível gerar link para uma aula não agendada');
-            }
-
             // Gera um token único
             const token = crypto.randomBytes(32).toString('hex');
-            const expiresAt = new Date(Date.now() + expiresInMinutes * 60000);
+            const expiresAt = new Date();
+            expiresAt.setMinutes(expiresAt.getMinutes() + expiresInMinutes);
 
-            // Atualiza a aula com o novo token
+            // Atualiza a aula com o token e data de expiração
             await classData.update({
                 invite_token: token,
                 invite_expires_at: expiresAt
             });
 
-            return {
-                token,
-                expiresAt,
-                url: `/aulas/${classId}/join/${token}`
-            };
+            // Retorna a URL formatada
+            return `/aulas/${classId}/convite/${token}`;
         } catch (error) {
             console.error('Erro ao gerar link de convite:', error);
             throw error;

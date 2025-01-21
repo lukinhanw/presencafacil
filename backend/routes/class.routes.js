@@ -25,9 +25,9 @@ const attendeeValidations = [
 // Rotas básicas
 router.get('/', verifyToken, classController.getClasses);
 router.get('/:id', verifyToken, classController.getClassById);
-router.post('/', verifyToken, hasRole('ADMIN'), classValidations, classController.createClass);
-router.put('/:id', verifyToken, hasRole('ADMIN'), classValidations, classController.updateClass);
-router.delete('/:id', verifyToken, hasRole('ADMIN'), classController.deleteClass);
+router.post('/', verifyToken, hasRole('ADMIN_ROLE'), classValidations, classController.createClass);
+router.put('/:id', verifyToken, hasRole('ADMIN_ROLE'), classValidations, classController.updateClass);
+router.delete('/:id', verifyToken, hasRole('ADMIN_ROLE'), classController.deleteClass);
 
 // Rotas para gerenciar participantes
 router.post('/:id/attendees', verifyToken, attendeeValidations, classController.registerAttendance);
@@ -35,10 +35,10 @@ router.post('/:id/attendees/:registration/early-leave', verifyToken, classContro
 router.delete('/:id/attendees/:registration', verifyToken, classController.removeAttendee);
 
 // Rotas para gerenciar status da aula
-router.post('/:id/finish', verifyToken, hasRole('ADMIN'), classController.finishClass);
+router.post('/:id/finish', verifyToken, hasRole('ADMIN_ROLE'), classController.finishClass);
 
 // Rotas para convites
-router.post('/:id/invite', verifyToken, hasRole('ADMIN'), classController.generateInviteLink);
+router.post('/:id/invite', verifyToken, hasRole(['ADMIN_ROLE']), classController.generateInviteLink);
 router.get('/:id/invite/:token/validate', classController.validateInviteToken);
 
 module.exports = router; 

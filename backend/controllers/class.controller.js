@@ -112,8 +112,6 @@ class ClassController {
     }
 
     async generateInviteLink(req, res, next) {
-        console.log('req', req);
-        console.log('res', res);
         try {
             const { expiresInMinutes } = req.body;
             const inviteData = await classService.generateInviteLink(req.params.id, expiresInMinutes);

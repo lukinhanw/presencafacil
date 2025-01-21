@@ -7,7 +7,6 @@ const trainingRoutes = require('./routes/training.routes');
 const employeeRoutes = require('./routes/employee.routes');
 const instructorRoutes = require('./routes/instructor.routes');
 const classRoutes = require('./routes/class.routes');
-const testRoutes = require('./routes/test.routes');
 
 const errorHandler = require('./middleware/errorHandler');
 

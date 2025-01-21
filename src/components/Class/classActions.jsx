@@ -21,11 +21,11 @@ export default function ClassActions({ classData, onUpdate }) {
 
     const handleGenerateInvite = async () => {
         try {
-            const { url } = await generateInviteLink(classData.id);
+            const url = await generateInviteLink(classData.id);
             setInviteLink(`${window.location.origin}${url}`);
-            showToast('Link de convite gerado com sucesso', 'success');
+            showToast.success('Link de convite gerado com sucesso', 'success');
         } catch (error) {
-            showToast(error.message, 'error');
+            showToast.error('Erro ao gerar link de convite');
         }
     };
 

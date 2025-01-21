@@ -25,7 +25,7 @@ export default function InviteLink({ classId }) {
 			const link = await generateInviteLink(classId);
 			setInviteLink(link);
 		} catch (error) {
-			showToast.error('Erro', 'Não foi possível gerar o link de convite');
+			showToast.error('Erro', error.message);
 		} finally {
 			setIsLoading(false);
 		}
