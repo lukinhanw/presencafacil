@@ -16,7 +16,7 @@ export default function AttendanceStats({ attendees }) {
 					{present}
 				</p>
 			</div>
-			<CheckCircleIcon className="h-8 w-8 text-green-600/40 dark:text-green-400/40" />
+			<CheckCircleIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
 		</div>
 	);
 }
