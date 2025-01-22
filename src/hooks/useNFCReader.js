@@ -2,75 +2,91 @@ import { useState, useEffect, useCallback } from 'react';
 import { normalizeCardNumber, isValidCardNumber } from '../utils/nfcUtils';
 
 export const useNFCReader = ({ onCardRead, enabled = true }) => {
-  const [buffer, setBuffer] = useState('');
-  const [isReading, setIsReading] = useState(false);
-  const [lastRead, setLastRead] = useState(null);
-  const [error, setError] = useState(null);
+	const [buffer, setBuffer] = useState('');
+	const [isReading, setIsReading] = useState(false);
+	const [lastRead, setLastRead] = useState(null);
+	const [error, setError] = useState(null);
+	const [timeoutId, setTimeoutId] = useState(null);
+	const [shouldProcess, setShouldProcess] = useState(false);
 
-  const resetBuffer = useCallback(() => {
-    setBuffer('');
-    setIsReading(false);
-  }, []);
+	const resetBuffer = useCallback(() => {
+		setBuffer('');
+		setIsReading(false);
+		setShouldProcess(false);
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+			setTimeoutId(null);
+		}
+	}, [timeoutId]);
 
-  const handleKeyPress = useCallback((event) => {
-    if (!enabled) return;
+	const processCardNumber = useCallback((cardNumber) => {
+		try {
+			const normalizedNumber = normalizeCardNumber(cardNumber);
+			if (isValidCardNumber(normalizedNumber)) {
+				setLastRead(normalizedNumber);
+				onCardRead(normalizedNumber);
+				setError(null);
+			} else {
+				setError('Formato de cartão inválido');
+			}
+		} catch (error) {
+			setError(error.message);
+		}
+	}, [onCardRead]);
 
-    // Start reading when we receive input
-    if (!isReading) {
-      setIsReading(true);
-    }
+	// Efeito para processar o cartão quando o buffer estiver pronto
+	useEffect(() => {
+		if (shouldProcess && buffer.length === 14) {
+			processCardNumber(buffer);
+			const timeoutId = setTimeout(resetBuffer, 100);
+			return () => clearTimeout(timeoutId);
+		}
+	}, [buffer, shouldProcess, processCardNumber, resetBuffer]);
 
-    // Add character to buffer
-    setBuffer(prev => prev + event.key);
+	const handleKeyPress = useCallback((event) => {
+		if (!enabled) return;
 
-    // Reset after 100ms of no input
-    const timeoutId = setTimeout(resetBuffer, 100);
-    return () => clearTimeout(timeoutId);
-  }, [enabled, isReading, resetBuffer]);
+		// Inicia a leitura apenas se não estiver lendo
+		if (!isReading) {
+			setIsReading(true);
+		}
 
-  const processCardNumber = useCallback((rawNumber) => {
-    try {
-      // Remove the Enter key from the end
-      const cardInput = rawNumber.slice(0, -1);
-      
-      // Normalize the card number
-      const normalizedNumber = normalizeCardNumber(cardInput);
+		// Adiciona o caractere ao buffer
+		setBuffer(prev => {
+			const newBuffer = prev + event.key;
+			// Se atingiu 14 caracteres, marca para processamento
+			if (newBuffer.length === 14) {
+				setShouldProcess(true);
+			}
+			return newBuffer;
+		});
 
-      // Validate the card number
-      if (!isValidCardNumber(normalizedNumber)) {
-        throw new Error('Formato de cartão inválido');
-      }
+		// Reseta o timeout anterior
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+		}
 
-      setLastRead(normalizedNumber);
-      onCardRead(normalizedNumber);
-      setError(null);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      resetBuffer();
-    }
-  }, [onCardRead, resetBuffer]);
+		// Define um novo timeout para resetar o buffer após 2 segundos sem entrada
+		const newTimeoutId = setTimeout(resetBuffer, 2000);
+		setTimeoutId(newTimeoutId);
+	}, [enabled, isReading, resetBuffer, timeoutId]);
 
-  useEffect(() => {
-    if (!enabled) return;
+	useEffect(() => {
+		if (!enabled) return;
 
-    // Process the buffer when Enter is pressed
-    if (buffer.endsWith('Enter')) {
-      processCardNumber(buffer);
-    }
-  }, [buffer, enabled, processCardNumber]);
+		window.addEventListener('keypress', handleKeyPress);
+		return () => {
+			window.removeEventListener('keypress', handleKeyPress);
+			if (timeoutId) {
+				clearTimeout(timeoutId);
+			}
+		};
+	}, [enabled, handleKeyPress, timeoutId]);
 
-  useEffect(() => {
-    if (!enabled) return;
-
-    window.addEventListener('keypress', handleKeyPress);
-    return () => window.removeEventListener('keypress', handleKeyPress);
-  }, [enabled, handleKeyPress]);
-
-  return {
-    isReading,
-    lastRead,
-    error,
-    clearError: () => setError(null)
-  };
+	return {
+		isReading,
+		lastRead,
+		error,
+		clearError: () => setError(null)
+	};
 };

@@ -27,14 +27,14 @@ const handleResponse = async (response) => {
 			throw new Error(data.errors.map(err => err.message || err).join(', '));
 		}
 		
-		// Se houver uma mensagem de erro específica
-		if (data.message) {
-			throw new Error(data.message);
-		}
-		
-		// Se houver um erro específico
+		// Se houver uma mensagem de erro específica no campo error
 		if (data.error) {
 			throw new Error(data.error);
+		}
+		
+		// Se houver uma mensagem de erro genérica
+		if (data.message) {
+			throw new Error(data.message);
 		}
 		
 		throw new Error('Ocorreu um erro na operação');

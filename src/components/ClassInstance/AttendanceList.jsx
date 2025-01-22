@@ -63,7 +63,7 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 			<div className="overflow-x-auto">
 				<table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
 					<thead>
-						<tr className="bg-gray-100 dark:bg-gray-700">
+						<tr className="bg-gray-200 dark:bg-gray-700">
 							<th className="px-6 py-4 text-center text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/6">
 								Foto
 							</th>
