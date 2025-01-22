@@ -129,11 +129,7 @@ export default function ClassInstance() {
 					<AttendanceStats attendees={classData.attendees || []} />
 
 					{!finished && (
-						<motion.div 
-							className="glass-card p-3 space-y-2"
-							whileHover={{ scale: 1.02 }}
-							transition={{ type: "spring", stiffness: 400, damping: 10 }}
-						>
+						<div className="glass-card p-3 space-y-2">
 							<motion.button
 								onClick={() => setIsManualModalOpen(true)}
 								className="w-full btn-gradient py-2 flex items-center justify-center gap-2 text-sm"
@@ -165,7 +161,7 @@ export default function ClassInstance() {
 								<CreditCardIcon className="h-4 w-4" />
 								<span>Cartão NFC</span>
 							</motion.button>
-						</motion.div>
+						</div>
 					)}
 				</motion.div>
 			</div>
