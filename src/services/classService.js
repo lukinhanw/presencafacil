@@ -226,31 +226,34 @@ export const finishClass = async (classId) => {
 };
 
 export const generateInviteLink = async (classId, expiresInMinutes = 60) => {
-	try {
-		const response = await fetch(`${API_URL}/classes/${classId}/invite`, {
-			method: 'POST',
-			headers: getAuthHeader(),
-			body: JSON.stringify({ expiresInMinutes })
-		});
+	const response = await fetch(`${API_URL}/classes/${classId}/invite`, {
+		method: 'POST',
+		headers: getAuthHeader(),
+		body: JSON.stringify({ expiresInMinutes })
+	});
 
-		return await handleResponse(response);
-	} catch (error) {
-		console.error('Erro ao gerar link de convite:', error);
-		throw error;
+	if (!response.ok) {
+		await handleResponse(response);
 	}
+
+	const data = await response.json();
+	return data;
 };
 
 export const validateInviteToken = async (classId, token) => {
-	try {
-		const response = await fetch(`${API_URL}/classes/${classId}/invite/${token}/validate`, {
-			headers: getAuthHeader()
-		});
+	const response = await fetch(`${API_URL}/classes/${classId}/invite/${token}`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
 
-		return await handleResponse(response);
-	} catch (error) {
-		console.error('Erro ao validar token:', error);
-		throw error;
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.message || 'Erro ao validar token');
 	}
+
+	return await response.json();
 };
 
 export const registerAttendanceByCard = async (classId, cardId) => {

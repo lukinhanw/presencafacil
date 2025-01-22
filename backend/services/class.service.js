@@ -499,7 +499,10 @@ class ClassService {
             });
 
             // Retorna a URL formatada
-            return `/aulas/${classId}/convite/${token}`;
+            return {
+                token,
+                url: `/api/classes/${classId}/invite/${token}`
+            };
         } catch (error) {
             console.error('Erro ao gerar link de convite:', error);
             throw error;
@@ -508,26 +511,134 @@ class ClassService {
 
     async validateInviteToken(classId, token) {
         try {
+            const classData = await Class.findOne({
+                where: {
+                    id: classId,
+                    invite_token: token,
+                    invite_expires_at: {
+                        [Op.gt]: new Date()
+                    },
+                    status: 'scheduled'
+                },
+                include: [
+                    {
+                        model: Instructor,
+                        as: 'instructor',
+                        attributes: ['id', 'name']
+                    }
+                ]
+            });
+
+            if (!classData) {
+                return {
+                    valid: false,
+                    message: 'Link de convite inválido ou expirado'
+                };
+            }
+
+            return {
+                valid: true,
+                classData: {
+                    id: classData.id,
+                    name: classData.name,
+                    unit: classData.unit,
+                    date_start: classData.date_start,
+                    instructor: classData.instructor
+                }
+            };
+        } catch (error) {
+            console.error('Erro ao validar token:', error);
+            throw error;
+        }
+    }
+
+    async checkParticipant(classId, registration) {
+        try {
+            // Primeiro verifica se a aula existe
             const classData = await Class.findByPk(classId);
             if (!classData) {
                 throw new Error('Aula não encontrada');
             }
 
-            if (classData.status !== 'scheduled') {
-                throw new Error('Aula não está mais disponível');
-            }
+            // Busca o participante
+            const participant = await ClassParticipant.findOne({
+                where: {
+                    class_id: classId,
+                    registration: registration
+                }
+            });
 
-            if (!classData.invite_token || classData.invite_token !== token) {
-                throw new Error('Token inválido');
-            }
-
-            if (new Date() > new Date(classData.invite_expires_at)) {
-                throw new Error('Token expirado');
-            }
-
-            return true;
+            return {
+                isRegistered: !!participant,
+                participant: participant ? {
+                    id: participant.id,
+                    name: participant.name,
+                    registration: participant.registration,
+                    unit: participant.unit,
+                    position: participant.position,
+                    type: participant.type,
+                    timestamp: participant.timestamp
+                } : null
+            };
         } catch (error) {
-            console.error('Erro ao validar token:', error);
+            console.error('Erro ao verificar participante:', error);
+            throw error;
+        }
+    }
+
+    async joinClassByInvite(classId, token, attendeeData) {
+        try {
+            // Valida o token primeiro
+            const validationResult = await this.validateInviteToken(classId, token);
+            if (!validationResult.valid) {
+                throw new Error(validationResult.message);
+            }
+
+            // Verifica se o participante já está registrado
+            const existingParticipant = await ClassParticipant.findOne({
+                where: {
+                    class_id: classId,
+                    registration: attendeeData.registration
+                }
+            });
+
+            if (existingParticipant) {
+                throw new Error('Você já está inscrito nesta aula');
+            }
+
+            // Se houver foto, salva usando o serviço de upload
+            let photoFileName = null;
+            if (attendeeData.photo) {
+                photoFileName = await uploadService.saveBase64Image(
+                    attendeeData.photo,
+                    `class_${classId}_${attendeeData.registration}`
+                );
+            }
+
+            // Registra a presença
+            const participant = await ClassParticipant.create({
+                class_id: classId,
+                name: attendeeData.name,
+                registration: attendeeData.registration,
+                unit: attendeeData.unit,
+                position: attendeeData.position || 'Não informado',
+                photo: photoFileName,
+                type: 'Convite'
+            });
+
+            // Atualiza o contador de presentes
+            await Class.increment('presents', { where: { id: classId } });
+
+            return participant;
+        } catch (error) {
+            // Se houver erro e a foto foi salva, remove o arquivo
+            if (error.photoFileName) {
+                try {
+                    await uploadService.deleteFile(error.photoFileName);
+                } catch (deleteError) {
+                    console.error('Erro ao deletar arquivo após falha:', deleteError);
+                }
+            }
             throw error;
         }
     }

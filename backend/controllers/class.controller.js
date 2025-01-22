@@ -1,5 +1,8 @@
 const classService = require('../services/class.service');
 const { validationResult } = require('express-validator');
+const { Op } = require('sequelize');
+const Class = require('../models/class.model');
+const ClassParticipant = require('../models/classParticipant.model');
 
 class ClassController {
     async getClasses(req, res, next) {
@@ -124,11 +127,71 @@ class ClassController {
 
     async validateInviteToken(req, res, next) {
         try {
-            const isValid = await classService.validateInviteToken(req.params.id, req.params.token);
-            res.json({ valid: isValid });
+            const { id, token } = req.params;
+            const result = await classService.validateInviteToken(id, token);
+            res.json(result);
         } catch (error) {
             console.error('Erro ao validar token:', error);
             next(error);
+        }
+    }
+
+    async joinClassByInvite(req, res, next) {
+        try {
+            const { id, token } = req.params;
+            const { name, registration, unit, position } = req.body;
+
+            // Validações manuais já que não podemos usar express-validator com FormData
+            if (!name) {
+                return res.status(400).json({ error: 'Nome do participante é obrigatório' });
+            }
+            if (!registration) {
+                return res.status(400).json({ error: 'Matrícula do participante é obrigatória' });
+            }
+            if (!unit) {
+                return res.status(400).json({ error: 'Unidade do participante é obrigatória' });
+            }
+
+            // Se a foto vier como arquivo
+            let photoData = null;
+            if (req.file) {
+                photoData = req.file.buffer.toString('base64');
+            } else if (req.body.photo) {
+                photoData = req.body.photo;
+            }
+
+            const result = await classService.joinClassByInvite(id, token, {
+                name,
+                registration,
+                unit,
+                position,
+                photo: photoData
+            });
+            
+            res.status(201).json(result);
+        } catch (error) {
+            console.error('Erro ao registrar presença por convite:', error);
+            res.status(400).json({ error: error.message || 'Erro ao registrar presença por convite' });
+        }
+    }
+
+    async checkParticipant(req, res, next) {
+        try {
+            const { id, registration } = req.params;
+            
+            if (!id || !registration) {
+                return res.status(400).json({ 
+                    error: 'ID da aula e matrícula são obrigatórios' 
+                });
+            }
+
+            const result = await classService.checkParticipant(id, registration);
+            res.json(result);
+        } catch (error) {
+            console.error('Erro ao verificar participante:', error);
+            res.status(error.message === 'Aula não encontrada' ? 404 : 500).json({
+                error: error.message || 'Erro ao verificar participante'
+            });
         }
     }
 }

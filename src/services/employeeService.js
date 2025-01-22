@@ -134,11 +134,15 @@ export const searchEmployees = async (query) => {
 
 export const getEmployeeByRegistration = async (registration) => {
 	const response = await fetch(`${API_URL}/employees/registration/${registration}`, {
-		headers: getAuthHeader()
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json'
+		}
 	});
 
 	if (!response.ok) {
-		await handleErrorResponse(response);
+		const error = await response.json();
+		throw new Error(error.message || 'Erro ao buscar funcionário');
 	}
 
 	return await response.json();

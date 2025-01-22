@@ -18,7 +18,7 @@ function App() {
 		<Routes>
 			<Route path="/login" element={<Login />} />
 			<Route path="/unauthorized" element={<Unauthorized />} />
-			<Route path="/aulas/:id/join/:token" element={<Join />} />
+			<Route path="/aulas/:id/convite/:token" element={<Join />} />
 			<Route path="/" element={
 				<ProtectedRoute>
 					<Layout />

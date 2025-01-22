@@ -22,10 +22,13 @@ export default function InviteLink({ classId }) {
 	const handleGenerateLink = async () => {
 		try {
 			setIsLoading(true);
-			const link = await generateInviteLink(classId);
+			const { token } = await generateInviteLink(classId);
+			const baseUrl = window.location.origin;
+			const link = `${baseUrl}/aulas/${classId}/convite/${token}`;
 			setInviteLink(link);
+			showToast.success('Link de convite gerado com sucesso');
 		} catch (error) {
-			showToast.error('Erro', error.message);
+			showToast.error('Erro ao gerar link de convite');
 		} finally {
 			setIsLoading(false);
 		}
@@ -33,7 +36,7 @@ export default function InviteLink({ classId }) {
 
 	const handleCopyLink = () => {
 		navigator.clipboard.writeText(inviteLink);
-		showToast.success('Sucesso', 'Link copiado para a área de transferência!');
+		showToast.success('Link copiado para a área de transferência!');
 	};
 
 	return (

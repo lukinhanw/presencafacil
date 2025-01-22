@@ -25,6 +25,10 @@ const employeeValidations = [
         .trim()
 ];
 
+// Rotas públicas
+router.get('/registration/:registration', employeeController.getEmployeeByRegistration);
+router.get('/card/:cardNumber', employeeController.getEmployeeByCardNumber);
+
 // Rotas protegidas por autenticação
 router.use(verifyToken);
 
@@ -33,12 +37,6 @@ router.get('/', employeeController.getEmployees);
 
 // Buscar colaboradores (para autocomplete)
 router.get('/search', employeeController.searchEmployees);
-
-// Buscar colaborador por número do cartão
-router.get('/card/:cardNumber', employeeController.getEmployeeByCardNumber);
-
-// Buscar colaborador por matrícula
-router.get('/registration/:registration', employeeController.getEmployeeByRegistration);
 
 // Rotas que requerem papel de ADMIN
 router.use(hasRole(['ADMIN_ROLE']));

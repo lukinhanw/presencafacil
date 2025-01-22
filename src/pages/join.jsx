@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { getClassById, validateInviteToken, registerAttendance } from '../services/classService';
+import { validateInviteToken } from '../services/classService';
 import { getEmployeeByRegistration } from '../services/employeeService';
 import WebcamCapture from '../components/ClassInstance/WebcamCapture';
 import { showToast } from '../components/General/toast';
@@ -9,36 +9,31 @@ import { showToast } from '../components/General/toast';
 export default function Join() {
 	const { id, token } = useParams();
 	const navigate = useNavigate();
-	const [step, setStep] = useState('registration'); // registration, photo, success
-	const [isLoading, setIsLoading] = useState(false);
+	const [step, setStep] = useState('validating'); // validating, registration, photo, success
+	const [isLoading, setIsLoading] = useState(true);
 	const [classData, setClassData] = useState(null);
 	const [employee, setEmployee] = useState(null);
 	const { register, handleSubmit, formState: { errors } } = useForm();
 
 	useEffect(() => {
-		validateToken();
+		validateInviteAndLoadClass();
 	}, [id, token]);
 
-	const validateToken = async () => {
+	const validateInviteAndLoadClass = async () => {
 		try {
 			setIsLoading(true);
-			const isValid = true;
-			if (!isValid) {
-				showToast.error('Erro', 'Link de convite inválido ou expirado');
+			const response = await validateInviteToken(id, token);
+			
+			if (!response.valid) {
+				showToast.error('Link de convite inválido ou expirado');
 				navigate('/');
 				return;
 			}
 
-			const data = await getClassById(id);
-			if (data.date_end) {
-				showToast.error('Erro', 'Esta aula já foi finalizada');
-				navigate('/');
-				return;
-			}
-
-			setClassData(data);
+			setClassData(response.classData);
+			setStep('registration');
 		} catch (error) {
-			showToast.error('Erro', 'Não foi possível validar o link de convite');
+			showToast.error('Não foi possível validar o link de convite');
 			navigate('/');
 		} finally {
 			setIsLoading(false);
@@ -49,10 +44,21 @@ export default function Join() {
 		try {
 			setIsLoading(true);
 			const employeeData = await getEmployeeByRegistration(data.registration);
+			
+			// Verificar se o funcionário já está inscrito na aula
+			const response = await fetch(`${import.meta.env.VITE_API_URL}/classes/${id}/participants/${employeeData.registration}/check`);
+			const participantData = await response.json();
+			
+			if (participantData.isRegistered) {
+				showToast.error('Você já está inscrito nesta aula');
+				return;
+			}
+			
 			setEmployee(employeeData);
 			setStep('photo');
 		} catch (error) {
-			showToast.error('Erro', 'Matrícula não encontrada');
+			console.error('Erro ao buscar funcionário:', error);
+			showToast.error(error.message || 'Matrícula não encontrada');
 		} finally {
 			setIsLoading(false);
 		}
@@ -61,23 +67,40 @@ export default function Join() {
 	const handlePhotoCapture = async (photoData) => {
 		try {
 			setIsLoading(true);
-			await registerAttendance(id, {
-				id: employee.id,
+
+			const requestData = {
 				name: employee.name,
 				registration: employee.registration,
-				photo: photoData,
-				type: 'Invite'
+				unit: employee.unit,
+				position: employee.position,
+				photo: photoData
+			};
+
+			const response = await fetch(`${import.meta.env.VITE_API_URL}/classes/${id}/invite/${token}/join`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(requestData)
 			});
+
+			const responseData = await response.json();
+
+			if (!response.ok) {
+				throw new Error(responseData.message || responseData.error || 'Erro ao registrar presença');
+			}
+
 			setStep('success');
-			showToast.success('Sucesso', 'Presença registrada com sucesso!');
+			showToast.success('Presença registrada com sucesso!');
 		} catch (error) {
-			showToast.error('Erro', error.message || 'Não foi possível registrar a presença');
+			console.error('Erro ao registrar presença:', error);
+			showToast.error(error.message || 'Não foi possível registrar a presença');
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
-	if (isLoading || !classData) {
+	if (isLoading || step === 'validating') {
 		return (
 			<div className="min-h-screen flex items-center justify-center">
 				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
@@ -90,10 +113,16 @@ export default function Join() {
 			<div className="glass-card max-w-md w-full p-6 space-y-6">
 				<div className="text-center">
 					<h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-						{classData.training.name}
+						{classData.name}
 					</h1>
 					<p className="text-sm text-gray-600 dark:text-gray-400">
 						Instrutor: {classData.instructor.name}
+					</p>
+					<p className="text-sm text-gray-600 dark:text-gray-400">
+						Unidade: {classData.unit}
+					</p>
+					<p className="text-sm text-gray-600 dark:text-gray-400">
+						Data: {new Date(classData.date_start).toLocaleDateString()}
 					</p>
 				</div>
 
@@ -172,7 +201,7 @@ export default function Join() {
 							onClick={() => window.close()}
 							className="btn-gradient w-full"
 						>
-							Fechar
+							Você já pode fechar esta janela
 						</button>
 					</div>
 				)}

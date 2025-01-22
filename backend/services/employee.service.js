@@ -121,13 +121,22 @@ class EmployeeService {
     }
 
     async getEmployeeByRegistration(registration) {
-        const employee = await Employee.findOne({
-            where: { registration }
-        });
-        if (!employee) {
-            throw new Error('Colaborador não encontrado');
+        try {
+            const employee = await Employee.findOne({
+                where: { registration }
+            });
+
+            if (!employee) {
+                const error = new Error('Funcionário não encontrado');
+                error.statusCode = 404;
+                throw error;
+            }
+
+            return employee;
+        } catch (error) {
+            console.error('Erro ao buscar funcionário por matrícula:', error);
+            throw error;
         }
-        return employee;
     }
 
     async getEmployeeByCardNumber(cardNumber) {

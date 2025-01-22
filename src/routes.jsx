@@ -7,6 +7,7 @@ import Classes from './pages/classes';
 import ClassDetails from './pages/classDetails';
 import Trainings from './pages/trainings';
 import Instructors from './pages/instructors';
+import Join from './pages/join';
 
 function PrivateRoute({ children }) {
     const { isAuthenticated } = useAuth();
@@ -17,6 +18,7 @@ export default function AppRoutes() {
     return (
         <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/aulas/:id/convite/:token" element={<Join />} />
             
             <Route path="/" element={
                 <PrivateRoute>
