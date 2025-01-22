@@ -86,7 +86,7 @@ class ClassController {
 
     async registerEarlyLeave(req, res, next) {
         try {
-            const classData = await classService.registerEarlyLeave(req.params.id, req.params.registration);
+            const classData = await classService.registerEarlyLeave(req.params.id, req.params.attendeeId);
             res.json(classData);
         } catch (error) {
             console.error('Erro ao registrar saída antecipada:', error);
@@ -96,7 +96,7 @@ class ClassController {
 
     async removeAttendee(req, res, next) {
         try {
-            const classData = await classService.removeAttendee(req.params.id, req.params.registration);
+            const classData = await classService.removeAttendee(req.params.id, req.params.attendeeId);
             res.json(classData);
         } catch (error) {
             console.error('Erro ao remover participante:', error);

@@ -16,7 +16,7 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 			showToast.success('Sucesso', 'Presença removida com sucesso!');
 			onUpdate();
 		} catch (error) {
-			showToast.error('Erro', 'Não foi possível remover a presença');
+			showToast.error('Erro', error.message);
 		}
 		setDeleteAlert({ isOpen: false, attendeeId: null });
 	};
@@ -27,7 +27,7 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 			showToast.success('Sucesso', 'Saída antecipada registrada com sucesso!');
 			onUpdate();
 		} catch (error) {
-			showToast.error('Erro', 'Não foi possível registrar a saída antecipada');
+			showToast.error('Erro', error.message);
 		}
 		setEarlyLeaveAlert({ isOpen: false, attendeeId: null });
 	};
@@ -54,7 +54,13 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 								Colaborador
 							</th>
 							<th className="px-6 py-4 text-center text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/6">
-								Horário
+								Horário Entrada
+							</th>
+							<th className="px-6 py-4 text-center text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/6">
+								Horário Saída
+							</th>
+							<th className="px-6 py-4 text-center text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/6">
+								Unidade
 							</th>
 							<th className="px-6 py-4 text-center text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider w-1/6">
 								Cargo
@@ -94,6 +100,16 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 									{new Date(attendee.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-800 dark:text-gray-100">
+									{attendee.early_leave ? (
+										new Date(attendee.early_leave_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+									) : (
+										'-'
+									)}
+								</td>
+								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-800 dark:text-gray-100">
+									{attendee.unit}
+								</td>
+								<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-800 dark:text-gray-100">
 									{attendee.position}
 								</td>
 								{!isFinished && (
@@ -108,13 +124,15 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 													<ClockIcon className="h-5 w-5" />
 												</button>
 											)}
-											<button
-												onClick={() => setDeleteAlert({ isOpen: true, attendeeId: attendee.id })}
-												className="text-red-500 hover:text-red-700 dark:text-red-300 dark:hover:text-red-200"
-												title="Remover presença"
-											>
-												<TrashIcon className="h-5 w-5" />
-											</button>
+											{!attendee.early_leave && (
+												<button
+													onClick={() => setDeleteAlert({ isOpen: true, attendeeId: attendee.id })}
+													className="text-red-500 hover:text-red-700 dark:text-red-300 dark:hover:text-red-200"
+													title="Remover presença"
+												>
+													<TrashIcon className="h-5 w-5" />
+												</button>
+											)}
 										</div>
 									</td>
 								)}

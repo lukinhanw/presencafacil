@@ -168,16 +168,14 @@ export const removeAttendee = async (classId, registration) => {
 
 export const updateEarlyLeave = async (classId, attendeeId) => {
 	try {
-		const classData = await getClassById(classId);
-		const attendeeIndex = classData.attendees.findIndex(a => a.id === attendeeId);
-		if (attendeeIndex === -1) throw new Error('Participante não encontrado');
+		const response = await fetch(`${API_URL}/classes/${classId}/attendees/${attendeeId}/early-leave`, {
+			method: 'POST',
+			headers: getAuthHeader()
+		});
 
-		classData.attendees[attendeeIndex].early_leave = true;
-		classData.attendees[attendeeIndex].early_leave_time = new Date().toISOString();
-
-		return await updateClass(classId, classData);
+		return await handleResponse(response);
 	} catch (error) {
-		console.error('Erro ao atualizar saída antecipada:', error);
+		console.error('Erro ao registrar saída antecipada:', error);
 		throw error;
 	}
 };

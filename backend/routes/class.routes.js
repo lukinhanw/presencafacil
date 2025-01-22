@@ -39,8 +39,8 @@ router.delete('/:id', hasRole(['ADMIN_ROLE']), classController.deleteClass);
 
 // Rotas para gerenciar participantes
 router.post('/:id/attendees', attendeeValidations, classController.registerAttendance);
-router.post('/:id/attendees/:registration/early-leave', classController.registerEarlyLeave);
-router.delete('/:id/attendees/:registration', classController.removeAttendee);
+router.post('/:id/attendees/:attendeeId/early-leave', classController.registerEarlyLeave);
+router.delete('/:id/attendees/:attendeeId', classController.removeAttendee);
 
 // Rotas para gerenciar status da aula
 router.post('/:id/finish', hasRole(['ADMIN_ROLE']), classController.finishClass);

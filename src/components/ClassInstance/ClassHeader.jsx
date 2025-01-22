@@ -17,6 +17,8 @@ export default function ClassHeader({
 					<span className="font-medium">Instrutor: {classData.instructor.name}</span>
 					<span>•</span>
 					<span>Início: {formatDateTimeHourMin(classData.date_start)}</span>
+					<span>•</span>
+					<span>Unidade: {classData.unit}</span>
 					{isFinished && (
 						<>
 							<span>•</span>

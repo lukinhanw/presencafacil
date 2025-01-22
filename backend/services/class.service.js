@@ -375,12 +375,12 @@ class ClassService {
         }
     }
 
-    async registerEarlyLeave(classId, registration) {
+    async registerEarlyLeave(classId, participantId) {
         try {
             const participant = await ClassParticipant.findOne({
                 where: {
                     class_id: classId,
-                    registration: registration
+                    id: participantId
                 }
             });
 
@@ -405,7 +405,7 @@ class ClassService {
         }
     }
 
-    async removeAttendee(classId, registration) {
+    async removeAttendee(classId, participantId) {
         try {
             const classInstance = await Class.findByPk(classId);
             if (!classInstance) {
@@ -419,7 +419,7 @@ class ClassService {
             const participant = await ClassParticipant.findOne({
                 where: {
                     class_id: classId,
-                    registration: registration
+                    id: participantId
                 }
             });
 
