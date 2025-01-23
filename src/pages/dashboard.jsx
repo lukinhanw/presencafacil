@@ -159,7 +159,7 @@ export default function Dashboard() {
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ delay: 0.6 }}
-				className="flex-1 bg-white dark:bg-gray-900 rounded-lg p-4 shadow-lg px-6 py-10"
+				className="flex-1 rounded-lg p-4 px-6 py-10"
 			>
 				<motion.h2
 					className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 px-4"
@@ -188,12 +188,12 @@ export default function Dashboard() {
 							className="group relative overflow-hidden glass-card-alt"
 						>
 							{/* Gradient Background com animação */}
-							<div className={`absolute inset-0 opacity-30 bg-gradient-to-br ${item.bgColor} group-hover:opacity-40 transition-opacity duration-300`} />
+							<div className={`absolute inset-0 opacity-30 bg-gradient-to-br  group-hover:opacity-40 transition-opacity duration-300`} />
 
 							{/* Content */}
 							<div className="relative z-10 p-6">
 								<div className="flex items-start space-x-4">
-									<div className={`p-3 rounded-lg bg-white/90 dark:bg-gray-800/90 ${item.bgColor} transform group-hover:scale-110 transition-transform duration-300`}>
+									<div className={`p-3 rounded-lg bg-white/90 dark:bg-gray-800/90  transform group-hover:scale-110 transition-transform duration-300`}>
 										<item.icon className={`h-8 w-8 ${item.iconColor}`} />
 									</div>
 									<div className="flex-1 text-left">
