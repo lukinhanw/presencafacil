@@ -75,14 +75,6 @@ const Class = sequelize.define('class', {
             model: 'instructors',
             key: 'id'
         }
-    },
-    invite_token: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    invite_expires_at: {
-        type: DataTypes.DATE,
-        allowNull: true
     }
 }, {
     tableName: 'classes',

@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const Class = require('../models/class.model');
 const Instructor = require('../models/instructor.model');
 const ClassParticipant = require('../models/classParticipant.model');
+const ClassInvite = require('../models/classInvite.model');
 const uploadService = require('./upload.service');
 
 // URL base para os arquivos estáticos
@@ -17,6 +18,25 @@ class ClassService {
             case 'DDS': return 'DDS';
             case 'Others': return 'Outros';
             default: return type;
+        }
+    }
+
+    getCodeByType(type) {
+        const date = new Date();
+        const year = date.getFullYear().toString().slice(-2);
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+
+        switch (type) {
+            case 'DDS':
+                return `DDS${year}${month}${day}${random}`;
+            case 'External':
+                return `EXT${year}${month}${day}${random}`;
+            case 'Others':
+                return `OUT${year}${month}${day}${random}`;
+            default:
+                return `${year}${month}${day}${random}`;
         }
     }
 
@@ -165,7 +185,7 @@ class ClassService {
                 originalType: classData.type,
                 date_start: classData.date_start,
                 date_end: classData.date_end,
-                presents: classData.participants?.length || 0,
+                presents: classData.presents,
                 status: classData.status,
                 unit: classData.unit,
                 training: {
@@ -300,15 +320,6 @@ class ClassService {
         } catch (error) {
             console.error('Erro ao excluir aula:', error);
             throw error;
-        }
-    }
-
-    getCodeByType(type) {
-        switch (type) {
-            case 'External': return 'EXT';
-            case 'DDS': return 'DDS';
-            case 'Others': return 'OUTROS';
-            default: return '';
         }
     }
 
@@ -492,16 +503,19 @@ class ClassService {
             const expiresAt = new Date();
             expiresAt.setMinutes(expiresAt.getMinutes() + expiresInMinutes);
 
-            // Atualiza a aula com o token e data de expiração
-            await classData.update({
-                invite_token: token,
-                invite_expires_at: expiresAt
+            // Cria um novo registro de convite
+            await ClassInvite.create({
+                class_id: classId,
+                token,
+                expires_at: expiresAt,
+                is_active: true
             });
 
             // Retorna a URL formatada
             return {
                 token,
-                url: `/api/classes/${classId}/invite/${token}`
+                url: `/api/classes/${classId}/invite/${token}`,
+                expiresAt
             };
         } catch (error) {
             console.error('Erro ao gerar link de convite:', error);
@@ -514,10 +528,6 @@ class ClassService {
             const classData = await Class.findOne({
                 where: {
                     id: classId,
-                    invite_token: token,
-                    invite_expires_at: {
-                        [Op.gt]: new Date()
-                    },
                     status: 'scheduled'
                 },
                 include: [
@@ -530,6 +540,25 @@ class ClassService {
             });
 
             if (!classData) {
+                return {
+                    valid: false,
+                    message: 'Aula não encontrada ou já finalizada'
+                };
+            }
+
+            // Busca o convite ativo
+            const invite = await ClassInvite.findOne({
+                where: {
+                    class_id: classId,
+                    token: token,
+                    is_active: true,
+                    expires_at: {
+                        [Op.gt]: new Date()
+                    }
+                }
+            });
+
+            if (!invite) {
                 return {
                     valid: false,
                     message: 'Link de convite inválido ou expirado'
