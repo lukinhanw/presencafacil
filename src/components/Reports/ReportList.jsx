@@ -17,7 +17,9 @@ import { formatDateTimeHourMin } from '../../utils/dateUtils';
 export default function ReportList({ reports, onGenerate, isLoading }) {
     const [selectedClasses, setSelectedClasses] = useState([]);
     const [selectedEmployees, setSelectedEmployees] = useState([]);
-    const [viewMode, setViewMode] = useState('list'); // 'list' ou 'grid'
+    const [viewMode, setViewMode] = useState(() => {
+        return localStorage.getItem('reportsViewMode') || 'list';
+    });
 
     const handleSelectClass = (classData) => {
         if (selectedClasses.find(c => c.id === classData.id)) {
@@ -49,6 +51,12 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
         } else if (selectedEmployees.length > 0) {
             onGenerate({ selectedEmployees, format: 'excel' });
         }
+    };
+
+    const handleViewModeChange = () => {
+        const newMode = viewMode === 'list' ? 'grid' : 'list';
+        setViewMode(newMode);
+        localStorage.setItem('reportsViewMode', newMode);
     };
 
     const renderClassCard = (classData) => (
@@ -294,7 +302,7 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                             Visualização:
                         </span>
                         <button
-                            onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
+                            onClick={handleViewModeChange}
                             className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors duration-200"
                             title={viewMode === 'list' ? 'Visualização em Grid' : 'Visualização em Lista'}
                         >
