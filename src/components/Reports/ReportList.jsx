@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-    DocumentChartBarIcon, 
+import {
+    DocumentChartBarIcon,
     TableCellsIcon,
     UserIcon,
     BuildingOfficeIcon,
@@ -333,17 +333,19 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                         <span className="text-sm text-gray-600 dark:text-gray-400">
                             Visualização:
                         </span>
-                        <button
-                            onClick={handleViewModeChange}
-                            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors duration-200"
-                            title={viewMode === 'list' ? 'Visualização em Grid' : 'Visualização em Lista'}
-                        >
-                            {viewMode === 'list' ? (
-                                <Squares2X2Icon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                            ) : (
-                                <ListBulletIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                            )}
-                        </button>
+                        <Tooltip content={viewMode === 'list' ? "Visualizar em grid" : "Visualizar em lista"}>
+                            <button
+                                onClick={handleViewModeChange}
+                                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors duration-200"
+                                title={viewMode === 'list' ? 'Visualização em Grid' : 'Visualização em Lista'}
+                            >
+                                {viewMode === 'list' ? (
+                                    <Squares2X2Icon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                                ) : (
+                                    <ListBulletIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                                )}
+                            </button>
+                        </Tooltip>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -431,8 +433,8 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                         </motion.div>
                     ) : (
                         item.training ? renderClassCard(item) :
-                        item.employee ? renderEmployeeReport(item) :
-                        renderReportCard(item)
+                            item.employee ? renderEmployeeReport(item) :
+                                renderReportCard(item)
                     );
                 })}
             </div>
