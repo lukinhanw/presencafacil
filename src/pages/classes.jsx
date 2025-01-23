@@ -30,7 +30,14 @@ export default function Classes() {
 	const navigate = useNavigate();
 	const isAdmin = hasRole('ADMIN_ROLE');
 	const { isDark } = useTheme();
-	const [viewMode, setViewMode] = useState('list');
+	const [viewMode, setViewMode] = useState(() => {
+		return localStorage.getItem('classesViewMode') || 'list';
+	});
+
+	const handleViewModeChange = (mode) => {
+		setViewMode(mode);
+		localStorage.setItem('classesViewMode', mode);
+	};
 
 	const fetchClasses = useCallback(async () => {
 		try {
@@ -136,7 +143,7 @@ export default function Classes() {
 					</h1>
 					<div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
 						<button
-							onClick={() => setViewMode('list')}
+							onClick={() => handleViewModeChange('list')}
 							className={`p-1.5 rounded-md transition-colors ${
 								viewMode === 'list'
 									? 'bg-white dark:bg-gray-700 text-primary-500 shadow-sm'
@@ -147,7 +154,7 @@ export default function Classes() {
 							<FiList className="h-5 w-5" />
 						</button>
 						<button
-							onClick={() => setViewMode('grid')}
+							onClick={() => handleViewModeChange('grid')}
 							className={`p-1.5 rounded-md transition-colors ${
 								viewMode === 'grid'
 									? 'bg-white dark:bg-gray-700 text-primary-500 shadow-sm'
