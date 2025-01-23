@@ -3,6 +3,7 @@ import { PencilIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon } from '@
 import DataTable from '../components/General/datatable';
 import Modal from '../components/General/modal';
 import Alert from '../components/General/alert';
+import ConfirmationDialog from '../components/General/confirmationDialog';
 import InstructorForm from '../components/Instructor/instructorForm';
 import InstructorFilters from '../components/Instructor/instructorFilters';
 import { getInstructors, createInstructor, updateInstructor, deleteInstructor, toggleInstructorStatus } from '../services/instructorService';
@@ -20,7 +21,7 @@ export default function Instructors() {
 	});
 	const [selectedInstructor, setSelectedInstructor] = useState(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [deleteAlert, setDeleteAlert] = useState({ isOpen: false, instructorId: null });
+	const [deleteAlert, setDeleteAlert] = useState({ isOpen: false, instructor: null });
 	const [statusAlert, setStatusAlert] = useState({ isOpen: false, instructor: null });
 	const { hasRole } = useAuth();
 	const isAdmin = hasRole('ADMIN_ROLE');
@@ -77,9 +78,9 @@ export default function Instructors() {
 	const handleDelete = async () => {
 		try {
 			setIsLoading(true);
-			await deleteInstructor(deleteAlert.instructorId);
-			showToast.success('Sucesso', 'Instrutor excluído com sucesso!');
-			setDeleteAlert({ isOpen: false, instructorId: null });
+			await deleteInstructor(deleteAlert.instructor.id);
+			showToast.success('Sucesso', 'Instrutor excluído permanentemente!');
+			setDeleteAlert({ isOpen: false, instructor: null });
 			fetchInstructors();
 		} catch (error) {
 			showToast.error('Erro', error.message || 'Não foi possível excluir o instrutor');
@@ -92,7 +93,7 @@ export default function Instructors() {
 		try {
 			setIsLoading(true);
 			await toggleInstructorStatus(statusAlert.instructor.id);
-			showToast.success('Sucesso', 'Status do instrutor alterado com sucesso!');
+			showToast.success('Sucesso', `Instrutor ${statusAlert.instructor.isActive ? 'desativado' : 'ativado'} com sucesso!`);
 			setStatusAlert({ isOpen: false, instructor: null });
 			fetchInstructors();
 		} catch (error) {
@@ -114,6 +115,11 @@ export default function Instructors() {
 			cell: (row) => row.name
 		},
 		{
+			accessorKey: 'email',
+			header: 'Email',
+			cell: (row) => row.email
+		},
+		{
 			accessorKey: 'unit',
 			header: 'Unidade',
 			cell: (row) => row.unit
@@ -127,7 +133,8 @@ export default function Instructors() {
 			accessorKey: 'isActive',
 			header: 'Status',
 			cell: (row) => (
-				<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${row.isActive
+				<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+					row.isActive
 						? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
 						: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
 					}`}>
@@ -151,7 +158,7 @@ export default function Instructors() {
 				<button
 					onClick={() => setStatusAlert({ isOpen: true, instructor: row })}
 					className={`${row.isActive
-							? 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300'
+							? 'text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300'
 							: 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300'
 						}`}
 				>
@@ -162,9 +169,9 @@ export default function Instructors() {
 					)}
 				</button>
 			</Tooltip>
-			<Tooltip content="Excluir instrutor">
+			<Tooltip content="Excluir instrutor permanentemente">
 				<button
-					onClick={() => setDeleteAlert({ isOpen: true, instructorId: row.id })}
+					onClick={() => setDeleteAlert({ isOpen: true, instructor: row })}
 					className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
 				>
 					<TrashIcon className="h-5 w-5" />
@@ -200,6 +207,7 @@ export default function Instructors() {
 				data={instructors}
 				actions={actions}
 				isLoading={isLoading}
+				rowClassName={(row) => !row.isActive ? 'opacity-60 dark:opacity-50' : ''}
 			/>
 
 			<Modal
@@ -216,15 +224,6 @@ export default function Instructors() {
 			</Modal>
 
 			<Alert
-				isOpen={deleteAlert.isOpen}
-				onClose={() => setDeleteAlert({ isOpen: false, instructorId: null })}
-				onConfirm={handleDelete}
-				title="Excluir Instrutor"
-				message="Tem certeza que deseja excluir este instrutor? Esta ação não pode ser desfeita."
-				type="danger"
-			/>
-
-			<Alert
 				isOpen={statusAlert.isOpen}
 				onClose={() => setStatusAlert({ isOpen: false, instructor: null })}
 				onConfirm={handleToggleStatus}
@@ -233,6 +232,17 @@ export default function Instructors() {
 					? `Tem certeza que deseja desativar o instrutor ${statusAlert.instructor?.name}?` 
 					: `Tem certeza que deseja ativar o instrutor ${statusAlert.instructor?.name}?`}
 				type={statusAlert.instructor?.isActive ? "warning" : "success"}
+			/>
+
+			<ConfirmationDialog
+				isOpen={deleteAlert.isOpen}
+				onClose={() => setDeleteAlert({ isOpen: false, instructor: null })}
+				onConfirm={handleDelete}
+				title="Excluir Instrutor Permanentemente"
+				message={`Esta ação não pode ser desfeita. O instrutor ${deleteAlert.instructor?.name} será excluído permanentemente do sistema, junto com todos os seus dados e histórico.`}
+				confirmationText="eu confirmo"
+				confirmText="Excluir Permanentemente"
+				type="danger"
 			/>
 		</div>
 	);

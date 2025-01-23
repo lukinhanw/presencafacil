@@ -77,7 +77,8 @@ export const getInstructors = async (filters = {}) => {
 		await handleErrorResponse(response);
 	}
 
-	return await response.json();
+	const data = await response.json();
+	return data.data || [];
 };
 
 export const createInstructor = async (data) => {

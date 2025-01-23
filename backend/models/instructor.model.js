@@ -15,6 +15,15 @@ const Instructor = sequelize.define('Instructor', {
             notEmpty: { msg: 'Nome é obrigatório' }
         }
     },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+            notNull: { msg: 'Email é obrigatório' },
+            isEmail: { msg: 'Email inválido' }
+        }
+    },
     registration: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -38,6 +47,13 @@ const Instructor = sequelize.define('Instructor', {
         validate: {
             notNull: { msg: 'Cargo é obrigatório' },
             notEmpty: { msg: 'Cargo é obrigatório' }
+        }
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+            notNull: { msg: 'Senha é obrigatória' }
         }
     },
     isActive: {

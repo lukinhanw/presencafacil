@@ -35,10 +35,10 @@ const User = sequelize.define('User', {
     roles: {
         type: DataTypes.JSON,
         allowNull: false,
-        defaultValue: ['INSTRUCTOR_ROLE'],
+        defaultValue: ['USER_ROLE'],
         get() {
             const value = this.getDataValue('roles');
-            if (!value) return ['INSTRUCTOR_ROLE'];
+            if (!value) return ['USER_ROLE'];
             return Array.isArray(value) ? value : 
                    (typeof value === 'string' ? JSON.parse(value) : [value]).filter(Boolean);
         },
@@ -56,7 +56,7 @@ const User = sequelize.define('User', {
                     throw new Error('Roles deve ser um array');
                 }
                 
-                const validRoles = ['ADMIN_ROLE', 'INSTRUCTOR_ROLE'];
+                const validRoles = ['ADMIN_ROLE', 'USER_ROLE', 'INSTRUCTOR_ROLE'];
                 if (!roles.every(role => validRoles.includes(role))) {
                     throw new Error('Role inválida');
                 }

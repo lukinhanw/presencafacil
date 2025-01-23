@@ -1,9 +1,12 @@
 const express = require('express');
 const { body } = require('express-validator');
 const instructorController = require('../controllers/instructor.controller');
-const { verifyToken, hasRole } = require('../middleware/auth');
+const { verifyToken: authMiddleware, hasRole } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Middleware para verificar se é admin
+const isAdmin = hasRole(['ADMIN_ROLE']);
 
 // Validações comuns para criação e atualização
 const instructorValidations = [
@@ -19,36 +22,32 @@ const instructorValidations = [
     body('position')
         .notEmpty().withMessage('Cargo é obrigatório')
         .trim(),
-    body('specialties')
-        .isArray().withMessage('Especialidades deve ser um array')
-        .notEmpty().withMessage('Pelo menos uma especialidade é obrigatória')
+    body('email')
+        .notEmpty().withMessage('Email é obrigatório')
+        .isEmail().withMessage('Email inválido')
+        .trim()
 ];
 
-// Rotas protegidas por autenticação
-router.use(verifyToken);
+// Todas as rotas requerem autenticação
+router.use(authMiddleware);
 
-// Listar instrutores (com filtros)
-router.get('/', instructorController.getInstructors);
-
-// Buscar instrutores (para autocomplete)
-router.get('/search', instructorController.searchInstructors);
-
-// Buscar instrutor por ID
-router.get('/:id', instructorController.getInstructorById);
+// Rotas públicas (apenas autenticação necessária)
+router.get('/', instructorController.findAll);
+router.get('/:id', instructorController.findById);
 
 // Rotas que requerem papel de ADMIN
-router.use(hasRole(['ADMIN_ROLE']));
+router.use(isAdmin);
 
 // Criar instrutor
-router.post('/', instructorValidations, instructorController.createInstructor);
+router.post('/', instructorValidations, instructorController.create);
 
 // Atualizar instrutor
-router.put('/:id', instructorValidations, instructorController.updateInstructor);
+router.put('/:id', instructorValidations, instructorController.update);
 
 // Excluir instrutor
-router.delete('/:id', instructorController.deleteInstructor);
+router.delete('/:id', instructorController.delete);
 
-// Ativar/Desativar instrutor
-router.patch('/:id/toggle-status', instructorController.toggleInstructorStatus);
+// Alterar status do instrutor
+router.patch('/:id/toggle-status', instructorController.toggleStatus);
 
 module.exports = router; 

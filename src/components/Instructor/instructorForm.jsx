@@ -46,11 +46,7 @@ export default function InstructorForm({ onSubmit, initialData, isLoading }) {
                         type="text"
                         id="registration"
                         {...register('registration', {
-                            required: 'Matrícula é obrigatória',
-                            pattern: {
-                                value: /^\d+$/,
-                                message: 'Matrícula deve conter apenas números'
-                            }
+                            required: 'Matrícula é obrigatória'
                         })}
                         className="input-field mt-1"
                     />
@@ -73,6 +69,45 @@ export default function InstructorForm({ onSubmit, initialData, isLoading }) {
                         <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
                     )}
                 </div>
+
+                <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Email
+                    </label>
+                    <input
+                        type="email"
+                        id="email"
+                        {...register('email', {
+                            required: 'Email é obrigatório',
+                            pattern: {
+                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                message: 'Email inválido'
+                            }
+                        })}
+                        className="input-field mt-1"
+                    />
+                    {errors.email && (
+                        <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+                    )}
+                </div>
+
+                {!initialData && (
+                    <div className="relative">
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Senha
+                        </label>
+                        <input
+                            type="text"
+                            id="password"
+                            disabled
+                            value="Será igual à matrícula"
+                            className="input-field mt-1 bg-gray-100 dark:bg-gray-700"
+                        />
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            A senha inicial será igual à matrícula
+                        </p>
+                    </div>
+                )}
 
                 <div>
                     <label htmlFor="unit" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
