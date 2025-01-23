@@ -8,6 +8,7 @@ import InstructorFilters from '../components/Instructor/instructorFilters';
 import { getInstructors, createInstructor, updateInstructor, deleteInstructor, toggleInstructorStatus } from '../services/instructorService';
 import { useAuth } from '../contexts/AuthContext';
 import { showToast } from '../components/General/toast';
+import Tooltip from '../components/General/Tooltip';
 
 export default function Instructors() {
 	const [instructors, setInstructors] = useState([]);
@@ -20,6 +21,7 @@ export default function Instructors() {
 	const [selectedInstructor, setSelectedInstructor] = useState(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [deleteAlert, setDeleteAlert] = useState({ isOpen: false, instructorId: null });
+	const [statusAlert, setStatusAlert] = useState({ isOpen: false, instructor: null });
 	const { hasRole } = useAuth();
 	const isAdmin = hasRole('ADMIN_ROLE');
 
@@ -86,11 +88,12 @@ export default function Instructors() {
 		}
 	};
 
-	const handleToggleStatus = async (id) => {
+	const handleToggleStatus = async () => {
 		try {
 			setIsLoading(true);
-			await toggleInstructorStatus(id);
+			await toggleInstructorStatus(statusAlert.instructor.id);
 			showToast.success('Sucesso', 'Status do instrutor alterado com sucesso!');
+			setStatusAlert({ isOpen: false, instructor: null });
 			fetchInstructors();
 		} catch (error) {
 			showToast.error('Erro', error.message || 'Não foi possível alterar o status do instrutor');
@@ -136,34 +139,37 @@ export default function Instructors() {
 
 	const actions = (row) => isAdmin ? (
 		<>
-			<button
-				onClick={() => handleOpenModal(row)}
-				className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
-				title="Editar"
-			>
-				<PencilIcon className="h-5 w-5" />
-			</button>
-			<button
-				onClick={() => handleToggleStatus(row.id)}
-				className={`${row.isActive
-						? 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300'
-						: 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300'
-					}`}
-				title={row.isActive ? 'Desativar' : 'Ativar'}
-			>
-				{row.isActive ? (
-					<XCircleIcon className="h-5 w-5" />
-				) : (
-					<CheckCircleIcon className="h-5 w-5" />
-				)}
-			</button>
-			<button
-				onClick={() => setDeleteAlert({ isOpen: true, instructorId: row.id })}
-				className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-				title="Excluir"
-			>
-				<TrashIcon className="h-5 w-5" />
-			</button>
+			<Tooltip content="Editar instrutor">
+				<button
+					onClick={() => handleOpenModal(row)}
+					className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
+				>
+					<PencilIcon className="h-5 w-5" />
+				</button>
+			</Tooltip>
+			<Tooltip content={row.isActive ? "Desativar instrutor" : "Ativar instrutor"}>
+				<button
+					onClick={() => setStatusAlert({ isOpen: true, instructor: row })}
+					className={`${row.isActive
+							? 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300'
+							: 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300'
+						}`}
+				>
+					{row.isActive ? (
+						<XCircleIcon className="h-5 w-5" />
+					) : (
+						<CheckCircleIcon className="h-5 w-5" />
+					)}
+				</button>
+			</Tooltip>
+			<Tooltip content="Excluir instrutor">
+				<button
+					onClick={() => setDeleteAlert({ isOpen: true, instructorId: row.id })}
+					className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+				>
+					<TrashIcon className="h-5 w-5" />
+				</button>
+			</Tooltip>
 		</>
 	) : null;
 
@@ -216,6 +222,17 @@ export default function Instructors() {
 				title="Excluir Instrutor"
 				message="Tem certeza que deseja excluir este instrutor? Esta ação não pode ser desfeita."
 				type="danger"
+			/>
+
+			<Alert
+				isOpen={statusAlert.isOpen}
+				onClose={() => setStatusAlert({ isOpen: false, instructor: null })}
+				onConfirm={handleToggleStatus}
+				title={statusAlert.instructor?.isActive ? "Desativar Instrutor" : "Ativar Instrutor"}
+				message={statusAlert.instructor?.isActive 
+					? `Tem certeza que deseja desativar o instrutor ${statusAlert.instructor?.name}?` 
+					: `Tem certeza que deseja ativar o instrutor ${statusAlert.instructor?.name}?`}
+				type={statusAlert.instructor?.isActive ? "warning" : "success"}
 			/>
 		</div>
 	);
