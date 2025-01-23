@@ -36,6 +36,8 @@ export default function TicketFilters({ filters, onFilterChange, isAdmin }) {
                         classNamePrefix="select"
                         isClearable
                         placeholder="Selecione o status"
+                        menuPortalTarget={document.body}
+                        menuPosition={'fixed'}
                     />
                 </div>
 
@@ -55,6 +57,8 @@ export default function TicketFilters({ filters, onFilterChange, isAdmin }) {
                         classNamePrefix="select"
                         isClearable
                         placeholder="Selecione a categoria"
+                        menuPortalTarget={document.body}
+                        menuPosition={'fixed'}
                     />
                 </div>
 
@@ -74,6 +78,8 @@ export default function TicketFilters({ filters, onFilterChange, isAdmin }) {
                         classNamePrefix="select"
                         isClearable
                         placeholder="Selecione a prioridade"
+                        menuPortalTarget={document.body}
+                        menuPosition={'fixed'}
                     />
                 </div>
 

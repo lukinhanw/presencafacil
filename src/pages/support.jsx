@@ -157,7 +157,7 @@ export default function Support() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="glass-card border-none"
+                className="border-none"
             >
                 <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
                     {isAdmin ? 'Todos os Tickets' : 'Meus Tickets'}

@@ -13,7 +13,7 @@ export default function Layout() {
 			<MobileSidebar />
 			<Header />
 			{isHome ? (
-				<div className="flex-1 pt-16 bg-white/50 dark:bg-gray-800/50">
+				<div className="flex-1 pt-16">
 					<Dashboard />
 				</div>
 			) : (

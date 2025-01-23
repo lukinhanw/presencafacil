@@ -14,17 +14,17 @@ const icons = {
 };
 
 const colors = {
-	success: 'text-green-500 dark:text-green-400',
-	error: 'text-red-500 dark:text-red-400',
-	warning: 'text-yellow-500 dark:text-yellow-400',
-	info: 'text-blue-500 dark:text-blue-400',
+	success: 'text-green-100 dark:text-green-400',
+	error: 'text-red-100 dark:text-red-400',
+	warning: 'text-yellow-100 dark:text-yellow-400',
+	info: 'text-blue-100 dark:text-blue-400',
 };
 
 const backgrounds = {
-	success: 'bg-slate-50 dark:bg-slate-500/80 backdrop-blur-sm',
-	error: 'bg-red-50 dark:bg-red-500/80 backdrop-blur-sm',
-	warning: 'bg-yellow-50 dark:bg-yellow-500/80 backdrop-blur-sm',
-	info: 'bg-blue-50 dark:bg-blue-500/80 backdrop-blur-sm',
+	success: 'bg-emerald-700 dark:bg-emerald-500/80 backdrop-blur-sm',
+	error: 'bg-red-700 dark:bg-red-500/80 backdrop-blur-sm',
+	warning: 'bg-yellow-700 dark:bg-yellow-500/80 backdrop-blur-sm',
+	info: 'bg-blue-700 dark:bg-blue-500/80 backdrop-blur-sm',
 };
 
 const CustomToast = ({ type, title, message, t }) => {
@@ -42,10 +42,10 @@ const CustomToast = ({ type, title, message, t }) => {
 						<Icon className={`h-6 w-6 ${colors[type]}`} />
 					</div>
 					<div className="ml-3 flex-1">
-						<p className="text-sm font-medium text-gray-900 dark:text-white">
+						<p className="text-sm font-medium text-gray-200 dark:text-white">
 							{title}
 						</p>
-						<p className="mt-1 text-sm text-gray-500 dark:text-gray-300">
+						<p className="mt-1 text-sm text-gray-100 dark:text-gray-300">
 							{message}
 						</p>
 					</div>
@@ -54,7 +54,7 @@ const CustomToast = ({ type, title, message, t }) => {
 			<div className="flex border-l border-gray-200 dark:border-gray-700">
 				<button
 					onClick={() => toast.dismiss(t.id)}
-					className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-200 focus:outline-none"
+					className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-gray-100 dark:text-gray-300 hover:text-gray-300 dark:hover:text-gray-200 focus:outline-none"
 				>
 					Fechar
 				</button>
