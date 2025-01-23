@@ -10,9 +10,11 @@ import {
     CheckCircleIcon,
     Squares2X2Icon,
     ListBulletIcon,
-    UsersIcon 
+    UsersIcon,
+    ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 import { formatDateTimeHourMin } from '../../utils/dateUtils';
+import Tooltip from '../General/Tooltip';
 
 export default function ReportList({ reports, onGenerate, isLoading }) {
     const [selectedClasses, setSelectedClasses] = useState([]);
@@ -101,22 +103,26 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
             </div>
 
             <div className="flex gap-2">
-                <button
-                    onClick={() => onGenerate({ classData, format: 'pdf' })}
-                    disabled={isLoading}
-                    className="btn-gradient flex-1 flex items-center justify-center gap-2"
-                >
-                    <DocumentChartBarIcon className="h-5 w-5 text-white" />
-                    {isLoading ? 'Gerando...' : 'PDF'}
-                </button>
-                <button
-                    onClick={() => onGenerate({ classData, format: 'excel' })}
-                    disabled={isLoading}
-                    className="btn-gradient-green flex-1 flex items-center justify-center gap-2"
-                >
-                    <TableCellsIcon className="h-5 w-5 text-white" />
-                    {isLoading ? 'Gerando...' : 'Excel'}
-                </button>
+                <Tooltip content="Baixar PDF">
+                    <button
+                        onClick={() => onGenerate({ classData, format: 'pdf' })}
+                        disabled={isLoading}
+                        className="btn-gradient flex-1 flex items-center justify-center gap-2"
+                    >
+                        <ArrowDownTrayIcon className="h-5 w-5 text-white" />
+                        <span className="sr-only">PDF</span>
+                    </button>
+                </Tooltip>
+                <Tooltip content="Baixar Excel">
+                    <button
+                        onClick={() => onGenerate({ classData, format: 'excel' })}
+                        disabled={isLoading}
+                        className="btn-gradient-green flex-1 flex items-center justify-center gap-2"
+                    >
+                        <ArrowDownTrayIcon className="h-5 w-5 text-white" />
+                        <span className="sr-only">Excel</span>
+                    </button>
+                </Tooltip>
             </div>
         </motion.div>
     );
@@ -141,13 +147,28 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                 <p>Última geração: {formatDateTimeHourMin(report.lastGenerated)}</p>
             </div>
 
-            <button
-                onClick={() => onGenerate({ reportId: report.id })}
-                disabled={isLoading}
-                className="btn-gradient w-full"
-            >
-                {isLoading ? 'Gerando...' : 'Gerar Relatório'}
-            </button>
+            <div className="flex space-x-2">
+                <Tooltip content="Baixar PDF">
+                    <button
+                        onClick={() => onGenerate({ ...report, format: 'pdf' })}
+                        className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
+                        disabled={isLoading}
+                    >
+                        <ArrowDownTrayIcon className="h-5 w-5" />
+                        <span className="sr-only">PDF</span>
+                    </button>
+                </Tooltip>
+                <Tooltip content="Baixar Excel">
+                    <button
+                        onClick={() => onGenerate({ ...report, format: 'excel' })}
+                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                        disabled={isLoading}
+                    >
+                        <ArrowDownTrayIcon className="h-5 w-5" />
+                        <span className="sr-only">Excel</span>
+                    </button>
+                </Tooltip>
+            </div>
         </motion.div>
     );
 
@@ -189,14 +210,16 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
             </div>
 
             <div className="flex gap-2">
-                <button
-                    onClick={() => onGenerate({ employeeReport: report, format: 'excel' })}
-                    disabled={isLoading}
-                    className="btn-gradient-green flex-1 flex items-center justify-center gap-2"
-                >
-                    <TableCellsIcon className="h-5 w-5 text-white" />
-                    {isLoading ? 'Gerando...' : 'Excel'}
-                </button>
+                <Tooltip content="Baixar Excel">
+                    <button
+                        onClick={() => onGenerate({ employeeReport: report, format: 'excel' })}
+                        disabled={isLoading}
+                        className="btn-gradient-green flex-1 flex items-center justify-center gap-2"
+                    >
+                        <ArrowDownTrayIcon className="h-5 w-5 text-white" />
+                        <span className="sr-only">Excel</span>
+                    </button>
+                </Tooltip>
             </div>
         </motion.div>
     );
@@ -234,18 +257,24 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                         </div>
                     </div>
                     <div className="flex gap-2 ml-4">
-                        <button
-                            onClick={() => onGenerate({ classData: item, format: 'pdf' })}
-                            className="p-2 rounded-md btn-gradient"
-                        >
-                            <DocumentChartBarIcon className="h-5 w-5 text-white" />
-                        </button>
-                        <button
-                            onClick={() => onGenerate({ classData: item, format: 'excel' })}
-                            className="p-2 rounded-md btn-gradient-green"
-                        >
-                            <TableCellsIcon className="h-5 w-5 text-white" />
-                        </button>
+                        <Tooltip content="Baixar PDF">
+                            <button
+                                onClick={() => onGenerate({ classData: item, format: 'pdf' })}
+                                className="p-2 rounded-md btn-gradient"
+                            >
+                                <ArrowDownTrayIcon className="h-5 w-5 text-white" />
+                                <span className="sr-only">PDF</span>
+                            </button>
+                        </Tooltip>
+                        <Tooltip content="Baixar Excel">
+                            <button
+                                onClick={() => onGenerate({ classData: item, format: 'excel' })}
+                                className="p-2 rounded-md btn-gradient-green"
+                            >
+                                <ArrowDownTrayIcon className="h-5 w-5 text-white" />
+                                <span className="sr-only">Excel</span>
+                            </button>
+                        </Tooltip>
                     </div>
                 </div>
             );
@@ -279,12 +308,15 @@ export default function ReportList({ reports, onGenerate, isLoading }) {
                         </div>
                     </div>
                     <div className="flex gap-2 ml-4">
-                        <button
-                            onClick={() => onGenerate({ employeeReport: item, format: 'excel' })}
-                            className="p-2 rounded-md btn-gradient-green"
-                        >
-                            <TableCellsIcon className="h-5 w-5 text-white" />
-                        </button>
+                        <Tooltip content="Baixar Excel">
+                            <button
+                                onClick={() => onGenerate({ employeeReport: item, format: 'excel' })}
+                                className="p-2 rounded-md btn-gradient-green"
+                            >
+                                <ArrowDownTrayIcon className="h-5 w-5 text-white" />
+                                <span className="sr-only">Excel</span>
+                            </button>
+                        </Tooltip>
                     </div>
                 </div>
             );

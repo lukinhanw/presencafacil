@@ -5,10 +5,11 @@ import { showToast } from '../components/General/toast';
 import { REPORT_TYPES, getReports, downloadReport } from '../services/reportService';
 import { selectStyles } from '../components/Shared/selectStyles';
 import { selectStylesDark } from '../components/Shared/selectStylesDark';
-import { DocumentChartBarIcon } from '@heroicons/react/24/outline';
+import { DocumentChartBarIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import ReportFilters from '../components/Reports/ReportFilters';
 import ReportList from '../components/Reports/ReportList';
 import { getClasses } from '../services/classService';
+import Tooltip from '../components/General/Tooltip';
 
 export default function Reports() {
     const { isDark } = useTheme();
@@ -76,12 +77,32 @@ export default function Reports() {
         loadAllClasses();
     }, []);
 
+    const actions = (row) => (
+        <div className="flex space-x-2">
+            <Tooltip content="Baixar relatório">
+                <button
+                    onClick={() => handleDownload(row)}
+                    className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
+                >
+                    <ArrowDownTrayIcon className="h-5 w-5" />
+                </button>
+            </Tooltip>
+        </div>
+    );
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
                     Relatórios
                 </h1>
+                <button
+                    onClick={() => handleOpenModal()}
+                    className="btn-gradient flex items-center"
+                >
+                    <PlusIcon className="h-5 w-5 mr-2" />
+                    Novo Relatório
+                </button>
             </div>
 
             <div className="space-y-4">

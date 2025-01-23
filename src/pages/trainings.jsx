@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, PlusIcon, ViewfinderCircleIcon } from '@heroicons/react/24/outline';
 import DataTable from '../components/General/datatable';
 import Modal from '../components/General/modal';
 import Alert from '../components/General/alert';
@@ -8,6 +8,7 @@ import TrainingFilters from '../components/Training/trainingFilters';
 import { getTrainings, createTraining, updateTraining, deleteTraining } from '../services/trainingService';
 import { useAuth } from '../contexts/AuthContext';
 import { showToast } from '../components/General/toast';
+import Tooltip from '../components/General/Tooltip';
 
 export default function Trainings() {
 	const [trainings, setTrainings] = useState([]);
@@ -86,6 +87,11 @@ export default function Trainings() {
 		}
 	};
 
+	const handleViewTraining = (trainingId) => {
+		// Implement the logic to view a training
+		console.log(`View training with ID: ${trainingId}`);
+	};
+
 	const columns = [
 		{
 			accessorKey: 'name',
@@ -115,20 +121,32 @@ export default function Trainings() {
 	];
 
 	const actions = (row) => isAdmin ? (
-		<>
-			<button
-				onClick={() => handleOpenModal(row)}
-				className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
-			>
-				<PencilIcon className="h-5 w-5" />
-			</button>
-			<button
-				onClick={() => setDeleteAlert({ isOpen: true, trainingId: row.id })}
-				className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-			>
-				<TrashIcon className="h-5 w-5" />
-			</button>
-		</>
+		<div className="flex space-x-2">
+			<Tooltip content="Visualizar treinamento">
+				<button
+					onClick={() => handleViewTraining(row.id)}
+					className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
+				>
+					<ViewfinderCircleIcon className="h-5 w-5" />
+				</button>
+			</Tooltip>
+			<Tooltip content="Editar treinamento">
+				<button
+					onClick={() => handleOpenModal(row)}
+					className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
+				>
+					<PencilIcon className="h-5 w-5" />
+				</button>
+			</Tooltip>
+			<Tooltip content="Excluir treinamento">
+				<button
+					onClick={() => setDeleteAlert({ isOpen: true, trainingId: row.id })}
+					className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+				>
+					<TrashIcon className="h-5 w-5" />
+				</button>
+			</Tooltip>
+		</div>
 	) : null;
 
 	return (
@@ -138,13 +156,15 @@ export default function Trainings() {
 					Treinamentos
 				</h1>
 				{isAdmin && (
-					<button
-						onClick={() => handleOpenModal()}
-						className="btn-gradient flex items-center"
-					>
-						<PlusIcon className="h-5 w-5 mr-2" />
-						Novo Treinamento
-					</button>
+					<Tooltip content="Novo treinamento">
+						<button
+							onClick={() => handleOpenModal()}
+							className="btn-gradient flex items-center"
+						>
+							<PlusIcon className="h-5 w-5 mr-2" />
+							Novo Treinamento
+						</button>
+					</Tooltip>
 				)}
 			</div>
 

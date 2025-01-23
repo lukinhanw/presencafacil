@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { FiUsers, FiClock, FiMapPin, FiAward, FiPlus, FiTrash2, FiArrowRight, FiGrid, FiList } from 'react-icons/fi';
+import { PencilIcon, TrashIcon, PlusIcon, ViewfinderCircleIcon, QrCodeIcon, Squares2X2Icon, ListBulletIcon } from '@heroicons/react/24/outline';
 import Modal from '../components/General/modal';
 import Alert from '../components/General/alert';
 import ClassForm from '../components/Class/classForm';
 import ClassFilters from '../components/Class/classFilters';
-import { getClasses, createClass, deleteClass } from '../services/classService';
+import { getClasses, createClass, deleteClass, generateInviteLink } from '../services/classService';
 import { getTrainings } from '../services/trainingService';
 import { getInstructors } from '../services/instructorService';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,6 +14,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { showToast } from '../components/General/toast';
 import { useNavigate } from 'react-router-dom';
 import { formatDateTime } from '../utils/dateUtils';
+import Tooltip from '../components/General/Tooltip';
 
 export default function Classes() {
 	const [classes, setClasses] = useState([]);
@@ -134,6 +136,31 @@ export default function Classes() {
 		show: { opacity: 1, y: 0 }
 	};
 
+	const actions = (row) => (
+		<div className="flex space-x-2">
+			<Tooltip content="Visualizar aula">
+				<button
+					onClick={() => handleEnterClass(row.id)}
+					className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
+				>
+					<ViewfinderCircleIcon className="h-5 w-5" />
+				</button>
+			</Tooltip>
+			{isAdmin && (
+				<>
+					<Tooltip content="Excluir aula">
+						<button
+							onClick={() => setDeleteAlert({ isOpen: true, classId: row.id })}
+							className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+						>
+							<TrashIcon className="h-5 w-5" />
+						</button>
+					</Tooltip>
+				</>
+			)}
+		</div>
+	);
+
 	return (
 		<div className="space-y-6 p-6">
 			<div className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -142,38 +169,35 @@ export default function Classes() {
 						Aulas
 					</h1>
 					<div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-						<button
-							onClick={() => handleViewModeChange('list')}
-							className={`p-1.5 rounded-md transition-colors ${
-								viewMode === 'list'
-									? 'bg-white dark:bg-gray-700 text-primary-500 shadow-sm'
-									: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-							}`}
-							title="Visualização em lista"
-						>
-							<FiList className="h-5 w-5" />
-						</button>
-						<button
-							onClick={() => handleViewModeChange('grid')}
-							className={`p-1.5 rounded-md transition-colors ${
-								viewMode === 'grid'
-									? 'bg-white dark:bg-gray-700 text-primary-500 shadow-sm'
-									: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-							}`}
-							title="Visualização em grid"
-						>
-							<FiGrid className="h-5 w-5" />
-						</button>
+						<Tooltip content={viewMode === 'grid' ? "Visualizar em lista" : "Visualizar em grid"}>
+							<button
+								onClick={() => handleViewModeChange(viewMode === 'grid' ? 'list' : 'grid')}
+								className={`p-1.5 rounded-md transition-colors ${
+									viewMode === 'grid'
+										? 'bg-white dark:bg-gray-700 text-primary-500 shadow-sm'
+										: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+								}`}
+								title="Visualização em lista"
+							>
+								{viewMode === 'grid' ? (
+									<ListBulletIcon className="h-5 w-5" />
+								) : (
+									<Squares2X2Icon className="h-5 w-5" />
+								)}
+							</button>
+						</Tooltip>
 					</div>
 				</div>
 				{isAdmin && (
-					<button
-						onClick={handleOpenModal}
-						className="btn-gradient flex items-center gap-2"
-					>
-						<FiPlus className="h-5 w-5" />
-						Nova Aula
-					</button>
+					<Tooltip content="Nova aula">
+						<button
+							onClick={handleOpenModal}
+							className="btn-gradient flex items-center gap-2"
+						>
+							<PlusIcon className="h-5 w-5 mr-2" />
+							Nova Aula
+						</button>
+					</Tooltip>
 				)}
 			</div>
 
@@ -324,23 +348,9 @@ export default function Classes() {
 									</div>
 
 									<div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-										<button
-											onClick={() => handleEnterClass(classItem.id)}
-											className="btn-primary flex items-center gap-1 px-3 py-1.5 text-sm"
-										>
-											<span>Acessar</span>
-											<FiArrowRight className="h-4 w-4" />
-										</button>
-
-										{isAdmin && (
-											<button
-												onClick={() => setDeleteAlert({ isOpen: true, classId: classItem.id })}
-												className="btn-danger-icon p-1.5 rounded-lg"
-												title="Excluir aula"
-											>
-												<FiTrash2 className="h-4 w-4" />
-											</button>
-										)}
+										<div className="flex items-center gap-2">
+											{actions(classItem)}
+										</div>
 									</div>
 								</>
 							) : (
@@ -399,23 +409,9 @@ export default function Classes() {
 
 										{/* Ações */}
 										<div className="flex items-center gap-2 flex-shrink-0 ml-4">
-											<button
-												onClick={() => handleEnterClass(classItem.id)}
-												className="btn-primary flex items-center gap-1 px-3 py-1.5 text-sm"
-											>
-												<span>Acessar</span>
-												<FiArrowRight className="h-4 w-4" />
-											</button>
-
-											{isAdmin && (
-												<button
-													onClick={() => setDeleteAlert({ isOpen: true, classId: classItem.id })}
-													className="btn-danger-icon p-1.5 rounded-lg"
-													title="Excluir aula"
-												>
-													<FiTrash2 className="h-4 w-4" />
-												</button>
-											)}
+											<div className="flex items-center gap-2">
+												{actions(classItem)}
+											</div>
 										</div>
 									</div>
 								</>

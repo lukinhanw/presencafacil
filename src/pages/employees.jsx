@@ -8,6 +8,7 @@ import EmployeeFilters from '../components/Employee/employeeFilters';
 import { getEmployees, createEmployee, updateEmployee, deleteEmployee } from '../services/employeeService';
 import { useAuth } from '../contexts/AuthContext';
 import { showToast } from '../components/General/toast';
+import Tooltip from '../components/General/Tooltip';
 
 export default function Employees() {
 	const [employees, setEmployees] = useState([]);
@@ -110,20 +111,24 @@ export default function Employees() {
 	];
 
 	const actions = (row) => isAdmin ? (
-		<>
-			<button
-				onClick={() => handleOpenModal(row)}
-				className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
-			>
-				<PencilIcon className="h-5 w-5" />
-			</button>
-			<button
-				onClick={() => setDeleteAlert({ isOpen: true, employeeId: row.id })}
-				className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-			>
-				<TrashIcon className="h-5 w-5" />
-			</button>
-		</>
+		<div className="flex space-x-2">
+			<Tooltip content="Editar colaborador">
+				<button
+					onClick={() => handleOpenModal(row)}
+					className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
+				>
+					<PencilIcon className="h-5 w-5" />
+				</button>
+			</Tooltip>
+			<Tooltip content="Excluir colaborador">
+				<button
+					onClick={() => setDeleteAlert({ isOpen: true, employeeId: row.id })}
+					className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+				>
+					<TrashIcon className="h-5 w-5" />
+				</button>
+			</Tooltip>
+		</div>
 	) : null;
 
 	return (
@@ -133,13 +138,15 @@ export default function Employees() {
 					Colaboradores
 				</h1>
 				{isAdmin && (
-					<button
-						onClick={() => handleOpenModal()}
-						className="btn-gradient flex items-center"
-					>
-						<PlusIcon className="h-5 w-5 mr-2" />
-						Novo Colaborador
-					</button>
+					<Tooltip content="Novo colaborador">
+						<button
+							onClick={() => handleOpenModal()}
+							className="btn-gradient flex items-center"
+						>
+							<PlusIcon className="h-5 w-5 mr-2" />
+							Novo Colaborador
+						</button>
+					</Tooltip>
 				)}
 			</div>
 
