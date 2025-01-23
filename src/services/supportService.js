@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 // Mock data for tickets
 const MOCK_TICKETS = [
     {
@@ -76,106 +78,134 @@ export const TICKET_STATUS = [
     { value: 'closed', label: 'Fechado' }
 ];
 
+const getAuthHeader = (isFormData = false) => {
+    const auth = JSON.parse(localStorage.getItem('@presenca:auth'));
+    if (!auth || !auth.token) {
+        throw new Error('Usuário não autenticado');
+    }
+    return {
+        'Authorization': `Bearer ${auth.token}`,
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' })
+    };
+};
+
+const handleResponse = async (response) => {
+    if (!response.ok) {
+        const data = await response.json();
+        
+        if (data.errors && Array.isArray(data.errors)) {
+            throw new Error(data.errors.map(err => err.message || err).join(', '));
+        }
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        if (data.message) {
+            throw new Error(data.message);
+        }
+        
+        throw new Error('Ocorreu um erro na operação');
+    }
+    
+    return response.status !== 204 ? response.json() : null;
+};
+
 export const getTickets = async (filters = {}) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+        const params = new URLSearchParams();
+        if (filters.status) params.append('status', filters.status?.value || filters.status);
+        if (filters.category) params.append('category', filters.category?.value || filters.category);
+        if (filters.priority) params.append('priority', filters.priority?.value || filters.priority);
+        if (filters.userSearch) params.append('userSearch', filters.userSearch);
 
-    let filteredTickets = [...MOCK_TICKETS];
+        const response = await fetch(`${API_URL}/tickets?${params}`, {
+            headers: getAuthHeader()
+        });
 
-    if (filters.userId) {
-        filteredTickets = filteredTickets.filter(ticket => ticket.userId === filters.userId);
+        return await handleResponse(response);
+    } catch (error) {
+        console.error('Erro ao buscar tickets:', error);
+        throw error;
     }
-
-    if (filters.status) {
-        filteredTickets = filteredTickets.filter(ticket => ticket.status === filters.status);
-    }
-
-    if (filters.category) {
-        filteredTickets = filteredTickets.filter(ticket => ticket.category === filters.category);
-    }
-
-    if (filters.priority) {
-        filteredTickets = filteredTickets.filter(ticket => ticket.priority === filters.priority);
-    }
-
-    if (filters.userSearch) {
-        const search = filters.userSearch.toLowerCase();
-        filteredTickets = filteredTickets.filter(ticket =>
-            ticket.userName.toLowerCase().includes(search)
-        );
-    }
-
-    return filteredTickets.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 };
 
 export const getTicketById = async (id) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const ticket = MOCK_TICKETS.find(t => t.id === parseInt(id));
-    if (!ticket) throw new Error('Ticket não encontrado');
-    return ticket;
+    try {
+        const response = await fetch(`${API_URL}/tickets/${id}`, {
+            headers: getAuthHeader()
+        });
+
+        return await handleResponse(response);
+    } catch (error) {
+        console.error('Erro ao buscar ticket:', error);
+        throw error;
+    }
 };
 
 export const createTicket = async (data) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+        const formData = new FormData();
+        formData.append('title', data.title);
+        formData.append('description', data.description);
+        formData.append('priority', data.priority?.value || data.priority);
+        formData.append('category', data.category?.value || data.category);
 
-    const newTicket = {
-        id: MOCK_TICKETS.length + 1,
-        ...data,
-        status: 'open',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        messages: [{
-            id: 1,
-            message: data.description,
-            userId: data.userId,
-            userName: data.userName,
-            isSupport: false,
-            createdAt: new Date().toISOString(),
-            attachments: data.attachments ? Array.from(data.attachments).map((file, index) => ({
-                id: index + 1,
-                name: file.name,
-                url: URL.createObjectURL(file)
-            })) : []
-        }]
-    };
+        if (data.attachments) {
+            Array.from(data.attachments).forEach(file => {
+                formData.append('attachments', file);
+            });
+        }
 
-    MOCK_TICKETS.push(newTicket);
-    return newTicket;
+        const response = await fetch(`${API_URL}/tickets`, {
+            method: 'POST',
+            headers: getAuthHeader(true),
+            body: formData
+        });
+
+        return await handleResponse(response);
+    } catch (error) {
+        console.error('Erro ao criar ticket:', error);
+        throw error;
+    }
 };
 
 export const addMessage = async (ticketId, data) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+        const formData = new FormData();
+        formData.append('message', data.message);
 
-    const ticket = MOCK_TICKETS.find(t => t.id === parseInt(ticketId));
-    if (!ticket) throw new Error('Ticket não encontrado');
+        if (data.attachments) {
+            Array.from(data.attachments).forEach(file => {
+                formData.append('attachments', file);
+            });
+        }
 
-    const newMessage = {
-        id: ticket.messages.length + 1,
-        message: data.message,
-        userId: data.userId,
-        userName: data.userName,
-        isSupport: data.isSupport,
-        createdAt: new Date().toISOString(),
-        attachments: data.attachments ? Array.from(data.attachments).map((file, index) => ({
-            id: index + 1,
-            name: file.name,
-            url: URL.createObjectURL(file)
-        })) : []
-    };
+        const response = await fetch(`${API_URL}/tickets/${ticketId}/messages`, {
+            method: 'POST',
+            headers: getAuthHeader(true),
+            body: formData
+        });
 
-    ticket.messages.push(newMessage);
-    ticket.updatedAt = new Date().toISOString();
-
-    return ticket;
+        return await handleResponse(response);
+    } catch (error) {
+        console.error('Erro ao adicionar mensagem:', error);
+        throw error;
+    }
 };
 
 export const updateTicketStatus = async (ticketId, status) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+        const statusValue = status?.value || status;
+        const response = await fetch(`${API_URL}/tickets/${ticketId}/status`, {
+            method: 'PATCH',
+            headers: getAuthHeader(),
+            body: JSON.stringify({ status: statusValue })
+        });
 
-    const ticket = MOCK_TICKETS.find(t => t.id === parseInt(ticketId));
-    if (!ticket) throw new Error('Ticket não encontrado');
-
-    ticket.status = status;
-    ticket.updatedAt = new Date().toISOString();
-
-    return ticket;
+        return await handleResponse(response);
+    } catch (error) {
+        console.error('Erro ao atualizar status:', error);
+        throw error;
+    }
 }; 

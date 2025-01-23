@@ -72,21 +72,21 @@ export default function TicketDetails({ ticket, onAddMessage, onUpdateStatus, is
                     >
                         <div className={`max-w-lg rounded-lg p-4 ${
                             message.isSupport 
-                                ? 'bg-primary-50 dark:bg-primary-900/50' 
-                                : 'bg-gray-50 dark:bg-gray-800/50'
+                                ? 'bg-primary-200 dark:bg-primary-800/50' 
+                                : 'bg-gray-200 dark:bg-gray-600/50'
                         }`}>
                             <div className="flex items-center space-x-2 mb-2">
                                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                    {message.userName}
+                                    {message.user?.name || 'Usuário'}
                                 </span>
                                 <span className="text-xs text-gray-500">
-                                    {format(new Date(message.createdAt), 'HH:mm')}
+                                    {message.created_at ? format(new Date(message.created_at), 'dd/MM/yyyy HH:mm') : ''}
                                 </span>
                             </div>
                             <p className="text-sm text-gray-900 dark:text-gray-100">
                                 {message.message}
                             </p>
-                            {message.attachments?.length > 0 && (
+                            {Array.isArray(message.attachments) && message.attachments.length > 0 && (
                                 <div className="mt-2 space-y-1">
                                     {message.attachments.map((attachment, i) => (
                                         <a

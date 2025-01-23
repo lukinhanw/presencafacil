@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const multer = require('multer');
 
 class UploadService {
     constructor() {
@@ -51,8 +52,58 @@ class UploadService {
     }
 
     getFilePath(fileName) {
-        const filePath = path.join(this.uploadDir, fileName);
-        return filePath;
+        return path.join(this.uploadDir, fileName);
+    }
+
+    // Configuração do multer para upload de arquivos
+    getMulterConfig(subDir = '') {
+        const storage = multer.diskStorage({
+            destination: (req, file, cb) => {
+                const uploadPath = subDir ? path.join(this.uploadDir, subDir) : this.uploadDir;
+                
+                if (!fs.existsSync(uploadPath)) {
+                    fs.mkdirSync(uploadPath, { recursive: true });
+                }
+                
+                cb(null, uploadPath);
+            },
+            filename: (req, file, cb) => {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+                cb(null, uniqueSuffix + path.extname(file.originalname));
+            }
+        });
+
+        const fileFilter = (req, file, cb) => {
+            const allowedTypes = [
+                'image/jpeg',
+                'image/png',
+                'image/gif',
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'text/plain'
+            ];
+
+            if (allowedTypes.includes(file.mimetype)) {
+                cb(null, true);
+            } else {
+                cb(new Error('Tipo de arquivo não permitido. Apenas imagens, PDFs e documentos são aceitos.'), false);
+            }
+        };
+
+        return multer({
+            storage,
+            fileFilter,
+            limits: {
+                fileSize: 5 * 1024 * 1024, // 5MB
+                files: 5 // Máximo de 5 arquivos por vez
+            }
+        });
+    }
+
+    // Método para processar o upload de arquivos
+    getUploadMiddleware(subDir = '') {
+        return this.getMulterConfig(subDir).array('attachments');
     }
 }
 
