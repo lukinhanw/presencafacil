@@ -46,12 +46,6 @@ class TicketController {
 
     async createTicket(req, res) {
         try {
-            console.log('CreateTicket - Body original:', {
-                body: req.body,
-                priority: req.body.priority,
-                category: req.body.category
-            });
-
             // Extrair valores dos objetos do select se necessário
             const ticketData = {
                 ...req.body,
@@ -59,11 +53,8 @@ class TicketController {
                 category: req.body.category?.value || req.body.category
             };
 
-            console.log('CreateTicket - Dados processados:', ticketData);
-
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                console.log('CreateTicket - Erros de validação:', errors.array());
                 return res.status(400).json({ 
                     message: 'Erro de validação',
                     errors: errors.array()
@@ -87,7 +78,6 @@ class TicketController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                console.log('AddMessage - Erros de validação:', errors.array());
                 return res.status(400).json({ 
                     message: 'Erro de validação',
                     errors: errors.array()
@@ -122,22 +112,14 @@ class TicketController {
 
     async updateStatus(req, res) {
         try {
-            console.log('UpdateStatus - Body original:', {
-                body: req.body,
-                status: req.body.status
-            });
-
             // Extrair valor do objeto do select se necessário
             const statusData = {
                 ...req.body,
                 status: req.body.status?.value || req.body.status
             };
 
-            console.log('UpdateStatus - Dados processados:', statusData);
-
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                console.log('UpdateStatus - Erros de validação:', errors.array());
                 return res.status(400).json({ 
                     message: 'Erro de validação',
                     errors: errors.array()
