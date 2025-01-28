@@ -111,6 +111,7 @@ Gerencia os convites para aulas.
 | token | Token do convite |
 | expires_at | Data de validade do convite |
 
+
 #### 3. Class_Participants (Participantes)
 Registra informações dos participantes das aulas.
 
@@ -165,3 +166,33 @@ Gerencia informações dos usuários do sistema.
 | email | E-mail |
 | password | Senha |
 | roles | Permissões do usuário |
+
+#### 8. Tickets (Tickets de Suporte)
+Gerencia os tickets de suporte do sistema.
+
+| Campo | Descrição |
+|-------|-----------|
+| id | ID único |
+| title | Título do ticket |
+| description | Descrição detalhada |
+| status | Status (open, in-progress, closed) |
+| priority | Prioridade (low, medium, high) |
+| category | Categoria (technical, doubt, error, suggestion) |
+| creator_id | ID do criador (pode ser user_id ou instructor_id) |
+| creator_type | Tipo do criador ('user' ou 'instructor') |
+| created_at | Data de criação |
+| updated_at | Data de atualização |
+
+#### 9. Ticket_Messages (Mensagens dos Tickets)
+Armazena as mensagens trocadas em cada ticket.
+
+| Campo | Descrição |
+|-------|-----------|
+| id | ID único |
+| message | Conteúdo da mensagem |
+| is_support | Flag se é mensagem do suporte |
+| user_id | ID do usuário que enviou |
+| ticket_id | ID do ticket relacionado |
+| attachments | Anexos em formato JSON |
+| created_at | Data de criação |
+| updated_at | Data de atualização |

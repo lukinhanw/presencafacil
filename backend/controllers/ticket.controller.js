@@ -4,11 +4,16 @@ const ticketService = require('../services/ticket.service');
 class TicketController {
     async getTickets(req, res) {
         try {
+            const isInstructor = req.user.roles.includes('INSTRUCTOR_ROLE');
+            const isAdmin = req.user.roles.includes('ADMIN_ROLE');
+
             const filters = {
                 ...req.query,
                 userId: req.user.id,
-                isAdmin: req.user.role === 'ADMIN_ROLE'
+                userType: isInstructor ? 'instructor' : 'user',
+                isAdmin: isAdmin
             };
+
             const tickets = await ticketService.getTickets(filters);
             res.json(tickets);
         } catch (error) {
@@ -22,7 +27,13 @@ class TicketController {
             const ticket = await ticketService.getTicketById(req.params.id);
             
             // Verificar se o usuário tem acesso ao ticket
-            if (!req.user.role === 'ADMIN_ROLE' && ticket.user_id !== req.user.id) {
+            const isAdmin = req.user.roles.includes('ADMIN_ROLE');
+            const isOwner = (
+                (ticket.creator_type === 'user' && ticket.creator.id === req.user.id) ||
+                (ticket.creator_type === 'instructor' && ticket.creator.id === req.user.id)
+            );
+
+            if (!isAdmin && !isOwner) {
                 return res.status(403).json({ message: 'Acesso negado' });
             }
 
@@ -62,6 +73,7 @@ class TicketController {
             const ticket = await ticketService.createTicket({
                 ...ticketData,
                 userId: req.user.id,
+                userType: req.user.roles.includes('INSTRUCTOR_ROLE') ? 'instructor' : 'user',
                 attachments: req.files
             });
             res.status(201).json(ticket);
@@ -85,7 +97,13 @@ class TicketController {
             const ticket = await ticketService.getTicketById(req.params.id);
             
             // Verificar se o usuário tem acesso ao ticket
-            if (!req.user.role === 'ADMIN_ROLE' && ticket.user_id !== req.user.id) {
+            const isAdmin = req.user.roles.includes('ADMIN_ROLE');
+            const isOwner = (
+                (ticket.creator_type === 'user' && ticket.creator.id === req.user.id) ||
+                (ticket.creator_type === 'instructor' && ticket.creator.id === req.user.id)
+            );
+
+            if (!isAdmin && !isOwner) {
                 return res.status(403).json({ message: 'Acesso negado' });
             }
 
@@ -93,7 +111,7 @@ class TicketController {
                 ...req.body,
                 userId: req.user.id,
                 attachments: req.files,
-                isSupport: req.user.role === 'ADMIN_ROLE'
+                isSupport: req.user.roles.includes('ADMIN_ROLE')
             });
             res.json(updatedTicket);
         } catch (error) {
@@ -127,7 +145,7 @@ class TicketController {
             }
 
             // Apenas administradores podem atualizar o status
-            if (req.user.role !== 'ADMIN_ROLE') {
+            if (!req.user.roles.includes('ADMIN_ROLE')) {
                 return res.status(403).json({ message: 'Acesso negado' });
             }
 

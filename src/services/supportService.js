@@ -145,22 +145,42 @@ export const getTicketById = async (id) => {
 
 export const createTicket = async (data) => {
     try {
-        const formData = new FormData();
-        formData.append('title', data.title);
-        formData.append('description', data.description);
-        formData.append('priority', data.priority?.value || data.priority);
-        formData.append('category', data.category?.value || data.category);
+        const auth = JSON.parse(localStorage.getItem('@presenca:auth'));
+        const userType = auth?.user?.roles?.includes('INSTRUCTOR_ROLE') ? 'instructor' : 'user';
 
-        if (data.attachments) {
+        // Se tem anexos, usa FormData
+        if (data.attachments && data.attachments.length > 0) {
+            const formData = new FormData();
+            formData.append('title', data.title);
+            formData.append('description', data.description);
+            formData.append('priority', data.priority?.value || data.priority);
+            formData.append('category', data.category?.value || data.category);
+            formData.append('userType', userType);
+
             Array.from(data.attachments).forEach(file => {
                 formData.append('attachments', file);
             });
+
+            const response = await fetch(`${API_URL}/tickets`, {
+                method: 'POST',
+                headers: getAuthHeader(true),
+                body: formData
+            });
+
+            return await handleResponse(response);
         }
 
+        // Se não tem anexos, envia como JSON
         const response = await fetch(`${API_URL}/tickets`, {
             method: 'POST',
-            headers: getAuthHeader(true),
-            body: formData
+            headers: getAuthHeader(),
+            body: JSON.stringify({
+                title: data.title,
+                description: data.description,
+                priority: data.priority?.value || data.priority,
+                category: data.category?.value || data.category,
+                userType: userType
+            })
         });
 
         return await handleResponse(response);
@@ -172,19 +192,36 @@ export const createTicket = async (data) => {
 
 export const addMessage = async (ticketId, data) => {
     try {
-        const formData = new FormData();
-        formData.append('message', data.message);
+        const auth = JSON.parse(localStorage.getItem('@presenca:auth'));
+        const userType = auth?.user?.roles?.includes('INSTRUCTOR_ROLE') ? 'instructor' : 'user';
 
-        if (data.attachments) {
+        // Se tem anexos, usa FormData
+        if (data.attachments && data.attachments.length > 0) {
+            const formData = new FormData();
+            formData.append('message', data.message);
+            formData.append('userType', userType);
+
             Array.from(data.attachments).forEach(file => {
                 formData.append('attachments', file);
             });
+
+            const response = await fetch(`${API_URL}/tickets/${ticketId}/messages`, {
+                method: 'POST',
+                headers: getAuthHeader(true),
+                body: formData
+            });
+
+            return await handleResponse(response);
         }
 
+        // Se não tem anexos, envia como JSON
         const response = await fetch(`${API_URL}/tickets/${ticketId}/messages`, {
             method: 'POST',
-            headers: getAuthHeader(true),
-            body: formData
+            headers: getAuthHeader(),
+            body: JSON.stringify({
+                message: data.message,
+                userType: userType
+            })
         });
 
         return await handleResponse(response);

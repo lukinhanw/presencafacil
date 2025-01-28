@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const User = require('./user.model');
+const Instructor = require('./instructor.model');
 
 const Ticket = sequelize.define('ticket', {
     id: {
@@ -38,12 +39,15 @@ const Ticket = sequelize.define('ticket', {
             isIn: [['technical', 'doubt', 'error', 'suggestion']]
         }
     },
-    user_id: {
+    creator_id: {
         type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    creator_type: {
+        type: DataTypes.STRING,
         allowNull: false,
-        references: {
-            model: 'users',
-            key: 'id'
+        validate: {
+            isIn: [['user', 'instructor']]
         }
     }
 }, {
@@ -52,7 +56,17 @@ const Ticket = sequelize.define('ticket', {
     underscored: true
 });
 
-// Relacionamentos
-Ticket.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+// Relacionamentos polimórficos
+Ticket.belongsTo(User, {
+    foreignKey: 'creator_id',
+    constraints: false,
+    as: 'userCreator'
+});
+
+Ticket.belongsTo(Instructor, {
+    foreignKey: 'creator_id',
+    constraints: false,
+    as: 'instructorCreator'
+});
 
 module.exports = Ticket; 

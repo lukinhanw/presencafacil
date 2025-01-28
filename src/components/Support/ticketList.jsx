@@ -16,6 +16,22 @@ const item = {
 	show: { opacity: 1, y: 0 }
 };
 
+const formatDate = (dateString) => {
+	try {
+		if (!dateString) return 'Data não disponível';
+		
+		// Converte a string da data para o formato que o JavaScript entende
+		const formattedDate = dateString.replace(' ', 'T');
+		const date = new Date(formattedDate);
+		
+		if (isNaN(date.getTime())) return 'Data inválida';
+		return format(date, 'dd/MM/yyyy HH:mm');
+	} catch (error) {
+		console.error('Erro ao formatar data:', error);
+		return 'Data inválida';
+	}
+};
+
 export default function TicketList({ tickets, onOpenTicket, isLoading }) {
 	const getStatusColor = (status) => {
 		const colors = {
@@ -63,6 +79,8 @@ export default function TicketList({ tickets, onOpenTicket, isLoading }) {
 		);
 	}
 
+	console.log(tickets);
+
 	return (
 		<motion.div
 			variants={container}
@@ -106,11 +124,11 @@ export default function TicketList({ tickets, onOpenTicket, isLoading }) {
 					</div>
 
 					<div className="mt-4 flex items-center text-xs text-gray-600 dark:text-gray-300 space-x-4 flex-wrap">
-						<span>Por: {ticket.user.name}</span>
+						<span>Por: {ticket.creator?.name || 'Usuário não encontrado'}</span>
 						<span>•</span>
-						<span>Criado em: {format(new Date(ticket.createdAt), 'dd/MM/yyyy HH:mm')}</span>
+						<span>Criado em: {formatDate(ticket.createdAt)}</span>
 						<span>•</span>
-						<span>Última atualização: {format(new Date(ticket.updatedAt), 'dd/MM/yyyy HH:mm')}</span>
+						<span>Última atualização: {formatDate(ticket.updatedAt)}</span>
 					</div>
 				</motion.div>
 			))}

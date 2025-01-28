@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const Ticket = require('../models/ticket.model');
 const TicketMessage = require('../models/ticketMessage.model');
 const User = require('../models/user.model');
+const Instructor = require('../models/instructor.model');
 const uploadService = require('./upload.service');
 const path = require('path');
 const crypto = require('crypto');
@@ -13,6 +14,17 @@ class TicketService {
         // Formatar datas ISO
         plainTicket.created_at = plainTicket.created_at?.toISOString();
         plainTicket.updated_at = plainTicket.updated_at?.toISOString();
+        
+        // Formatar criador
+        if (plainTicket.creator_type === 'user' && plainTicket.userCreator) {
+            plainTicket.creator = plainTicket.userCreator;
+        } else if (plainTicket.creator_type === 'instructor' && plainTicket.instructorCreator) {
+            plainTicket.creator = plainTicket.instructorCreator;
+        }
+        
+        // Remover campos desnecessários
+        delete plainTicket.userCreator;
+        delete plainTicket.instructorCreator;
         
         if (plainTicket.messages) {
             plainTicket.messages = plainTicket.messages.map(message => {
@@ -32,8 +44,10 @@ class TicketService {
     async getTickets(filters = {}) {
         const where = {};
 
-        if (filters.userId && !filters.isAdmin) {
-            where.user_id = filters.userId;
+        // Se não for admin, só mostra os tickets do próprio usuário
+        if (!filters.isAdmin) {
+            where.creator_id = filters.userId;
+            where.creator_type = filters.userType;
         }
 
         if (filters.status) {
@@ -48,22 +62,20 @@ class TicketService {
             where.priority = filters.priority;
         }
 
-        if (filters.userSearch) {
-            const users = await User.findAll({
-                where: {
-                    name: { [Op.like]: `%${filters.userSearch}%` }
-                }
-            });
-            where.user_id = { [Op.in]: users.map(u => u.id) };
-        }
-
         const tickets = await Ticket.findAll({
             where,
             include: [
                 {
                     model: User,
-                    as: 'user',
-                    attributes: ['id', 'name']
+                    as: 'userCreator',
+                    attributes: ['id', 'name', 'email'],
+                    required: false
+                },
+                {
+                    model: Instructor,
+                    as: 'instructorCreator',
+                    attributes: ['id', 'name', 'email'],
+                    required: false
                 },
                 {
                     model: TicketMessage,
@@ -71,8 +83,15 @@ class TicketService {
                     include: [
                         {
                             model: User,
-                            as: 'user',
-                            attributes: ['id', 'name']
+                            as: 'userSender',
+                            attributes: ['id', 'name'],
+                            required: false
+                        },
+                        {
+                            model: Instructor,
+                            as: 'instructorSender',
+                            attributes: ['id', 'name'],
+                            required: false
                         }
                     ]
                 }
@@ -88,8 +107,13 @@ class TicketService {
             include: [
                 {
                     model: User,
-                    as: 'user',
-                    attributes: ['id', 'name']
+                    as: 'userCreator',
+                    attributes: ['id', 'name', 'email']
+                },
+                {
+                    model: Instructor,
+                    as: 'instructorCreator',
+                    attributes: ['id', 'name', 'email']
                 },
                 {
                     model: TicketMessage,
@@ -97,8 +121,15 @@ class TicketService {
                     include: [
                         {
                             model: User,
-                            as: 'user',
-                            attributes: ['id', 'name']
+                            as: 'userSender',
+                            attributes: ['id', 'name'],
+                            required: false
+                        },
+                        {
+                            model: Instructor,
+                            as: 'instructorSender',
+                            attributes: ['id', 'name'],
+                            required: false
                         }
                     ],
                     order: [['created_at', 'ASC']]
@@ -119,7 +150,8 @@ class TicketService {
             description: data.description,
             priority: data.priority,
             category: data.category,
-            user_id: data.userId
+            creator_id: data.userId,
+            creator_type: data.userType
         });
 
         // Processar anexos
@@ -127,11 +159,9 @@ class TicketService {
         if (data.attachments && data.attachments.length > 0) {
             attachments = await Promise.all(
                 data.attachments.map(async file => {
-                    // Gerar nome único para o arquivo
                     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
                     const fileName = `ticket_${ticket.id}_${uniqueSuffix}${path.extname(file.originalname)}`;
                     
-                    // Salvar arquivo usando o método existente
                     await uploadService.saveBase64Image(file.buffer.toString('base64'), `ticket_${ticket.id}`);
                     
                     return {
@@ -145,7 +175,8 @@ class TicketService {
         // Criar primeira mensagem com a descrição
         await TicketMessage.create({
             message: data.description,
-            user_id: data.userId,
+            sender_id: data.userId,
+            sender_type: data.userType || 'user',
             ticket_id: ticket.id,
             is_support: false,
             attachments: attachments || []
@@ -155,18 +186,20 @@ class TicketService {
     }
 
     async addMessage(ticketId, data) {
-        const ticket = await this.getTicketById(ticketId);
+        const ticket = await Ticket.findByPk(ticketId);
+        
+        if (!ticket) {
+            throw new Error('Ticket não encontrado');
+        }
 
         // Processar anexos
         let attachments = [];
         if (data.attachments && data.attachments.length > 0) {
             attachments = await Promise.all(
                 data.attachments.map(async file => {
-                    // Gerar nome único para o arquivo
                     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
                     const fileName = `ticket_${ticketId}_${uniqueSuffix}${path.extname(file.originalname)}`;
                     
-                    // Salvar arquivo usando o método existente
                     await uploadService.saveBase64Image(file.buffer.toString('base64'), `ticket_${ticketId}`);
                     
                     return {
@@ -179,7 +212,8 @@ class TicketService {
 
         await TicketMessage.create({
             message: data.message,
-            user_id: data.userId,
+            sender_id: data.userId,
+            sender_type: data.userType || 'user',
             ticket_id: ticketId,
             is_support: data.isSupport,
             attachments: attachments || []
@@ -192,8 +226,12 @@ class TicketService {
     }
 
     async updateTicketStatus(ticketId, status) {
-        const ticket = await this.getTicketById(ticketId);
+        const ticket = await Ticket.findByPk(ticketId);
         
+        if (!ticket) {
+            throw new Error('Ticket não encontrado');
+        }
+
         if (!['open', 'in-progress', 'closed'].includes(status)) {
             throw new Error('Status inválido');
         }

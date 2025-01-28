@@ -5,6 +5,7 @@ import Select from 'react-select';
 import { FiPaperclip, FiSend } from 'react-icons/fi';
 import { TICKET_STATUS } from '../../services/supportService';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { selectStyles } from '../Shared/selectStyles';
 import { selectStylesDark } from '../Shared/selectStylesDark';
 
@@ -12,6 +13,7 @@ export default function TicketDetails({ ticket, onAddMessage, onUpdateStatus, is
     const [newMessage, setNewMessage] = useState('');
     const [attachments, setAttachments] = useState(null);
     const { isDark } = useTheme();
+    const { user } = useAuth();
     const stylesSelect = isDark ? selectStylesDark : selectStyles;
 
     const handleSubmit = async (e) => {
@@ -39,7 +41,7 @@ export default function TicketDetails({ ticket, onAddMessage, onUpdateStatus, is
                         {ticket.title}
                     </h3>
                     <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
-                        <span>Criado por: {ticket.user.name}</span>
+                        <span>Criado por: {ticket.creator?.name || 'Usuário não encontrado'}</span>
                         <span>•</span>
                         <span>{format(new Date(ticket.createdAt), 'dd/MM/yyyy HH:mm')}</span>
                     </div>
@@ -63,48 +65,61 @@ export default function TicketDetails({ ticket, onAddMessage, onUpdateStatus, is
             </div>
 
             <div className="space-y-4 max-h-96 overflow-y-auto p-4 glass-card">
-                {ticket.messages.map((message, index) => (
-                    <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`flex ${message.isSupport ? 'justify-end' : 'justify-start'}`}
-                    >
-                        <div className={`max-w-lg rounded-lg p-4 ${
-                            message.isSupport 
-                                ? 'bg-primary-200 dark:bg-primary-800/50' 
-                                : 'bg-gray-200 dark:bg-gray-600/50'
-                        }`}>
-                            <div className="flex items-center space-x-2 mb-2">
-                                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                    {message.user?.name || 'Usuário'}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                    {message.created_at ? format(new Date(message.created_at), 'dd/MM/yyyy HH:mm') : ''}
-                                </span>
-                            </div>
-                            <p className="text-sm text-gray-900 dark:text-gray-100">
-                                {message.message}
-                            </p>
-                            {Array.isArray(message.attachments) && message.attachments.length > 0 && (
-                                <div className="mt-2 space-y-1">
-                                    {message.attachments.map((attachment, i) => (
-                                        <a
-                                            key={i}
-                                            href={attachment.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 flex items-center gap-1"
-                                        >
-                                            <FiPaperclip className="h-4 w-4" />
-                                            {attachment.name}
-                                        </a>
-                                    ))}
+                {ticket.messages.map((message, index) => {
+                    const isOwnMessage = message.sender_id === user?.id || (message.is_support && isAdmin);
+                    const messagePosition = isOwnMessage ? 'justify-end' : 'justify-start';
+                    const messageColor = message.is_support 
+                        ? 'bg-primary-100 dark:bg-primary-800/50'
+                        : isOwnMessage
+                            ? 'bg-slate-100 dark:bg-slate-800/50'
+                            : 'bg-gray-100 dark:bg-gray-700/50';
+                    const textColor = message.is_support
+                        ? 'text-primary-900 dark:text-primary-100'
+                        : isOwnMessage
+                            ? 'text-slate-900 dark:text-slate-100'
+                            : 'text-gray-900 dark:text-gray-100';
+
+                    return (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`flex ${messagePosition}`}
+                        >
+                            <div className={`max-w-lg rounded-lg p-4 ${messageColor}`}>
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <span className={`text-sm font-medium ${textColor}`}>
+                                        {message.is_support ? 'Administrador' : 
+                                         message.sender_type === 'instructor' ? message.instructorSender?.name :
+                                         message.userSender?.name || 'Usuário'}
+                                    </span>
+                                    <span className="text-xs text-gray-500">
+                                        {message.created_at ? format(new Date(message.created_at), 'dd/MM/yyyy HH:mm') : ''}
+                                    </span>
                                 </div>
-                            )}
-                        </div>
-                    </motion.div>
-                ))}
+                                <p className={`text-sm ${textColor}`}>
+                                    {message.message}
+                                </p>
+                                {Array.isArray(message.attachments) && message.attachments.length > 0 && (
+                                    <div className="mt-2 space-y-1">
+                                        {message.attachments.map((attachment, i) => (
+                                            <a
+                                                key={i}
+                                                href={attachment.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 flex items-center gap-1"
+                                            >
+                                                <FiPaperclip className="h-4 w-4" />
+                                                {attachment.name}
+                                            </a>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    );
+                })}
             </div>
 
             {ticket.status !== 'closed' && (

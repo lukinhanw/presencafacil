@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const User = require('./user.model');
+const Instructor = require('./instructor.model');
 const Ticket = require('./ticket.model');
 
 const TicketMessage = sequelize.define('ticket_message', {
@@ -18,13 +19,13 @@ const TicketMessage = sequelize.define('ticket_message', {
         allowNull: false,
         defaultValue: false
     },
-    user_id: {
+    sender_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'users',
-            key: 'id'
-        }
+        allowNull: false
+    },
+    sender_type: {
+        type: DataTypes.ENUM('user', 'instructor'),
+        allowNull: false
     },
     ticket_id: {
         type: DataTypes.INTEGER,
@@ -50,8 +51,19 @@ const TicketMessage = sequelize.define('ticket_message', {
     updatedAt: 'updated_at'
 });
 
-// Relacionamentos
-TicketMessage.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+// Relacionamentos polimórficos
+TicketMessage.belongsTo(User, { 
+    foreignKey: 'sender_id', 
+    constraints: false,
+    as: 'userSender'
+});
+
+TicketMessage.belongsTo(Instructor, { 
+    foreignKey: 'sender_id', 
+    constraints: false,
+    as: 'instructorSender'
+});
+
 TicketMessage.belongsTo(Ticket, { foreignKey: 'ticket_id', as: 'ticket' });
 Ticket.hasMany(TicketMessage, { foreignKey: 'ticket_id', as: 'messages' });
 
