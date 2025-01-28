@@ -39,7 +39,7 @@ export default function TicketDetails({ ticket, onAddMessage, onUpdateStatus, is
                         {ticket.title}
                     </h3>
                     <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
-                        <span>Criado por: {ticket.userName}</span>
+                        <span>Criado por: {ticket.user.name}</span>
                         <span>•</span>
                         <span>{format(new Date(ticket.createdAt), 'dd/MM/yyyy HH:mm')}</span>
                     </div>

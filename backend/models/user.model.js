@@ -56,7 +56,7 @@ const User = sequelize.define('User', {
                     throw new Error('Roles deve ser um array');
                 }
                 
-                const validRoles = ['ADMIN_ROLE'];
+                const validRoles = ['ADMIN_ROLE', 'INSTRUCTOR_ROLE'];
                 if (!roles.every(role => validRoles.includes(role))) {
                     throw new Error('Role inválida');
                 }

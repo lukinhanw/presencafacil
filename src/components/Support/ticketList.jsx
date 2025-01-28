@@ -106,7 +106,7 @@ export default function TicketList({ tickets, onOpenTicket, isLoading }) {
 					</div>
 
 					<div className="mt-4 flex items-center text-xs text-gray-600 dark:text-gray-300 space-x-4 flex-wrap">
-						<span>Por: {ticket.userName}</span>
+						<span>Por: {ticket.user.name}</span>
 						<span>•</span>
 						<span>Criado em: {format(new Date(ticket.createdAt), 'dd/MM/yyyy HH:mm')}</span>
 						<span>•</span>

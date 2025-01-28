@@ -36,7 +36,7 @@ function App() {
 				<Route
 					path="/relatorios"
 					element={
-						<ProtectedRoute roles={['ADMIN_ROLE']}>
+						<ProtectedRoute roles={['ADMIN_ROLE', 'INSTRUCTOR_ROLE']}>
 							<Reports />
 						</ProtectedRoute>
 					}

@@ -1,4 +1,5 @@
 const { DataTypes } = require('sequelize');
+const bcrypt = require('bcryptjs');
 const sequelize = require('../config/database');
 
 const Instructor = sequelize.define('Instructor', {
@@ -63,7 +64,20 @@ const Instructor = sequelize.define('Instructor', {
     }
 }, {
     tableName: 'instructors',
-    underscored: true
+    underscored: true,
+    hooks: {
+        beforeSave: async (instructor) => {
+            if (instructor.changed('password')) {
+                const salt = await bcrypt.genSalt(10);
+                instructor.password = await bcrypt.hash(instructor.password, salt);
+            }
+        }
+    }
 });
+
+// Método para comparar senhas
+Instructor.prototype.comparePassword = async function(candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+};
 
 module.exports = Instructor; 
