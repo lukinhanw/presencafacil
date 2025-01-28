@@ -10,7 +10,6 @@ Tecnologias Utilizadas:
 Frontend: React.js com Vite para alta performance.
 Estilização: TailwindCSS com suporte a temas claro e escuro.
 Serviços: Simulação de API com JSON para leitura e escrita de dados.
-Design: Glassmorphism/Neomorphism com animações suaves.
 Páginas e Funcionalidades Implementadas:
 
 Treinamentos (/treinamentos):
