@@ -10,7 +10,9 @@ class ClassController {
             const filters = {
                 search: req.query.search,
                 types: req.query.types,
-                units: req.query.units
+                units: req.query.units,
+                userRole: req.user.role,
+                userId: req.user.id
             };
             
             const classes = await classService.getClasses(filters);

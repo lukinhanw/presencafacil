@@ -46,6 +46,12 @@ class ClassService {
             date_end: null
         };
 
+        // Se for instrutor, filtra apenas as aulas dele
+        if (filters.userRole === 'INSTRUCTOR_ROLE') {
+            where.instructor_id = filters.userId;
+        }
+        // Se for admin, não aplica filtro adicional (verá todas as aulas)
+
         // Filtro por texto (busca em nome, código)
         if (filters.search) {
             where[Op.or] = [

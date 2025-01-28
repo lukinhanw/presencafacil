@@ -24,6 +24,9 @@ const verifyToken = (req, res, next) => {
                        (typeof decoded.roles === 'string' ? JSON.parse(decoded.roles) : 
                        [decoded.roles]).filter(Boolean);
         
+        // Adiciona o role principal ao decoded
+        decoded.role = decoded.roles[0];
+        
         req.user = decoded;
         next();
     } catch (error) {
