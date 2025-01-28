@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { PencilIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon, KeyIcon } from '@heroicons/react/24/outline';
 import DataTable from '../components/General/datatable';
 import Modal from '../components/General/modal';
 import Alert from '../components/General/alert';
 import ConfirmationDialog from '../components/General/confirmationDialog';
 import InstructorForm from '../components/Instructor/instructorForm';
 import InstructorFilters from '../components/Instructor/instructorFilters';
-import { getInstructors, createInstructor, updateInstructor, deleteInstructor, toggleInstructorStatus } from '../services/instructorService';
+import { getInstructors, createInstructor, updateInstructor, deleteInstructor, toggleInstructorStatus, resetInstructorPassword } from '../services/instructorService';
 import { useAuth } from '../contexts/AuthContext';
 import { showToast } from '../components/General/toast';
 import Tooltip from '../components/General/Tooltip';
@@ -23,6 +23,7 @@ export default function Instructors() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [deleteAlert, setDeleteAlert] = useState({ isOpen: false, instructor: null });
 	const [statusAlert, setStatusAlert] = useState({ isOpen: false, instructor: null });
+	const [resetPasswordAlert, setResetPasswordAlert] = useState({ isOpen: false, instructor: null });
 	const { hasRole } = useAuth();
 	const isAdmin = hasRole('ADMIN_ROLE');
 
@@ -103,6 +104,19 @@ export default function Instructors() {
 		}
 	};
 
+	const handleResetPassword = async () => {
+		try {
+			setIsLoading(true);
+			await resetInstructorPassword(resetPasswordAlert.instructor.id);
+			showToast.success('Sucesso', `Senha do instrutor ${resetPasswordAlert.instructor.name} resetada com sucesso! A nova senha é igual à matrícula.`);
+			setResetPasswordAlert({ isOpen: false, instructor: null });
+		} catch (error) {
+			showToast.error('Erro', error.message || 'Não foi possível resetar a senha do instrutor');
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
 	const columns = [
 		{
 			accessorKey: 'registration',
@@ -167,6 +181,14 @@ export default function Instructors() {
 					) : (
 						<CheckCircleIcon className="h-5 w-5" />
 					)}
+				</button>
+			</Tooltip>
+			<Tooltip content="Resetar senha">
+				<button
+					onClick={() => setResetPasswordAlert({ isOpen: true, instructor: row })}
+					className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+				>
+					<KeyIcon className="h-5 w-5" />
 				</button>
 			</Tooltip>
 			<Tooltip content="Excluir instrutor permanentemente">
@@ -243,6 +265,17 @@ export default function Instructors() {
 				confirmationText="eu confirmo"
 				confirmText="Excluir Permanentemente"
 				type="danger"
+			/>
+
+			<ConfirmationDialog
+				isOpen={resetPasswordAlert.isOpen}
+				onClose={() => setResetPasswordAlert({ isOpen: false, instructor: null })}
+				onConfirm={handleResetPassword}
+				title="Resetar Senha do Instrutor"
+				message={`A senha do instrutor ${resetPasswordAlert.instructor?.name} será resetada para o valor da sua matrícula (${resetPasswordAlert.instructor?.registration}). Esta ação não pode ser desfeita.`}
+				confirmationText="eu confirmo"
+				confirmText="Resetar Senha"
+				type="warning"
 			/>
 		</div>
 	);

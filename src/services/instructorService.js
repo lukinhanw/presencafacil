@@ -146,3 +146,16 @@ export const toggleInstructorStatus = async (id) => {
 
 	return await response.json();
 };
+
+export const resetInstructorPassword = async (id) => {
+	const response = await fetch(`${API_URL}/instructors/${id}/reset-password`, {
+		method: 'POST',
+		headers: getAuthHeader()
+	});
+
+	if (!response.ok) {
+		await handleErrorResponse(response);
+	}
+
+	return await response.json();
+};

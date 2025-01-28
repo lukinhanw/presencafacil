@@ -50,4 +50,7 @@ router.delete('/:id', instructorController.delete);
 // Alterar status do instrutor
 router.patch('/:id/toggle-status', instructorController.toggleStatus);
 
+// Resetar senha do instrutor
+router.post('/:id/reset-password', instructorController.resetPassword);
+
 module.exports = router; 

@@ -322,6 +322,64 @@ class InstructorService {
         console.log(`[${timestamp}] Instrutor encontrado:`, instructor ? 'Sim' : 'Não');
         return instructor;
     }
+
+    async resetPassword(id) {
+        const transaction = await sequelize.transaction();
+        const timestamp = new Date().toISOString();
+        console.log(`[${timestamp}] Iniciando reset de senha do instrutor ID:`, id);
+
+        try {
+            const instructor = await Instructor.findByPk(id);
+            if (!instructor) {
+                console.log(`[${timestamp}] Erro: Instrutor não encontrado com ID:`, id);
+                throw new Error('Instrutor não encontrado');
+            }
+
+            // Gerar nova senha (igual à matrícula)
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(instructor.registration, salt);
+
+            console.log(`[${timestamp}] Atualizando senha do instrutor...`);
+            await instructor.update({ 
+                password: hashedPassword 
+            }, { transaction });
+            console.log(`[${timestamp}] Senha do instrutor atualizada com sucesso`);
+
+            // Atualizar a senha do usuário correspondente
+            console.log(`[${timestamp}] Buscando usuário associado com matrícula:`, instructor.registration);
+            const user = await User.findOne({ 
+                where: { registration: instructor.registration },
+                transaction 
+            });
+
+            if (user) {
+                console.log(`[${timestamp}] Usuário encontrado, atualizando senha...`);
+                await user.update({ 
+                    password: instructor.registration // O hook do modelo User vai criptografar
+                }, { transaction });
+                console.log(`[${timestamp}] Senha do usuário atualizada com sucesso`);
+            } else {
+                console.log(`[${timestamp}] Aviso: Nenhum usuário encontrado com a matrícula:`, instructor.registration);
+            }
+
+            console.log(`[${timestamp}] Iniciando commit da transação...`);
+            await transaction.commit();
+            console.log(`[${timestamp}] Transação commitada com sucesso`);
+            console.log('=== Fim do Processo de Reset de Senha ===');
+
+            const instructorData = instructor.toJSON();
+            delete instructorData.password;
+            return instructorData;
+        } catch (error) {
+            console.error(`[${timestamp}] Erro durante o reset de senha:`, error);
+            if (transaction) {
+                console.log(`[${timestamp}] Iniciando rollback da transação...`);
+                await transaction.rollback();
+                console.log(`[${timestamp}] Rollback concluído`);
+            }
+            throw error;
+        }
+    }
 }
 
 module.exports = new InstructorService(); 
