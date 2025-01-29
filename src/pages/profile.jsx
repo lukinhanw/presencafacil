@@ -1,10 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import Select from 'react-select';
 import { useAuth } from '../contexts/AuthContext';
 import { showToast } from '../components/General/toast';
-import { updateUserProfile, updateUserPassword } from '../services/userService';
+import { updateUserProfile, updateUserPassword, getUserProfile } from '../services/userService';
 import { UserCircleIcon, KeyIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { selectStyles } from '../components/Shared/selectStyles';
 import { selectStylesDark } from '../components/Shared/selectStylesDark';
@@ -25,7 +25,8 @@ export default function Profile() {
         register: registerProfile,
         handleSubmit: handleSubmitProfile,
         formState: { errors: errorsProfile },
-        control
+        control,
+        reset: resetProfile
     } = useForm({
         defaultValues: {
             name: user?.name || '',
@@ -40,8 +41,41 @@ export default function Profile() {
         register: registerPassword,
         handleSubmit: handleSubmitPassword,
         formState: { errors: errorsPassword },
+        watch,
         reset: resetPassword,
-    } = useForm();
+    } = useForm({
+        onChange: (data) => {
+            console.log('Mudança no formulário de senha:', {
+                currentPassword: data.currentPassword ? '***' : undefined,
+                newPassword: data.newPassword ? '***' : undefined,
+                confirmPassword: data.confirmPassword ? '***' : undefined
+            });
+        }
+    });
+
+    useEffect(() => {
+        const loadProfile = async () => {
+            try {
+                setIsLoading(true);
+                const profile = await getUserProfile();
+                updateUserData(profile);
+                setPreviewImage(profile.avatar);
+                resetProfile({
+                    name: profile.name,
+                    email: profile.email,
+                    registration: profile.registration,
+                    position: profile.position ? { value: profile.position, label: profile.position } : null,
+                    unit: profile.unit ? { value: profile.unit, label: profile.unit } : null
+                });
+            } catch (error) {
+                showToast.error('Erro', error.message || 'Erro ao carregar perfil');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadProfile();
+    }, []);
 
     const handleImageChange = (event) => {
         const file = event.target.files[0];
@@ -75,11 +109,21 @@ export default function Profile() {
 
     const onSubmitPassword = async (data) => {
         try {
+            console.log('Iniciando processo de alteração de senha...');
+            console.log('Dados do formulário:', {
+                currentPassword: data.currentPassword ? '***' : undefined,
+                newPassword: data.newPassword ? '***' : undefined,
+                confirmPassword: data.confirmPassword ? '***' : undefined,
+                formErrors: errorsPassword
+            });
+
             setIsLoading(true);
             await updateUserPassword(data);
+            console.log('Senha atualizada com sucesso!');
             showToast.success('Sucesso', 'Senha atualizada com sucesso!');
             resetPassword();
         } catch (error) {
+            console.error('Erro ao atualizar senha:', error);
             showToast.error('Erro', error.message || 'Erro ao atualizar senha');
         } finally {
             setIsLoading(false);
@@ -302,7 +346,8 @@ export default function Profile() {
                                 <input
                                     type="password"
                                     {...registerPassword('currentPassword', {
-                                        required: 'Senha atual é obrigatória'
+                                        required: 'Senha atual é obrigatória',
+                                        onChange: (e) => console.log('Senha atual alterada')
                                     })}
                                     className="input-field mt-1"
                                 />
@@ -324,7 +369,8 @@ export default function Profile() {
                                         minLength: {
                                             value: 6,
                                             message: 'A senha deve ter no mínimo 6 caracteres'
-                                        }
+                                        },
+                                        onChange: (e) => console.log('Nova senha alterada')
                                     })}
                                     className="input-field mt-1"
                                 />
@@ -343,9 +389,16 @@ export default function Profile() {
                                     type="password"
                                     {...registerPassword('confirmPassword', {
                                         required: 'Confirmação de senha é obrigatória',
-                                        validate: (value) =>
-                                            value === registerPassword('newPassword').value ||
-                                            'As senhas não coincidem'
+                                        validate: (value) => {
+                                            const newPassword = watch('newPassword');
+                                            console.log('Validando confirmação de senha:', {
+                                                newPassword: newPassword ? '***' : undefined,
+                                                confirmPassword: value ? '***' : undefined,
+                                                match: value === newPassword
+                                            });
+                                            return value === newPassword || 'As senhas não coincidem';
+                                        },
+                                        onChange: (e) => console.log('Confirmação de senha alterada')
                                     })}
                                     className="input-field mt-1"
                                 />

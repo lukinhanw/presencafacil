@@ -3,8 +3,9 @@ import { Menu, Transition } from '@headlessui/react';
 import { UserCircleIcon, SunIcon, MoonIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../../contexts/ThemeContext';
 
-// URL da imagem de avatar padrão
+
 const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function UserDropdown({ user, onLogout, onProfileClick }) {
 	const { theme, toggleTheme } = useTheme();
@@ -14,7 +15,7 @@ export default function UserDropdown({ user, onLogout, onProfileClick }) {
 			<Menu.Button className="flex-shrink-0 rounded-full p-1 hover:bg-gray-700/50 dark:hover:bg-gray-800/50 transition-colors duration-200">
 				<img
 					className="h-8 w-8 rounded-full ring-2 ring-primary-500/30 object-cover"
-					src={user?.avatar || DEFAULT_AVATAR}
+					src={`${user?.avatar}` || DEFAULT_AVATAR}
 					alt={user?.name}
 				/>
 			</Menu.Button>
