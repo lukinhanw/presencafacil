@@ -26,6 +26,7 @@ export default function Instructors() {
 	const [resetPasswordAlert, setResetPasswordAlert] = useState({ isOpen: false, instructor: null });
 	const { hasRole } = useAuth();
 	const isAdmin = hasRole('ADMIN_ROLE');
+	const API_URL = import.meta.env.VITE_API_URL;
 
 	const fetchInstructors = useCallback(async () => {
 		try {
@@ -118,6 +119,27 @@ export default function Instructors() {
 	};
 
 	const columns = [
+		{
+			accessorKey: 'avatar',
+			header: 'Foto',
+			cell: (row) => (
+				<div className="flex items-center justify-center">
+					{row.avatar ? (
+						<img
+							src={`${API_URL}/uploads/${row.avatar}`}
+							alt={`Foto de ${row.name}`}
+							className="h-10 w-10 rounded-full object-cover"
+						/>
+					) : (
+						<div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+							<span className="text-gray-500 dark:text-gray-400 text-sm">
+								{row.name?.charAt(0)?.toUpperCase()}
+							</span>
+						</div>
+					)}
+				</div>
+			)
+		},
 		{
 			accessorKey: 'registration',
 			header: 'Matrícula',
