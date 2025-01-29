@@ -43,15 +43,7 @@ export default function Profile() {
         formState: { errors: errorsPassword },
         watch,
         reset: resetPassword,
-    } = useForm({
-        onChange: (data) => {
-            console.log('Mudança no formulário de senha:', {
-                currentPassword: data.currentPassword ? '***' : undefined,
-                newPassword: data.newPassword ? '***' : undefined,
-                confirmPassword: data.confirmPassword ? '***' : undefined
-            });
-        }
-    });
+    } = useForm();
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -109,21 +101,11 @@ export default function Profile() {
 
     const onSubmitPassword = async (data) => {
         try {
-            console.log('Iniciando processo de alteração de senha...');
-            console.log('Dados do formulário:', {
-                currentPassword: data.currentPassword ? '***' : undefined,
-                newPassword: data.newPassword ? '***' : undefined,
-                confirmPassword: data.confirmPassword ? '***' : undefined,
-                formErrors: errorsPassword
-            });
-
             setIsLoading(true);
             await updateUserPassword(data);
-            console.log('Senha atualizada com sucesso!');
             showToast.success('Sucesso', 'Senha atualizada com sucesso!');
             resetPassword();
         } catch (error) {
-            console.error('Erro ao atualizar senha:', error);
             showToast.error('Erro', error.message || 'Erro ao atualizar senha');
         } finally {
             setIsLoading(false);

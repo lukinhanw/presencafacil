@@ -5,12 +5,10 @@ const sequelize = require('../config/database');
 
 class AdminService {
     async getAdmins(filters = {}) {
-        console.log('Filtros recebidos:', filters);
         const where = sequelize.literal(`JSON_CONTAINS(roles, '"ADMIN_ROLE"')`);
         const conditions = [];
 
         if (filters.search) {
-            console.log('Aplicando filtro de busca:', filters.search);
             conditions.push({
                 [Op.or]: [
                     { name: { [Op.like]: `%${filters.search}%` } },
@@ -20,7 +18,6 @@ class AdminService {
         }
 
         if (filters.units) {
-            console.log('Aplicando filtro de unidades:', filters.units);
             const unitArray = typeof filters.units === 'string' ? 
                 filters.units.split(',') : filters.units;
             
@@ -30,7 +27,6 @@ class AdminService {
         }
 
         if (filters.positions) {
-            console.log('Aplicando filtro de cargos:', filters.positions);
             const positionArray = typeof filters.positions === 'string' ? 
                 filters.positions.split(',') : filters.positions;
             
@@ -39,16 +35,12 @@ class AdminService {
             }
         }
 
-        console.log('Condições finais:', JSON.stringify(conditions, null, 2));
-
         const admins = await User.findAll({ 
             where: {
                 [Op.and]: [where, ...conditions]
             },
             order: [['name', 'ASC']]
         });
-
-        console.log('Total de admins encontrados:', admins.length);
 
         // Converte is_active para isActive em cada registro
         return admins.map(admin => {

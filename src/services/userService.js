@@ -74,18 +74,8 @@ export const updateUserProfile = async (data) => {
 
 export const updateUserPassword = async (data) => {
     try {
-        console.log('Dados enviados para atualização de senha:', {
-            currentPassword: data.currentPassword,
-            newPassword: data.newPassword,
-            confirmPassword: data.confirmPassword
-        });
-
         // Validação no frontend
         if (data.newPassword !== data.confirmPassword) {
-            console.log('Senhas não coincidem no frontend:', {
-                newPassword: data.newPassword,
-                confirmPassword: data.confirmPassword
-            });
             throw new Error('As senhas não coincidem');
         }
 
@@ -98,22 +88,13 @@ export const updateUserPassword = async (data) => {
             })
         });
 
-        console.log('Resposta do servidor:', {
-            status: response.status,
-            ok: response.ok
-        });
-
         if (!response.ok) {
-            const errorData = await response.json();
-            console.log('Erro retornado pelo servidor:', errorData);
             await handleErrorResponse(response);
         }
 
         const responseData = await response.json();
-        console.log('Dados retornados com sucesso:', responseData);
         return responseData.data;
     } catch (error) {
-        console.error('Erro ao atualizar senha:', error);
         throw new Error(error.message || 'Erro ao atualizar senha');
     }
 };

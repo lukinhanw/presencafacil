@@ -43,16 +43,8 @@ class ProfileController {
 
     async changePassword(req, res) {
         try {
-            console.log('Recebida requisição para alterar senha');
-            console.log('Dados recebidos:', {
-                userId: req.user.id,
-                currentPassword: '***',
-                newPassword: '***'
-            });
-
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                console.log('Erros de validação:', errors.array());
                 return res.status(400).json({
                     success: false,
                     errors: errors.array()
@@ -60,7 +52,6 @@ class ProfileController {
             }
 
             const profile = await profileService.changePassword(req.user.id, req.body);
-            console.log('Senha alterada com sucesso para usuário:', req.user.id);
             
             res.json({
                 success: true,
@@ -68,7 +59,6 @@ class ProfileController {
                 data: profile
             });
         } catch (error) {
-            console.error('Erro ao alterar senha:', error);
             res.status(400).json({
                 success: false,
                 message: error.message

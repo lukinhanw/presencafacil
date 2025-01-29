@@ -12,16 +12,7 @@ const ticketValidations = [
     body('description').notEmpty().withMessage('Descrição é obrigatória'),
     body('priority')
         .custom((value) => {
-            console.log('Validando priority:', {
-                value,
-                type: typeof value,
-                isObject: typeof value === 'object',
-                valueIfObject: value?.value,
-                raw: JSON.stringify(value)
-            });
-
             const priority = value?.value || value;
-            console.log('Priority extraído:', priority);
 
             if (!priority) {
                 throw new Error('Prioridade é obrigatória');
@@ -33,16 +24,7 @@ const ticketValidations = [
         }),
     body('category')
         .custom((value) => {
-            console.log('Validando category:', {
-                value,
-                type: typeof value,
-                isObject: typeof value === 'object',
-                valueIfObject: value?.value,
-                raw: JSON.stringify(value)
-            });
-
             const category = value?.value || value;
-            console.log('Category extraído:', category);
 
             if (!category) {
                 throw new Error('Categoria é obrigatória');
@@ -63,16 +45,7 @@ const messageValidations = [
 const statusValidations = [
     body('status')
         .custom((value) => {
-            console.log('Validando status:', {
-                value,
-                type: typeof value,
-                isObject: typeof value === 'object',
-                valueIfObject: value?.value,
-                raw: JSON.stringify(value)
-            });
-
             const status = value?.value || value;
-            console.log('Status extraído:', status);
 
             if (!status) {
                 throw new Error('Status é obrigatório');
@@ -86,12 +59,6 @@ const statusValidations = [
 
 // Middleware para debug do body
 const logRequestBody = (req, res, next) => {
-    console.log('Request Body:', {
-        raw: req.body,
-        stringified: JSON.stringify(req.body),
-        priority: req.body.priority,
-        category: req.body.category
-    });
     next();
 };
 
