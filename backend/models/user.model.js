@@ -88,6 +88,20 @@ const User = sequelize.define('User', {
     avatar: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    is_active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+        get() {
+            const value = this.getDataValue('is_active');
+            // Garante que o valor seja sempre booleano
+            return value === null || value === undefined ? true : !!value;
+        },
+        set(value) {
+            // Garante que o valor seja sempre booleano
+            this.setDataValue('is_active', !!value);
+        }
     }
 }, {
     tableName: 'users',

@@ -8,6 +8,7 @@ const employeeRoutes = require('./routes/employee.routes');
 const instructorRoutes = require('./routes/instructor.routes');
 const classRoutes = require('./routes/class.routes');
 const ticketRoutes = require('./routes/ticket.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 const errorHandler = require('./middleware/errorHandler');
 
@@ -29,6 +30,7 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/instructors', instructorRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/admins', adminRoutes);
 
 // Rota para ler um arquivo de imagem na pasta uploads
 app.use('/api/uploads', express.static('uploads'));
