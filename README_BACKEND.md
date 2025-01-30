@@ -4,6 +4,7 @@
 API REST desenvolvida com Node.js e Express para o sistema de gerenciamento de presenças. Utiliza PostgreSQL como banco de dados e JWT para autenticação.
 
 ## Estrutura do Projeto
+Pasta backend
 
 ```
 src/

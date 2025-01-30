@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -56,13 +56,6 @@ export default function Welcome() {
 		formState: { errors },
 		reset
 	} = useForm();
-
-	useEffect(() => {
-		// Se o usuário já aceitou os termos, redireciona para a página principal
-		if (user?.terms === 1) {
-			navigate('/');
-		}
-	}, [user, navigate]);
 
 	const handleNext = () => {
 		if (currentStep < steps.length) {

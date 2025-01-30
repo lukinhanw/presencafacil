@@ -6,15 +6,13 @@ const uploadService = require('./upload.service');
 
 class ProfileService {
     async getProfile(userId) {
-        const user = await User.findByPk(userId, {
-            attributes: { exclude: ['password'] }
-        });
-
+        const user = await User.findByPk(userId);
         if (!user) {
             throw new Error('Usuário não encontrado');
         }
 
         const data = user.toJSON();
+        delete data.password;
         data.isActive = data.is_active;
         delete data.is_active;
 
@@ -110,11 +108,10 @@ class ProfileService {
                 throw new Error('Senha atual incorreta');
             }
 
-            // Faz o hash da nova senha
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-            await user.update({ password: hashedPassword }, { transaction });
+            // Define a nova senha (o hook beforeSave fará o hash)
+            user.password = newPassword;
+            await user.save({ transaction });
+            
             await transaction.commit();
 
             const data = user.toJSON();
@@ -161,6 +158,8 @@ class ProfileService {
             delete data.password;
             data.isActive = data.is_active;
             delete data.is_active;
+
+            // Adiciona a URL completa da foto
             data.avatar = `${process.env.API_URL || 'http://localhost:5000'}/api/uploads/${fileName}`;
 
             return data;

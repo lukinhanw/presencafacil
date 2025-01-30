@@ -12,67 +12,86 @@ const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-	const [user, setUser] = useState(null);
-	const [token, setToken] = useState(null);
-	const [loading, setLoading] = useState(true);
+	const [authState, setAuthState] = useState({
+		user: null,
+		token: null,
+		initialized: false,
+		loading: true
+	});
 	const navigate = useNavigate();
 
 	useEffect(() => {
 		const storedAuth = getStoredAuth();
 		if (storedAuth) {
-			setUser(storedAuth.user);
-			setToken(storedAuth.token);
+			setAuthState({
+				user: storedAuth.user,
+				token: storedAuth.token,
+				initialized: true,
+				loading: false
+			});
+		} else {
+			setAuthState(prev => ({
+				...prev,
+				initialized: true,
+				loading: false
+			}));
 		}
-		setLoading(false);
 	}, []);
 
 	const login = async (credentials) => {
 		try {
 			const userData = await loginService(credentials);
 			const storedAuth = getStoredAuth();
-			setUser(storedAuth.user);
-			setToken(storedAuth.token);
-			navigate('/');
-			return true;
+			setAuthState({
+				user: storedAuth.user,
+				token: storedAuth.token,
+				initialized: true,
+				loading: false
+			});
+			return storedAuth.user;
 		} catch (error) {
 			throw error;
 		}
 	};
 
 	const logout = () => {
-		setUser(null);
-		setToken(null);
+		setAuthState({
+			user: null,
+			token: null,
+			initialized: true,
+			loading: false
+		});
 		removeStoredAuth();
 		navigate('/login');
 	};
 
-	const hasRole = (role) => {
-		return user?.roles?.includes(role);
-	};
-
 	const updateUserData = (newData) => {
 		try {
-			const updatedUser = { ...user, ...newData };
-			setUser(updatedUser);
-			setStoredAuth({ user: updatedUser, token });
+			const updatedUser = { ...authState.user, ...newData };
+			setAuthState(prev => ({
+				...prev,
+				user: updatedUser
+			}));
+			setStoredAuth({ user: updatedUser, token: authState.token });
 		} catch (error) {
 			console.error('Erro ao atualizar dados do usuário:', error);
 		}
 	};
 
-	if (loading) {
-		return null; // Ou um componente de loading
+	if (authState.loading) {
+		return null;
 	}
 
 	return (
 		<AuthContext.Provider value={{
-			user,
-			token,
+			user: authState.user,
+			token: authState.token,
 			login,
 			logout,
-			hasRole,
 			updateUserData,
-			isAuthenticated: !!token
+			isAuthenticated: !!authState.token,
+			initialized: authState.initialized,
+			hasRole: (role) => authState.user?.roles?.includes(role)
 		}}>
 			{children}
 		</AuthContext.Provider>

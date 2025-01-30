@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ProtectedWelcome } from './components/ProtectedWelcome';
 import Login from './pages/login';
 import Welcome from './pages/welcome';
 import Unauthorized from './pages/unauthorized';
@@ -20,9 +21,9 @@ function App() {
         <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/welcome" element={
-                <ProtectedRoute>
+                <ProtectedWelcome>
                     <Welcome />
-                </ProtectedRoute>
+                </ProtectedWelcome>
             } />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/aulas/:id/convite/:token" element={<Join />} />

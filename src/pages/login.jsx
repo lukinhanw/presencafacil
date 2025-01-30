@@ -15,9 +15,9 @@ export default function Login() {
 		setLoading(true);
 
 		try {
-			await login(credentials);
-			const destination = location.state?.from?.pathname || '/';
-			navigate(destination);
+			const userData = await login(credentials);
+			// Redireciona baseado nos termos
+			navigate(userData.terms === 0 ? '/welcome' : (location.state?.from?.pathname || '/'));
 		} catch (error) {
 			showToast.error('Erro', error.message);
 		} finally {
@@ -72,7 +72,7 @@ export default function Login() {
 						type="submit"
 						disabled={loading}
 						className="btn-gradient w-full flex justify-center"
-						>
+					>
 						{loading ? 'Carregando...' : 'Entrar'}
 					</button>
 				</form>

@@ -30,14 +30,11 @@ export const login = async (credentials) => {
 			throw new Error(data.message || 'Erro ao fazer login');
 		}
 
+		// Construir a URL do avatar no campo avatar em data.user
+		data.user.avatar = `${API_URL}/uploads/${data.user.avatar}`;
+
 		// Armazena os dados do usuário e o token
 		setStoredAuth(data);
-		
-		// Verifica se o tutorial foi concluído
-		const tutorialCompleted = localStorage.getItem('tutorialCompleted');
-		if (!tutorialCompleted) {
-			window.location.href = '/welcome';
-		}
 		
 		return data.user;
 	} catch (error) {
