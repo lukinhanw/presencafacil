@@ -163,12 +163,7 @@ export default function Dashboard() {
 				</motion.div>
 			</div>
 
-			<motion.div
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.6 }}
-				className="flex-1 rounded-lg p-4 px-6 py-10"
-			>
+			<div className="flex-1 rounded-lg">
 				<motion.h2
 					className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4 px-4"
 					initial={{ opacity: 0, x: -20 }}
@@ -229,7 +224,7 @@ export default function Dashboard() {
 						</motion.button>
 					))}
 				</motion.div>
-			</motion.div>
+			</div>
 		</div>
 	);
 }
