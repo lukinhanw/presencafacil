@@ -43,6 +43,12 @@ const navigation = [
 		roles: ['ADMIN_ROLE']
 	},
 	{
+		name: 'Administradores',
+		path: '/administradores',
+		icon: UserIcon,
+		roles: ['ADMIN_ROLE']
+	},
+	{
 		name: 'Suporte',
 		path: '/suporte',
 		icon: QuestionMarkCircleIcon

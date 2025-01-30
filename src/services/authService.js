@@ -33,6 +33,12 @@ export const login = async (credentials) => {
 		// Armazena os dados do usuário e o token
 		setStoredAuth(data);
 		
+		// Verifica se o tutorial foi concluído
+		const tutorialCompleted = localStorage.getItem('tutorialCompleted');
+		if (!tutorialCompleted) {
+			window.location.href = '/welcome';
+		}
+		
 		return data.user;
 	} catch (error) {
 		throw new Error(error.message || 'Erro ao fazer login');

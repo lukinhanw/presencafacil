@@ -45,6 +45,14 @@ const menuItems = [
 		iconColor: 'text-orange-600 dark:text-orange-400',
 	},
 	{
+		name: 'Administradores',
+		path: '/administradores',
+		icon: UserIcon,
+		description: 'Gerencie os administradores',
+		bgColor: 'from-indigo-500/10 to-indigo-600/10',
+		iconColor: 'text-indigo-600 dark:text-indigo-400',
+	},
+	{
 		name: 'Suporte',
 		path: '/suporte',
 		icon: QuestionMarkCircleIcon,

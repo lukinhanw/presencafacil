@@ -89,7 +89,6 @@ export default function Trainings() {
 
 	const handleViewTraining = (trainingId) => {
 		// Implement the logic to view a training
-		console.log(`View training with ID: ${trainingId}`);
 	};
 
 	const columns = [

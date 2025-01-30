@@ -1,57 +1,117 @@
-// Mock do usuário atual
-let MOCK_USER = {
-    id: 1,
-    name: 'Admin',
-    email: 'admin@example.com',
-    roles: ['ADMIN_ROLE'],
-    registration: 'ADM001',
-    position: 'Administrador do Sistema',
-    unit: 'Matriz',
-    avatar: null
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+const getAuthHeader = () => {
+    const auth = JSON.parse(localStorage.getItem('@presenca:auth'));
+    if (!auth || !auth.token) {
+        throw new Error('Usuário não autenticado');
+    }
+    return {
+        'Authorization': `Bearer ${auth.token}`,
+        'Content-Type': 'application/json'
+    };
+};
+
+const handleErrorResponse = async (response) => {
+    const data = await response.json();
+    
+    // Caso 1: Erros de validação do express-validator
+    if (data.errors && Array.isArray(data.errors)) {
+        throw new Error(data.errors.map(err => err.msg).join(', '));
+    }
+    
+    // Caso 2: Erro específico com mensagem e error
+    if (data.error) {
+        throw new Error(data.error);
+    }
+    
+    // Caso 3: Apenas mensagem de erro
+    if (data.message) {
+        throw new Error(data.message);
+    }
+    
+    // Caso padrão
+    throw new Error('Erro na operação');
 };
 
 export const updateUserProfile = async (data) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+        // Primeiro atualiza os dados básicos
+        const response = await fetch(`${API_URL}/profile`, {
+            method: 'PUT',
+            headers: getAuthHeader(),
+            body: JSON.stringify({
+                name: data.name,
+                email: data.email,
+                position: data.position,
+                unit: data.unit
+            })
+        });
 
-    // Validações
-    if (data.email && data.email !== MOCK_USER.email) {
-        if (data.email === 'usado@example.com') {
-            throw new Error('Este email já está em uso');
+        if (!response.ok) {
+            await handleErrorResponse(response);
         }
+
+        const updatedData = await response.json();
+
+        // Se houver avatar, faz uma chamada separada
+        if (data.avatar && data.avatar.startsWith('data:image')) {
+            const avatarResponse = await fetch(`${API_URL}/profile/avatar`, {
+                method: 'POST',
+                headers: getAuthHeader(),
+                body: JSON.stringify({ avatar: data.avatar })
+            });
+
+            if (!avatarResponse.ok) {
+                await handleErrorResponse(avatarResponse);
+            }
+        }
+
+        return updatedData.data;
+    } catch (error) {
+        throw new Error(error.message || 'Erro ao atualizar perfil');
     }
-
-    // Atualiza os dados mockados
-    MOCK_USER = {
-        ...MOCK_USER,
-        name: data.name,
-        email: data.email,
-        position: data.position,
-        unit: data.unit,
-        avatar: data.avatar
-    };
-
-    // Retorna os dados atualizados
-    return MOCK_USER;
 };
 
 export const updateUserPassword = async (data) => {
-    // Simula delay da rede
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+        // Validação no frontend
+        if (data.newPassword !== data.confirmPassword) {
+            throw new Error('As senhas não coincidem');
+        }
 
-    // Simula validação de senha atual
-    if (data.currentPassword !== 'senha123') {
-        throw new Error('Senha atual incorreta');
+        const response = await fetch(`${API_URL}/profile/change-password`, {
+            method: 'POST',
+            headers: getAuthHeader(),
+            body: JSON.stringify({
+                currentPassword: data.currentPassword,
+                newPassword: data.newPassword
+            })
+        });
+
+        if (!response.ok) {
+            await handleErrorResponse(response);
+        }
+
+        const responseData = await response.json();
+        return responseData.data;
+    } catch (error) {
+        throw new Error(error.message || 'Erro ao atualizar senha');
     }
+};
 
-    // Simula validação de nova senha
-    if (data.newPassword.length < 6) {
-        throw new Error('A nova senha deve ter no mínimo 6 caracteres');
+export const getUserProfile = async () => {
+    try {
+        const response = await fetch(`${API_URL}/profile`, {
+            headers: getAuthHeader()
+        });
+
+        if (!response.ok) {
+            await handleErrorResponse(response);
+        }
+
+        const data = await response.json();
+        return data.data;
+    } catch (error) {
+        throw new Error(error.message || 'Erro ao buscar perfil');
     }
-
-    if (data.newPassword !== data.confirmPassword) {
-        throw new Error('As senhas não coincidem');
-    }
-
-    // Em um cenário real, aqui atualizaríamos a senha no backend
-    return { message: 'Senha atualizada com sucesso' };
 }; 
