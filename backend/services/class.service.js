@@ -150,7 +150,7 @@ class ClassService {
                     registration: p.registration,
                     unit: p.unit,
                     position: p.position,
-                    photo: p.photo ? `${API_URL}/uploads/${p.photo}` : null,
+                    photo: p.photo ? `${API_URL}/api/uploads/${p.photo}` : null,
                     type: p.type,
                     timestamp: p.timestamp,
                     early_leave: p.early_leave,
@@ -231,8 +231,6 @@ class ClassService {
 
     async createClass(data) {
         try {
-            console.log('Dados recebidos:', data);
-
             // Validações específicas por tipo
             if (data.type === 'Portfolio') {
                 if (!data.training) {
@@ -273,12 +271,9 @@ class ClassService {
                 objective: data.type === 'Portfolio' ? data.training.objective : (data.objective || '')
             };
 
-            console.log('Dados para criação:', classData);
-
             const newClass = await Class.create(classData);
             return this.getClassById(newClass.id);
         } catch (error) {
-            console.error('Erro detalhado ao criar aula:', error);
             if (error.name === 'SequelizeValidationError') {
                 const messages = error.errors.map(err => err.message).join(', ');
                 throw new Error(`Erro de validação: ${messages}`);
