@@ -1,45 +1,74 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Simulação de dados iniciais
+const dadosSimulados = {
+	titulo: 'Lista de Presença Digital',
+	logo: null
+};
 
-export const getConfiguracoes = async () => {
-	try {
-		const response = await fetch(`${API_URL}/configuracoes`);
-		const data = await response.json();
+// Simula um atraso de rede
+const simularAtraso = () => new Promise(resolve => setTimeout(resolve, 800));
 
-		if (!response.ok) {
-			throw new Error(data.message || 'Erro ao buscar configurações');
-		}
-
-		return data;
-	} catch (error) {
-		throw new Error(error.message || 'Erro ao buscar configurações');
+// Função auxiliar para log com timestamp
+const logOperacao = (operacao, mensagem, dados = null) => {
+	const timestamp = new Date().toISOString();
+	console.log(`[${timestamp}] ConfigService - ${operacao}: ${mensagem}`);
+	if (dados) {
+		console.log('Dados:', dados);
 	}
 };
 
+/**
+ * Busca as configurações do sistema
+ * @returns {Promise<Object>} Configurações do sistema
+ */
+export const getConfiguracoes = async () => {
+	try {
+		logOperacao('GET', 'Iniciando busca das configurações');
+		
+		// Simula atraso de rede
+		await simularAtraso();
+		
+		// No futuro, substituir por chamada real à API
+		const configuracoes = { ...dadosSimulados };
+		
+		logOperacao('GET', 'Configurações obtidas com sucesso', configuracoes);
+		return configuracoes;
+	} catch (error) {
+		logOperacao('GET', `Erro ao buscar configurações: ${error.message}`);
+		throw new Error('Erro ao buscar configurações');
+	}
+};
+
+/**
+ * Salva as configurações do sistema
+ * @param {Object} configuracoes - Objeto com as configurações a serem salvas
+ * @returns {Promise<Object>} Configurações atualizadas
+ */
 export const salvarConfiguracoes = async (configuracoes) => {
 	try {
-		const formData = new FormData();
+		logOperacao('SAVE', 'Iniciando salvamento das configurações', configuracoes);
 		
-		// Adiciona os campos básicos
-		formData.append('titulo', configuracoes.titulo);
-
-		// Adiciona o arquivo de logo se existir
-		if (configuracoes.logo instanceof File) {
-			formData.append('logo', configuracoes.logo);
+		// Simula atraso de rede
+		await simularAtraso();
+		
+		// Simula validação dos dados
+		if (!configuracoes.titulo) {
+			const erro = 'O título é obrigatório';
+			logOperacao('SAVE', `Erro de validação: ${erro}`);
+			throw new Error(erro);
 		}
 
-		const response = await fetch(`${API_URL}/configuracoes`, {
-			method: 'POST',
-			body: formData
+		// Atualiza os dados simulados
+		Object.assign(dadosSimulados, {
+			titulo: configuracoes.titulo,
+			logo: configuracoes.logo instanceof File ? configuracoes.logo.name : configuracoes.logo
 		});
 
-		const data = await response.json();
-
-		if (!response.ok) {
-			throw new Error(data.message || 'Erro ao salvar configurações');
-		}
-
-		return data;
+		logOperacao('SAVE', 'Configurações salvas com sucesso', dadosSimulados);
+		
+		// No futuro, substituir por chamada real à API
+		return { ...dadosSimulados };
 	} catch (error) {
+		logOperacao('SAVE', `Erro ao salvar configurações: ${error.message}`);
 		throw new Error(error.message || 'Erro ao salvar configurações');
 	}
 }; 

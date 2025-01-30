@@ -10,7 +10,8 @@ const routeNames = {
 	'/suporte': 'Suporte',
 	'/relatorios': 'Relatórios',
 	'/perfil': 'Meu Perfil',
-	'/administradores': 'Administradores'
+	'/administradores': 'Administradores',
+	'/configuracoes': 'Configurações'
 };
 
 export default function Breadcrumb() {
