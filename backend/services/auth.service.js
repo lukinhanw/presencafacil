@@ -30,7 +30,10 @@ class AuthService {
             delete userJson.password;
 
             return {
-                user: userJson,
+                user: {
+                    ...userJson,
+                    terms: userJson.terms || 0
+                },
                 token
             };
         }
@@ -48,7 +51,8 @@ class AuthService {
 
             const userData = {
                 ...instructorJson,
-                roles: ['INSTRUCTOR_ROLE']
+                roles: ['INSTRUCTOR_ROLE'],
+                terms: instructorJson.terms || 0
             };
 
             const token = this.generateToken(userData);
@@ -67,13 +71,14 @@ class AuthService {
         // Garante que roles seja um array
         const roles = Array.isArray(userData.roles) ? userData.roles : 
                      (typeof userData.roles === 'string' ? JSON.parse(userData.roles) : 
-                     [userData.roles]).filter(Boolean)
+                     [userData.roles]).filter(Boolean);
 
         const token = jwt.sign(
             {
                 id: userData.id,
                 email: userData.email,
-                roles: roles
+                roles: roles,
+                terms: userData.terms || 0
             },
             secret,
             { expiresIn: '24h' }

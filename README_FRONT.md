@@ -1,62 +1,102 @@
-Contexto do Projeto:
+# Presença Fácil - Frontend
 
-Estamos desenvolvendo uma "Lista de Presença Digital" utilizando React.js, Vite, TailwindCSS e JavaScript. O objetivo do sistema é permitir o gerenciamento eficiente de aulas e treinamentos corporativos, incluindo registro de presença, controle de colaboradores e instrutores, e geração de relatórios de participação.
+## Visão Geral
+Sistema de gerenciamento de presenças desenvolvido com React + Vite, utilizando TailwindCSS para estilização e Context API para gerenciamento de estado.
 
-O projeto foi estruturado com base em princípios modernos de desenvolvimento web, garantindo escalabilidade, responsividade e uma excelente experiência para o usuário.
+## Estrutura do Projeto
 
-Características Principais do Sistema:
-Tecnologias Utilizadas:
+```
+src/
+├── assets/          # Recursos estáticos (imagens, animações)
+├── components/      # Componentes reutilizáveis
+│   ├── General/    # Componentes gerais (Toast, Modal, etc)
+│   ├── Layout/     # Componentes de layout (Sidebar, Header)
+│   └── Forms/      # Componentes de formulário
+├── contexts/       # Contextos React (AuthContext, etc)
+├── pages/          # Páginas da aplicação
+├── services/       # Serviços de API
+└── utils/          # Funções utilitárias
+```
 
-Frontend: React.js com Vite para alta performance.
-Estilização: TailwindCSS com suporte a temas claro e escuro.
-Serviços: Simulação de API com JSON para leitura e escrita de dados.
-Páginas e Funcionalidades Implementadas:
+## Principais Características
 
-Treinamentos (/treinamentos):
-CRUD completo de treinamentos.
-Campos dinâmicos como Nome, Código, Duração, Fornecedor, Conteúdo Programático, Classificação e Objetivo.
-Busca com debounce e filtros persistentes.
-Controle de acesso baseado em roles:
-ADMIN_ROLE: Acesso total.
-INSTRUCTOR_ROLE: Permissões limitadas (somente visualização).
-Paginação e tabela responsiva.
+### Autenticação
+- Gerenciada pelo `AuthContext` (`src/contexts/AuthContext.jsx`)
+- Sistema de roles para controle de acesso
+- Armazenamento de token JWT
+- Verificação de termos de uso
 
-Colaboradores (/colaboradores):
-CRUD de colaboradores com campos como Matrícula, Nome, Unidade e Cargo.
-Busca e filtros para localizar colaboradores facilmente.
-Paginação e ordenação.
+### Chamadas API
+- Utilizamos `fetch` para todas as chamadas ao backend
+- Padrão de serviços em `src/services/`
+- Exemplo de estrutura de serviço:
+```javascript
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-Instrutores (/instrutores):
-Gerenciamento de instrutores com campos específicos como Área de Especialização e Experiência.
-CRUD com as mesmas permissões de acesso utilizadas nas outras páginas.
+export const someService = async () => {
+    try {
+        const { token } = getStoredAuth();
+        const response = await fetch(`${API_URL}/endpoint`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!response.ok) throw new Error('Erro na requisição');
+        return await response.json();
+    } catch (error) {
+        throw error.message;
+    }
+};
+```
 
-Aulas (/aulas):
-CRUD de aulas com campos dinâmicos baseados no tipo da aula (Portfólio, Externo, DDS, Outros).
-População automática de informações no tipo "Portfólio", utilizando dados dos treinamentos cadastrados.
-Exibição de uma tabela simplificada com campos como Nome, Código, Tipo, Data de Início, Presentes, Instrutor e Ações.
-Ações incluem entrar na instância da aula e deletar aulas (apenas para ADMIN_ROLE).
-Página de Instância da Aula (/aulas/:id):
-A página mais importante do sistema, dedicada à gestão da lista de presença em tempo real.
+### Rotas
+- Definidas em `App.jsx`
+- Sistema de rotas protegidas baseado em roles
+- Middleware de autenticação integrado
 
-Funcionalidades:
-Visualização dos Dados da Aula: Exibe título, instrutor e horário de início, com um modal para mais detalhes.
+### Componentes Principais
+- `MobileSidebar.jsx`: Menu lateral responsivo
+- `Welcome.jsx`: Página de boas-vindas e aceitação de termos
+- `Dashboard.jsx`: Página principal do sistema
 
-Registro de Presença:
-Manual: Busca pelo colaborador, captura de foto via webcam e registro do horário.
-Link de Convite: Geração de link/QR Code, registro através do código e captura de foto.
-Cartão NFC: Leitura do código do cartão, validação com o cadastro e registro automático.
-Gestão de Presença: Inserir/remover colaboradores, marcar saída antecipada, e finalizar aula.
-Design e Usabilidade:
+### Fluxo de Autenticação
+1. Login via `/login`
+2. Verificação de termos de uso
+3. Redirecionamento para welcome se necessário
+4. Acesso ao dashboard
 
-Responsividade: Mobile-first com breakpoints (sm, md, lg).
-UX: Animações suaves (transition: all 0.3s ease-in-out), skeleton loading e toasts para feedback visual.
-Tema: Suporte a temas claro e escuro, com Glassmorphism/Neomorphism.
-Componentes Reutilizáveis:
+### Variáveis de Ambiente
+```env
+VITE_API_URL=http://localhost:5000/api
+```
 
-DataTable: Tabelas com paginação, ordenação e filtros.
-Modal: Para exibição de informações e ações.
-Toast Notifications: Feedback visual para sucesso e erros.
-Filtros: Busca com debounce e persistência no localStorage.
-WebcamCapture: Captura de fotos via webcam.
-NFCReader: Leitor para registro por cartão NFC.
-InviteLink: Geração de links e QR Codes para auto registro.
+## Funcionalidades Principais
+- Gerenciamento de presenças
+- Administração de usuários
+- Gestão de turmas
+- Sistema de tickets/suporte
+- Controle de acesso baseado em roles
+
+## Padrões de Código
+- Componentes funcionais com hooks
+- Context API para estado global
+- Tratamento consistente de erros
+- Toast notifications para feedback
+- Formulários com React Hook Form
+
+## Dependências Principais
+- React + Vite
+- TailwindCSS
+- React Router DOM
+- React Hook Form
+- Framer Motion
+- Heroicons
+
+## Scripts Disponíveis
+```bash
+npm install     # Instala dependências
+npm run dev     # Inicia servidor de desenvolvimento
+npm run build   # Gera build de produção
+npm run preview # Visualiza build de produção
+```

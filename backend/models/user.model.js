@@ -102,6 +102,11 @@ const User = sequelize.define('User', {
             // Garante que o valor seja sempre booleano
             this.setDataValue('is_active', !!value);
         }
+    },
+    terms: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
     }
 }, {
     tableName: 'users',

@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import Lottie from 'lottie-react';
 import welcomeAnimation from '../assets/animations/welcome.json';
 import { updateUserPassword } from '../services/userService';
+import { acceptTerms } from '../services/termsService';
 import { showToast } from '../components/General/toast';
 
 const steps = [
@@ -45,7 +46,7 @@ const steps = [
 export default function Welcome() {
 	const [currentStep, setCurrentStep] = useState(1);
 	const [isLoading, setIsLoading] = useState(false);
-	const { user } = useAuth();
+	const { user, updateUserData } = useAuth();
 	const navigate = useNavigate();
 
 	const {
@@ -55,6 +56,13 @@ export default function Welcome() {
 		formState: { errors },
 		reset
 	} = useForm();
+
+	useEffect(() => {
+		// Se o usuário já aceitou os termos, redireciona para a página principal
+		if (user?.terms === 1) {
+			navigate('/');
+		}
+	}, [user, navigate]);
 
 	const handleNext = () => {
 		if (currentStep < steps.length) {
@@ -68,8 +76,17 @@ export default function Welcome() {
 		}
 	};
 
-	const handleFinish = () => {
-		navigate('/');
+	const handleFinish = async () => {
+		try {
+			setIsLoading(true);
+			await acceptTerms();
+			updateUserData({ terms: 1 });
+			navigate('/');
+		} catch (error) {
+			showToast.error('Erro', error.message || 'Erro ao aceitar os termos');
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	const onSubmitPassword = async (data) => {
@@ -401,9 +418,10 @@ export default function Welcome() {
 						) : (
 							<button
 								onClick={handleFinish}
+								disabled={isLoading}
 								className="px-8 py-3 rounded-lg font-medium text-white bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
 							>
-								Começar
+								{isLoading ? 'Finalizando...' : 'Começar'}
 							</button>
 						)}
 					</div>
