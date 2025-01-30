@@ -15,6 +15,7 @@ import Join from './pages/join';
 import Support from './pages/support';
 import Profile from './pages/profile';
 import Reports from './pages/reports';
+import Configuracoes from './pages/configuracoes';
 
 function App() {
     return (
@@ -54,6 +55,7 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+                <Route path="configuracoes" element={<Configuracoes />} />
             </Route>
         </Routes>
     );
