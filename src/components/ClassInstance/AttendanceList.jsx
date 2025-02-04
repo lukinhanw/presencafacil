@@ -93,7 +93,7 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 								>
 									{attendee.photo ? (
 										<img
-											src={`${API_URL}/api/uploads/${attendee.photo}`}
+											src={`${API_URL}/uploads/${attendee.photo}`}
 											alt={`Foto de ${attendee.name}`}
 											className="w-12 h-12 rounded-full object-cover mx-auto"
 										/>
@@ -195,7 +195,7 @@ export default function AttendanceList({ classId, attendees, onUpdate, isFinishe
 							<div className="flex-shrink-0">
 								{detailsModal.attendee.photo ? (
 									<img
-										src={`${API_URL}/api/uploads/${detailsModal.attendee.photo}`}
+										src={`${API_URL}/uploads/${detailsModal.attendee.photo}`}
 										alt={`Foto de ${detailsModal.attendee.name}`}
 										className="w-24 h-24 rounded-full object-cover"
 									/>
