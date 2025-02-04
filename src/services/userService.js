@@ -64,6 +64,9 @@ export const updateUserProfile = async (data) => {
             if (!avatarResponse.ok) {
                 await handleErrorResponse(avatarResponse);
             }
+
+            const avatarData = await avatarResponse.json();
+            return avatarData.data;
         }
 
         return updatedData.data;

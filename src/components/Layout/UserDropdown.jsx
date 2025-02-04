@@ -11,15 +11,17 @@ const API_URL = import.meta.env.VITE_API_URL;
 export default function UserDropdown({ user, onLogout, onProfileClick }) {
 	const { theme, toggleTheme } = useTheme();
 
-	console.log('user avatar', user);
-	
+	// Se avatar não tiver a string http, adiciona a url do backend
+	const avatarUrl = user?.avatar ? (
+		user.avatar.startsWith('http') ? user.avatar : `${API_URL}/uploads/${user.avatar}`
+	) : DEFAULT_AVATAR;
 
 	return (
 		<Menu as="div" className="relative">
 			<Menu.Button className="flex-shrink-0 rounded-full p-1 hover:bg-gray-700/50 dark:hover:bg-gray-800/50 transition-colors duration-200">
 				<img
 					className="h-8 w-8 rounded-full ring-2 ring-primary-500/30 object-cover"
-					src={`${user?.avatar}` || DEFAULT_AVATAR}
+					src={avatarUrl}
 					alt={user?.name}
 				/>
 			</Menu.Button>
