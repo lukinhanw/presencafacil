@@ -1,43 +1,69 @@
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useConfig } from '../contexts/ConfigContext';
 import { showToast } from '../components/General/toast';
+import { motion } from 'framer-motion';
 
 export default function Login() {
-	const [credentials, setCredentials] = useState({ email: '', password: '' });
-	const [loading, setLoading] = useState(false);
-	const { login } = useAuth();
-	const location = useLocation();
 	const navigate = useNavigate();
+	const { login } = useAuth();
+	const { config } = useConfig();
+	const [isLoading, setIsLoading] = useState(false);
+	const [formData, setFormData] = useState({
+		email: '',
+		password: ''
+	});
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		setLoading(true);
-
 		try {
-			const userData = await login(credentials);
-			// Redireciona baseado nos termos
-			navigate(userData.terms === 0 ? '/welcome' : (location.state?.from?.pathname || '/'));
+			setIsLoading(true);
+			await login(formData);
+			navigate('/');
 		} catch (error) {
-			showToast.error('Erro', error.message);
+			showToast.error('Erro', error.message || 'Erro ao fazer login');
 		} finally {
-			setLoading(false);
+			setIsLoading(false);
 		}
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-			<div className="glass-card p-8 w-full max-w-md space-y-8">
-				<div>
-					<h2 className="text-center text-3xl font-bold bg-gradient-to-r from-primary-600 to-secondary-500 text-transparent bg-clip-text">
-						Lista de Presença Digital
+		<div className="min-h-screen flex items-center justify-center p-4">
+			<div className="max-w-md w-full space-y-8">
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					className="text-center"
+				>
+					{config.logo ? (
+						<img
+							src={config.logo}
+							alt="Logo"
+							className="h-24 w-24 mx-auto object-contain"
+						/>
+					) : (
+						<div className="h-24 w-24 mx-auto bg-primary-500/10 rounded-lg flex items-center justify-center">
+							<span className="text-primary-500 font-bold text-4xl">
+								{config.titulo?.charAt(0) || 'L'}
+							</span>
+						</div>
+					)}
+					<h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
+						{config.titulo || 'Lista Digital'}
 					</h2>
-					<p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+					<p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
 						Faça login para acessar o sistema
 					</p>
-				</div>
+				</motion.div>
 
-				<form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+				<motion.form
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{ delay: 0.2 }}
+					className="mt-8 space-y-6"
+					onSubmit={handleSubmit}
+				>
 					<div className="space-y-4">
 						<div>
 							<label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -45,37 +71,42 @@ export default function Login() {
 							</label>
 							<input
 								id="email"
+								name="email"
 								type="email"
-								value={credentials.email}
-								onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
-								className="input-field"
-								placeholder="seu@email.com"
+								autoComplete="email"
+								required
+								value={formData.email}
+								onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+								className="input-field mt-1"
+								placeholder="Digite seu email"
 							/>
 						</div>
-
 						<div>
 							<label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
 								Senha
 							</label>
 							<input
 								id="password"
+								name="password"
 								type="password"
-								value={credentials.password}
-								onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-								className="input-field"
-								placeholder="••••••"
+								autoComplete="current-password"
+								required
+								value={formData.password}
+								onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+								className="input-field mt-1"
+								placeholder="Digite sua senha"
 							/>
 						</div>
 					</div>
 
 					<button
 						type="submit"
-						disabled={loading}
-						className="btn-gradient w-full flex justify-center"
+						disabled={isLoading}
+						className="btn-gradient w-full"
 					>
-						{loading ? 'Carregando...' : 'Entrar'}
+						{isLoading ? 'Entrando...' : 'Entrar'}
 					</button>
-				</form>
+				</motion.form>
 			</div>
 		</div>
 	);

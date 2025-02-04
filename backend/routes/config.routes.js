@@ -2,7 +2,6 @@ const express = require('express');
 const { body } = require('express-validator');
 const configController = require('../controllers/config.controller');
 const { verifyToken, hasRole } = require('../middleware/auth');
-const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -10,7 +9,15 @@ const router = express.Router();
 const configValidations = [
 	body('titulo')
 		.notEmpty().withMessage('Título é obrigatório')
-		.trim()
+		.trim(),
+	body('logo')
+		.optional()
+		.custom((value) => {
+			if (value && !value.startsWith('data:image')) {
+				throw new Error('Formato de imagem inválido');
+			}
+			return true;
+		})
 ];
 
 // Rota pública para obter configurações
@@ -21,10 +28,6 @@ router.use(verifyToken);
 router.use(hasRole(['ADMIN_ROLE']));
 
 // Atualizar configurações
-router.post('/',
-	upload.single('logo'),
-	configValidations,
-	configController.updateConfig
-);
+router.put('/', configValidations, configController.updateConfig);
 
 module.exports = router; 

@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Config = sequelize.define('Config', {
+const Config = sequelize.define('config', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -10,11 +10,7 @@ const Config = sequelize.define('Config', {
     titulo: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: 'Lista de Presença Digital',
-        validate: {
-            notNull: { msg: 'Título é obrigatório' },
-            notEmpty: { msg: 'Título é obrigatório' }
-        }
+        defaultValue: 'Lista de Presença Digital'
     },
     logo: {
         type: DataTypes.STRING,
@@ -22,6 +18,7 @@ const Config = sequelize.define('Config', {
     }
 }, {
     tableName: 'configs',
+    timestamps: true,
     underscored: true
 });
 

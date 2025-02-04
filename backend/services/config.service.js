@@ -1,5 +1,5 @@
 const Config = require('../models/config.model');
-const { uploadFile, deleteFile } = require('../utils/upload');
+const uploadService = require('./upload.service');
 
 class ConfigService {
 	async getConfig() {
@@ -11,6 +11,11 @@ class ConfigService {
 					titulo: 'Lista de Presença Digital'
 				});
 			}
+
+			// Adiciona a URL completa do logo se existir
+			if (config.logo) {
+				config.logo = `${process.env.API_URL || 'http://localhost:5000'}/api/uploads/${config.logo}`;
+			}
 			
 			return config;
 		} catch (error) {
@@ -21,23 +26,24 @@ class ConfigService {
 
 	async updateConfig(dados, logoFile) {
 		try {
-			let config = await this.getConfig();
-
-			// Validação do título
-			if (!dados.titulo) {
-				const error = new Error('Título é obrigatório');
-				error.statusCode = 400;
-				throw error;
+			let config = await Config.findOne();
+			if (!config) {
+				config = await Config.create({
+					titulo: 'Lista de Presença Digital'
+				});
 			}
 
-			// Se enviou novo logo, faz upload e deleta o anterior
+			// Se enviou novo logo, salva e deleta o anterior
 			if (logoFile) {
 				if (config.logo) {
-					await deleteFile(config.logo);
+					await uploadService.deleteFile(config.logo);
 				}
 				
-				const logoPath = await uploadFile(logoFile, 'logos');
-				dados.logo = logoPath;
+				const fileName = await uploadService.saveBase64Image(
+					logoFile,
+					'logo'
+				);
+				dados.logo = fileName;
 			}
 
 			// Atualiza os dados
@@ -46,15 +52,11 @@ class ConfigService {
 				logo: dados.logo || config.logo
 			});
 
-			return await this.getConfig();
+			// Retorna os dados atualizados com a URL completa do logo
+			const updatedConfig = await this.getConfig();
+			return updatedConfig;
 		} catch (error) {
 			console.error('Erro ao atualizar configurações:', error);
-			
-			// Adiciona statusCode se não existir
-			if (!error.statusCode) {
-				error.statusCode = 500;
-			}
-			
 			throw error;
 		}
 	}

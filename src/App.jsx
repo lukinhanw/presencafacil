@@ -1,4 +1,8 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { ConfigProvider } from './contexts/ConfigContext';
+import { Toaster } from 'react-hot-toast';
 import Layout from './components/Layout/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ProtectedWelcome } from './components/ProtectedWelcome';
@@ -17,48 +21,55 @@ import Profile from './pages/profile';
 import Reports from './pages/reports';
 import Configuracoes from './pages/configuracoes';
 
-function App() {
+export default function App() {
     return (
-        <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/welcome" element={
-                <ProtectedWelcome>
-                    <Welcome />
-                </ProtectedWelcome>
-            } />
-            <Route path="/unauthorized" element={<Unauthorized />} />
-            <Route path="/aulas/:id/convite/:token" element={<Join />} />
-            <Route path="/" element={
-                <ProtectedRoute>
-                    <Layout />
-                </ProtectedRoute>
-            }>
-                <Route path="treinamentos" element={<Trainings />} />
-                <Route path="colaboradores" element={<Employees />} />
-                <Route path="instrutores" element={<Instructors />} />
-                <Route path="administradores" element={
-                    <ProtectedRoute roles={['ADMIN_ROLE']}>
-                        <Administrators />
-                    </ProtectedRoute>
-                } />
-                <Route path="aulas">
-                    <Route index element={<Classes />} />
-                    <Route path=":id" element={<ClassInstance />} />
-                </Route>
-                <Route path="suporte" element={<Support />} />
-                <Route path="perfil" element={<Profile />} />
-                <Route
-                    path="/relatorios"
-                    element={
-                        <ProtectedRoute roles={['ADMIN_ROLE', 'INSTRUCTOR_ROLE']}>
-                            <Reports />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route path="configuracoes" element={<Configuracoes />} />
-            </Route>
-        </Routes>
+        <BrowserRouter>
+            <ThemeProvider>
+                <ConfigProvider>
+                    <AuthProvider>
+                        <Routes>
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/welcome" element={
+                                <ProtectedWelcome>
+                                    <Welcome />
+                                </ProtectedWelcome>
+                            } />
+                            <Route path="/unauthorized" element={<Unauthorized />} />
+                            <Route path="/aulas/:id/convite/:token" element={<Join />} />
+                            <Route path="/" element={
+                                <ProtectedRoute>
+                                    <Layout />
+                                </ProtectedRoute>
+                            }>
+                                <Route path="treinamentos" element={<Trainings />} />
+                                <Route path="colaboradores" element={<Employees />} />
+                                <Route path="instrutores" element={<Instructors />} />
+                                <Route path="administradores" element={
+                                    <ProtectedRoute roles={['ADMIN_ROLE']}>
+                                        <Administrators />
+                                    </ProtectedRoute>
+                                } />
+                                <Route path="aulas">
+                                    <Route index element={<Classes />} />
+                                    <Route path=":id" element={<ClassInstance />} />
+                                </Route>
+                                <Route path="suporte" element={<Support />} />
+                                <Route path="perfil" element={<Profile />} />
+                                <Route
+                                    path="/relatorios"
+                                    element={
+                                        <ProtectedRoute roles={['ADMIN_ROLE', 'INSTRUCTOR_ROLE']}>
+                                            <Reports />
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route path="configuracoes" element={<Configuracoes />} />
+                            </Route>
+                        </Routes>
+                        <Toaster position="top-right" />
+                    </AuthProvider>
+                </ConfigProvider>
+            </ThemeProvider>
+        </BrowserRouter>
     );
 }
-
-export default App;

@@ -11,6 +11,7 @@ const ticketRoutes = require('./routes/ticket.routes');
 const adminRoutes = require('./routes/admin.routes');
 const profileRoutes = require('./routes/profile.routes');
 const termsRoutes = require('./routes/terms.routes');
+const configRoutes = require('./routes/config.routes');
 
 const errorHandler = require('./middleware/errorHandler');
 
@@ -36,6 +37,7 @@ app.use('/api/tickets', ticketRoutes);
 app.use('/api/admins', adminRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/terms', termsRoutes);
+app.use('/api/config', configRoutes);
 
 // Rota para ler um arquivo de imagem na pasta uploads
 app.use('/api/uploads', express.static('uploads'));
